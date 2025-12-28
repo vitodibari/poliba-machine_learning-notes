@@ -427,12 +427,11 @@ Of course, we are not using two classes, but just one class:
 
 The idea is to predict the following (suppose threshold is set to $0.5$):
 $$
-\text{if} \space h_\theta \ge0.5 \Rightarrow \text{predict} \space y=1
+\begin{align}
+& \text{if} \space h_\theta \ge0.5 \Rightarrow \text{predict} \space y=1 \\
+& \text{if} \space h_\theta <0.5 \Rightarrow \text{predict} \space y=0
+\end{align}
 $$
-$$
-\text{if} \space h_\theta <0.5 \Rightarrow \text{predict} \space y=0
-$$
-
 The value of the threshold is usually $0.5$ in a binary classification problem, but it can be changed if improves the classifier’s behavior.
 
 > [!warning]
@@ -452,113 +451,101 @@ $$
 
 ![Untitled](assets/Untitled%2011.png)
 
-The **logistic (sigmoid) function** represents the probability $p$ that $y=1$, given $x$, parametrized by $\theta$. The probabilistic interpretation follows:
-
+The **logistic (sigmoid) function** represents the probability $p$ that $y$ is equal $1$, given $x$ and parametrized by $\theta$. The probabilistic interpretation follows:
 $$
 h_\theta(x)=p(y=1|x;\theta) 
 $$
-
 $$
 p(y=1|x;\theta)+p(y=0|x;\theta)=1
 \\ \Rightarrow p(y=0|x;\theta)=1-p(y=1|x;\theta)
 $$
 
 ## Decision Boundary
+> [!info]
+> https://youtu.be/0az8RjxLLPQ?list=PLkDaE6sCZn6FNC6YRfRQc_FbeQrF8BwGI
 
-https://youtu.be/0az8RjxLLPQ?list=PLkDaE6sCZn6FNC6YRfRQc_FbeQrF8BwGI
-
-The **decision boundary** is a concept in machine learning and statistical classification that refers to the surface (or line in 2D space) that separates different classes or categories in a feature space. It represents the threshold at which a classifier changes its predicted class label.
+The **decision boundary** is a concept in machine learning and statistical classification that refers to the surface (or line in 2D space) that separates different classes or categories in a feature space. It <u>represents the threshold at which a classifier changes its predicted class label</u>.
 
 In linear regression, the decision boundary is modeled by the logistic (sigmoid) function and can be represented as a line (or, in general, an hyperplane) which splits dataset into two subsets.
-
-![Untitled](assets/Untitled%2012.png)
-
-- **Example**
-    
-    The decision boundary of the image above is the following:
-    
-    $h_\theta(x)=g(\theta_0+\theta_1x_1+\theta_2x_2)$
-    
-    Supposing $\theta^T=[-1 \space +1 \space +1]$, the objective is then to predict:
-    $y=1 \space\text{if} \space -3+x_1+x_2 \ge 0
-    \\ \Longrightarrow x_1+x_2\ge3$ (the line plotted in the image)
-    
-
+![Untitled|500](assets/Untitled%2012.png)
 The decision boundary can be even more “distorted” when modeled with non linear functions with increasing grade.
 
-## Cost Function
+**Example**
+The decision boundary of the image above is the following:
+$h_\theta(x)=g(\theta_0+\theta_1x_1+\theta_2x_2)$
 
+Supposing $\theta^T=[-1 \space +1 \space +1]$, the objective is then to predict:
+$y=1 \space\text{if} \space -3+x_1+x_2 \ge 0\\ \Longrightarrow x_1+x_2\ge3$ (the line plotted in the image)
+## Cost Function
 Let’s now see how to derive the **cost function** and how to minimize it, in order to get an optimal classifier.
 
 As seen for the linear regression, the idea is to solve the problem of the cost function minimization using the **maximum likelihood criterion**.
 
 (Recap)
 The formula used for the maximum likelihood criterion works only under **iid assumptions**: training samples are independent and have identical probability distribution.
-
 $$
 \begin{align}
 L(\theta)=L(\theta;X,y)=p(y|X;\theta)=\prod_{i=1}^mp(y^{(i)}|\mathbf{x}^{(i)};\theta)
-\end{align} 
+\end{align}
+\tag{1}
 $$
-
-In a binary classifier situation ($y = \{0,1\}$), data is distributed aver a **Bernoulli distribution**: the discrete probability distribution of the random variable $X$(the entire dataset) for which:
-
+In a binary classifier we have $y = \{0,1\}$ and data is distributed aver a **Bernoulli distribution**: the discrete probability distribution of the random variable $X$(the entire dataset) for which:
 $$
 \begin{align*}
 \Pr(X=1)&=p 
 \\ &= 1-\Pr(X=0) \\&=1-p
 \end{align*}
 $$
-
-![Untitled](assets/Untitled%2013.png)
-
+![Untitled|500](assets/Untitled%2013.png)
 The final term of the $(1)$ can be expanded as follows:
-
 $$
+\begin{align} \\
+&
 \begin{cases}
 p(y^{(i)}=1|\mathbf{x}^{(i)};\theta)=h_\theta(\mathbf{x}^{(i)}) \\
 p(y^{(i)}=0|\mathbf{x}^{(i)};\theta)=1-h_\theta(\mathbf{x}^{(i)})
 \end{cases} 
 \Longrightarrow
 \\
-\Longrightarrow
+& \Longrightarrow
 p(y^{(i)}|\mathbf{x}^{(i)};\theta) = h_\theta(\mathbf{x}^{(i)})^{y^{(i)}} \cdot 1-h_\theta(\mathbf{x}^{(i)})^{1-y^{(i)}}
 \Longrightarrow
 \\
-\Longrightarrow
+& \Longrightarrow
 L(\theta)=\prod_{i=1}^m h_\theta(\mathbf{x}^{(i)})^{y^{(i)}} \cdot 1-h_\theta(\mathbf{x}^{(i)})^{1-y^{(i)}}
+\end{align}
 $$
-
-It is very important to reduce $L(\theta)$ to a one-line expression because of further mathematical procedures.
+> [!warning]
+> It is very important to reduce $L(\theta)$ to a one-line expression because of further mathematical procedures.
 
 $$
-L(\theta)=\prod_{i=1}^m h_\theta(\mathbf{x}^{(i)})^{y^{(i)}} \cdot 1-h_\theta(\mathbf{x}^{(i)})^{1-y^{(i)}}
+\begin{align}
+L(\theta) &= \prod_{i=1}^m h_\theta(\mathbf{x}^{(i)})^{y^{(i)}} \cdot 1-h_\theta(\mathbf{x}^{(i)})^{1-y^{(i)}}
 \Longrightarrow
 \\
 \Longrightarrow
-l(\theta)=\log(L(\theta))=\\=\sum_{i=1}^m \bigg(y^{(i)}\log h_\theta(\mathbf{x}^{(i)}) + (1-y^{(i)})\log(1-h_\theta(\mathbf{x}^{(i)}))\bigg)
+l(\theta) &= \log(L(\theta))=\sum_{i=1}^m \bigg(y^{(i)}\log h_\theta(\mathbf{x}^{(i)}) + (1-y^{(i)})\log(1-h_\theta(\mathbf{x}^{(i)}))\bigg)
+\end{align}
 $$
 
-I can then define the **cost function** in a proper form in order to have a minimization problem* (just by putting the minus at the beginning):
-
+The **cost function** can be defined in a proper form in order to have a minimization problem (just by putting the minus at the beginning):
 $$
-J(\theta)=-\frac1m \sum_{i=1}^m \bigg(y^{(i)}\log h_\theta(\mathbf{x}^{(i)}) + (1-y^{(i)})\log(1-h_\theta(\mathbf{x}^{(i)}))\bigg)
+\begin{align}
+J(\theta) &= -\frac1m \sum_{i=1}^m \bigg(y^{(i)}\log h_\theta(\mathbf{x}^{(i)}) + (1-y^{(i)})\log(1-h_\theta(\mathbf{x}^{(i)}))\bigg) \\
+&=-\frac1m l(\theta)
+\end{align}
+\tag{2}
 $$
+> [!tip]
+> The reason why a **minimization problem** is wanted is easy: we already know an algorithm able to solve such a problem, the gradient descent.
 
-And finally what we want to compute is the vector of parameters $\hat\theta$ which minimizes the cost function $J(\theta)$
-
+And finally we want to compute the vector of parameters $\hat\theta$ which minimizes the cost function $J(\theta)$:
 $$
 \hat\theta=argmin_\theta J(\theta)
 $$
-
-*The reason why a **minimization problem** is wanted is easy: we already know an algorithm able to solve such a problem, the gradient descent.
-
 ## Errors
-
-I consider the following function $e^{(i)}$, which represents a single contribute of $-l(\theta)$ extracted from the summation (that’s why the $(i)$ apex).
-
-![Untitled](assets/Untitled%2014.png)
-
+I consider the following function $e^{(i)}$, which represents a single contribute of $-l(\theta)$ extracted from $(2)$ (that’s why the $(i)$ apex).
+![Untitled|400](assets/Untitled%2014.png)
 $$
 \begin{align*}
 e^{(i)}&=-l^{(i)}(\theta)\\
@@ -567,35 +554,28 @@ e^{(i)}&=-l^{(i)}(\theta)\\
 $$
 
 It can be easily seen that:
-
 $$
-\begin{cases}
-y^{(i)}=1 \Rightarrow e^{(i)}= -\log h_\theta(\mathbf x^{(i)})
-\space\space\space\space\space\space\space\space\space
+\begin{align}
+& y^{(i)} = 1
+\Rightarrow e^{(i)} = -\log h_\theta(\mathbf{x}^{(i)})
 \Rightarrow
-\begin{cases}
-h_\theta(\mathbf x^{(i)})=0 \Rightarrow e^{(i)} \rightarrow \infty \\
-h_\theta(\mathbf x^{(i)})=1 \Rightarrow e^{(i)} \rightarrow 0
-\end{cases} 
-
-\\\\
-
-y^{(i)}=0 \Rightarrow e^{(i)}= -\log (1-h_\theta(\mathbf x^{(i)}))
-
-\Rightarrow
-\begin{cases}
-h_\theta(\mathbf x^{(i)})=0 \Rightarrow e^{(i)} \rightarrow 0 \\
-h_\theta(\mathbf x^{(i)})=1 \Rightarrow e^{(i)} \rightarrow \infty
-\end{cases} 
-\end{cases} 
+& \begin{cases}
+h_\theta(\mathbf{x}^{(i)}) = 0 \Rightarrow e^{(i)} \to \infty \\
+h_\theta(\mathbf{x}^{(i)}) = 1 \Rightarrow e^{(i)} \to 0
+\end{cases}
+\\[1.2em]
+& y^{(i)} = 0 
+\Rightarrow e^{(i)} = -\log\!\bigl(1 - h_\theta(\mathbf{x}^{(i)})\bigr) \Rightarrow
+& \begin{cases}
+h_\theta(\mathbf{x}^{(i)}) = 0 \Rightarrow e^{(i)} \to 0 \\
+h_\theta(\mathbf{x}^{(i)}) = 1 \Rightarrow e^{(i)} \to \infty
+\end{cases}
+\end{align}
 $$
-
 ## Gradient Descent
-
 One more time, gradient descent is used to find the vector of parameters $\hat\theta$ which minimizes the cost function $J(\theta)$.
 
 The most important step (and the only actual difference with linear regression as well) is the following, the derivative step:
-
 $$
 \frac{\partial J(\theta)}{\partial\theta_k}=
 \frac1m\sum_{i=1}^m\bigg(
@@ -603,9 +583,7 @@ h_\theta(\mathbf{x}^{(i)})-y^{(i)}
 \bigg)x_k^{(i)}=
 \frac1m\sum_{i=1}^m\bigg(e^{(i)}\bigg)x_k^{(i)}
 $$
-
 And then the update step (same as the linear regression):
-
 $$
 \theta_k=\theta_k-\alpha\frac{\partial J(\theta)}{\partial\theta_k}
 =\theta_k-\alpha\frac1m\sum_{i=1}^m\bigg(
@@ -615,26 +593,19 @@ $$
 
 Just to recap, this algorithm is able to compute a set of parameters $\theta$ which allow an hyperplane to split a dataset in two parts, in a hyperspace.
 
-The entire demonstration of the calculus of the derivative of $J(\theta)$ is reported on the slides.
-
+> [!info]
+> The entire demonstration of the calculus of the derivative of $J(\theta)$ is reported on the slides.
 ## Multi-class Classification: One vs All Method
-
 Things can get complicated when a multi-class classifier is required.
-
 The most simple approach is the “**One-vs-All**” one, quite easy to understand:
-
 ![Untitled](assets/Untitled%2015.png)
-
 Given a $n$-classes problem, the objective is to calculate $n$ hypothesis, in order to cut out each class of data from the rest of the dataset; in other words, the hypothesis $h_\theta^{(i)}(x)$ aims at telling if $x$ belongs to the $i^{th}$ class.
-
 $$
 h_\theta^{(i)}(x)=p(y=i|x;\theta)
 \space\space\space
 i=1,...,n
 $$
-
 # 4. Fitting
-
 It is quite evident that there is a certain amount of “freedom” in choosing the mathematical representation of the regressor/classifier: it can basically be more or less complex (no. of features used, polynomial grade, ecc.). Of course, not all models **fit** the situation.
 
 In Machine Learning there are basically three scenarios:
