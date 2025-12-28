@@ -1,159 +1,132 @@
-# Machine Learning - Notes
 
+# Machine Learning Notes
+A.Y. 2023-2024, Polytechnic of Bari
+Author: Vito Di Bari
+Professor: Tommaso di Noia
+## Reading suggestions
 <aside>
-⚠️ Purple sections are AI-generated
-
+<font color="#6425d0">⚠️ Purple sections are AI-generated</font>
 </aside>
-
-- **Long demonstrations**
-    1. [Probabilistic interpretation of Linear Regression](https://www.notion.so/Machine-Learning-Notes-fd12021b7a554122bce07e4233196a54?pvs=21)
-    2. [Proof of Normal Equations](https://www.notion.so/Machine-Learning-Notes-fd12021b7a554122bce07e4233196a54?pvs=21)
-    3. [Calculus of $J(\theta)$ for logistic regression](https://www.notion.so/Machine-Learning-Notes-fd12021b7a554122bce07e4233196a54?pvs=21)
-    4. [Derivative of $J(\theta)$](https://www.notion.so/Machine-Learning-Notes-fd12021b7a554122bce07e4233196a54?pvs=21)
-    5. [Calculus of MSE and GER](https://www.notion.so/Machine-Learning-Notes-fd12021b7a554122bce07e4233196a54?pvs=21)
-
+<aside>
+<font color="#00b050">⚠️ Green sections are deep divings, so not mandatory for the exam</font>
+</aside>
+### Long demonstrations
+The following ones must be memorized for the mid-term exam.
+1. Probabilistic interpretation of Linear Regression (see [[#Probabilistic interpretation]])
+2. Calculus of MSE and GER (see [[#Bias and Variance trade-off]])
+3. [Derivative of $J(\theta)$](https://www.notion.so/Machine-Learning-Notes-fd12021b7a554122bce07e4233196a54?pvs=21)
+4. [Calculus of $J(\theta)$ for logistic regression](https://www.notion.so/Machine-Learning-Notes-fd12021b7a554122bce07e4233196a54?pvs=21)
+5. [[#Proof of Normal equations]]
 # 1. Introduction
-
 What is ML? **Machine Learning** is the field of study that gives to a program the ability to learn even if not explicitly programmed. 
 
-A well-posed **Machine Learning program** definition can be: a computer program is said to *learn* from experience $E$, w.r.t. some task $T$ and a performance measure $P$, if its performance on $T$, as measured by $P$, improves with experience $E$.
+A well-posed **Machine Learning program** definition can be: 
+a computer program is said to *learn* from experience $E$, w.r.t. some task $T$ and a performance measure $P$, if its performance on $T$, as measured by $P$, improves with experience $E$.
 
 Of course, there are many other valid definitions.
-
 ## 1st classification
-
 ### Supervised Learning
-
 The idea is to learn a mapping from given **inputs** $x$ and given **outputs** $y$.
 
 Given a **training set** (or labeled set) $D=\{(x_i,y_i)\}^N_{i=1}$, where $N$ is the number of training samples, each training input $x_i$, called **feature** or **attribute** is a $D$-dimensional vector of values (even a complex type of value). The output or **response variable** $y$ is made up **categorical** or **nominal** values defined in some finite set $y_i\in\{1,...,C\}$ or in a continuous domain (a real value).
 
-Type of $y_i$ gives the type of the problem:
-
+The type of $y_i$ gives the type of the problem:
 - $y_i$ is **categorical** → **classification** or **pattern recognition problem**
 - $y_i$ is **real-valued** → **regression problem**
 - **$y_i$** has some **natural ordering** → **ordinal regression problem**
 
-Once the input data is fed into the model, it can adjust its weights by itself, until it fits approximately the scenario.
+Once the input data is fed into the model, it can adjust its weights by itself, using the Gradient Descent algorithm, until it fits approximately the scenario.
 
-Most used form of ML.
+ML problems consists mostly in:
+- **Classification**: the goal is to <u>predict discrete output values</u>.
+- **Regression**: the goal is to <u>predict continuous (real) output values</u>.
+#### Examples
+**Housing price prediction**
+  ![Untitled|600](assets/Untitled.png)
+  
+  Given a finite set of data, I could consider a linear or quadratic model to predict the price, given the size of the house. In the supervised approach, the right answer will be given for each datapoint.
+  This is a regression problem: I want the algorithm to predict the price of an house, a real value.
+  
+  **Breast cancer**
+![Untitled|600](assets/Untitled%201.png)
+I want the algorithm to decide if a tumor is malignant or not, given the size. 
+This is an example of (binary) classification problem: given a certain tumor size, the algorithm should be able to return the chance that the tumor is malignant (or not). The tumor size is the feature of the problem.
 
-- **Classification**: The goal is to predict discrete output values
-- **Regression**: The goal is to predict continuous (real) output values.
-- **Example - Housing price prediction**
-    
-    ![Untitled](assets/Untitled.png)
-    
-    Given a finite set of data, I could consider a linear or quadratic model to predict the price, given the size of the house. In the supervised approach, the right answer will be given. This is a regression problem: I want the algorithm to predict the price of an house.
-    
-- **Example - Breast cancer**
-    
-    ![Untitled](assets/Untitled%201.png)
-    
-    I want the algorithm to decide if a tumor is malignant or not, given the size. This is an example of classification problem. Given a certain tumor size, the algorithm should be able to return the chance that the tumor is malignant or not. In this case, the tumor size is the feature of the problem.
-    
-    In general, I can have more types of (discrete) output values.
-    
-    In general, I can have more feature values (even $\infty$﻿, with a mathematical trick), like in the following variant of the example.
-    
-    ![Untitled](assets/Untitled%202.png)
-    
-    In this case, there are two features: tumor size and age. I could consider a line dividing two “clusters” of data.
-    
-
+In general, I can have more types of (discrete) output values, so a multi-class output problem.
+In general, I can have more feature values (even $\infty$﻿, with a mathematical trick), like in the following variant of the example.
+![Untitled|400](assets/Untitled%202.png)
+In this case, there are two features: tumor size and age. I could consider a line dividing two “clusters” of data.
 ### Unsupervised Learning
-
-In this case, there is no input labeles: the analysis is done just on “output data” of a scenario and the objective is to discover “interesting structures” in the data; this practice also is defined **knowledge discovery**. Available data is not labeled; indeed, the aim is not to classify labels, but to find interesting behaviors between given data.
+In this case, there is <u>no input labels</u>: the analysis is done just on *output data* of a scenario and the objective is to discover *interesting structures* in the data; this practice also is defined **knowledge discovery**. Available data is not labeled; indeed, the aim is not to classify labels, but to <u>find interesting behaviors between given data</u>.
 
 Unlike supervised learning, it is not told what the expected output is and there is no obvious error metric to use.
 
 Unsupervised learning is more typical of human and animal learning.
-
-- **Example - Google News**
-    
-    Each day, Google takes hundred of thousands of news and try to group them into categories or, using math language, group them into clusters. The interesting thing is that I don’t know categories a priori: the number of categories is given by the number of clusters found; once the clustering is finished, I can label each cluster with the category name.
-    
+#### Examples
+**Example - Google News**
+Each day, Google takes hundred of thousands of news and try to group them into categories or, using math language, group them into clusters. The interesting thing is that I don’t know categories a priori: the number of categories is given by the number of clusters found; once the clustering is finished, I can label each cluster with the category name.
 
 Other example can be: grouping social network’s friends, market segmentation (find customer segments), astronomical analysis.
-
 ### Semi-supervised Learning
-
-Semi-supervised learning is a machine learning approach that combines elements of both supervised and unsupervised learning. It uses a small amount of labeled data along with a large amount of unlabeled data during the training process. This approach is particularly useful when obtaining labeled data is expensive or time-consuming, but unlabeled data is abundant.
+Semi-supervised learning is a machine learning approach that <u>combines elements of both supervised and unsupervised learning</u>. It uses a small amount of labeled data initially, along with a large amount of unlabeled data later in the training process. This approach is particularly useful when obtaining labeled data is expensive or time-consuming, but unlabeled data is abundant.
 
 Key characteristics of semi-supervised learning include:
-
-- It leverages both labeled and unlabeled data
-- It can improve learning accuracy
-- It's useful when labeled data is scarce but unlabeled data is plentiful
+- leverages both labeled and unlabeled data
+- can improve learning accuracy
+- useful when labeled data is scarce but unlabeled data is plentiful
 
 Common applications of semi-supervised learning include speech analysis, protein sequence classification, and web content classification.
-
 ### Reinforcement Learning
-
-This kind of model is made to learn tasks automatically, by doing random actions and getting rewarded if the action is a good one, otherwise the model gets punished.
+This kind of model is made to <u>learn tasks automatically by doing random actions and getting rewarded if the action is a good one, otherwise the model gets punished</u>.
 
 A reinforcement learning model is an artificial intelligence approach where an agent learns to make decisions by interacting with an environment. The key components of reinforcement learning are:
-
 - Agent: The learner or decision-maker
 - Environment: The world that the agent interacts with
 - Actions: What the agent can do
 - States: The current situation of the agent
 - Rewards: Feedback from the environment
 
-The agent's goal is to learn a policy - a strategy for choosing actions - that maximizes the cumulative reward over time. This is achieved through trial and error: the agent explores the environment, takes actions, observes the consequences (rewards and new states), and adjusts its strategy accordingly.
+The agent's **goal** is to learn a policy - a strategy for choosing actions - that maximizes the cumulative reward over time. This is achieved through trial and error: the agent explores the environment, takes actions, observes the consequences (rewards and new states), and adjusts its strategy accordingly.
 
-Unlike supervised learning, reinforcement learning doesn't rely on labeled training data. Instead, it learns from the consequences of its actions, making it particularly suitable for problems where an optimal behavior is not known in advance but can be discovered through interaction.
+<u>Unlike supervised learning, reinforcement learning doesn't rely on labeled training data. Instead, it learns from the consequences of its actions, making it particularly suitable for problems where an optimal behavior is not known in advance but can be discovered through interaction.</u>
 
 Common applications of reinforcement learning include game playing (e.g., AlphaGo), robotics, autonomous vehicles, and resource management.
-
 ### Recommender Systems
+A recommender system is a type of information filtering system that seeks to <u>predict the preferences or ratings a user would give to an item</u>.
 
-A recommender system is a type of information filtering system that seeks to predict the preferences or ratings a user would give to an item. These systems are used in various applications, such as suggesting products to purchase, content to consume, or social connections to make. They analyze patterns in user behavior and preferences to provide personalized recommendations.
-
+These systems are used in various applications, such as suggesting products to purchase, content to consume, or social connections to make. They analyze patterns in user behavior and preferences to provide personalized recommendations.
 ## 2nd classification
-
 ### Discriminative Models
-
-Discriminative models focus on directly predicting the conditional probability distribution $P(Y|X)$, where $Y$ is the output label and $X$ is the input features. These models learn the decision boundary between different classes without modeling the underlying distribution of the data.
+Discriminative models focus on directly predicting the conditional probability distribution $P(Y|X)$, where $Y$ is the output label and $X$ is the input features. <u>These models learn the decision boundary between different classes without modeling the underlying distribution of the data.</u>
 
 Key characteristics of discriminative models include:
-
 - They directly model the probability of an output given the input
 - They typically require less training data compared to generative models
 - Examples include logistic regression, support vector machines (SVM), and neural networks
 
 Discriminative models are often preferred when the primary goal is prediction accuracy and when there's sufficient labeled training data available.
-
 ### Generative Models
-
-Generative models, in contrast to discriminative models, learn the joint probability distribution $P(X,Y)$ of both the input features $X$ and the output labels $Y$. These models can generate new data points and are particularly useful when understanding the underlying data distribution is important.
+Generative models, in contrast to discriminative models, learn the joint probability distribution $P(X,Y)$ of both the input features $X$ and the output labels $Y$. T<u>hese models can generate new data points and are particularly useful when understanding the underlying data distribution is important.</u>
 
 Key characteristics of generative models include:
-
 - They model how the data was generated
 - They can handle missing data more naturally
 - They can generate new, synthetic data points
 - Examples include Naive Bayes, Hidden Markov Models, and Generative Adversarial Networks (GANs)
 
 Generative models are often used in unsupervised learning tasks and can be beneficial when the amount of labeled data is limited.
-
 ## Principles
-
 ### Ockham’s razor
-
 - The simplest answer is usually the correct answer
 - Simplicity is the ultimate sophistication
-- Of two equivalent theories or explanations, all other things being equal, the simpler one is to be preferred
+- <u>Of two equivalent theories or explanations, all other things being equal, the simpler one is to be preferred</u>
 - We are to admit no more causes of natural things than such as are both true and sufficient to explain their appearances (?)
 - The simplest explanation is usually the best
 
 The “razor” metaphor reflects the principle of “shaving away” unnecessary assumptions in reasoning.
-
 ### No Free Lunch (NFL) Theorem
-
-If an algorithms performs well on a certain class of problems, then it necessarily performs bad on the set of all remaining problems.
-
-No algorithm can give good results in all problems.
+<u>If an algorithms performs well on a certain class of problems, then it necessarily performs bad on the set of all remaining problems.</u>
+<u>No algorithm can give good results in all problems.</u>
 
 It can be seen in a mathematical way:
 
@@ -162,33 +135,28 @@ $$
 $$
 
 Where:
-
 - $a_1$ and $a_2$ are two algorithms
 - $d_m^y$ is the ordered set of size $m$ of the cost values $y \in Y$ associated to input values $x \in X$
-- $f:X \rightarrow Y$
+- $f:X \rightarrow Y$ is the function being optimized
+- $P$ is the conditional probability of obtaining a given sequence of cost values from algorithm $a$ run $m$ times on function $f$
 
-It says that the average of the performance over all the optimization problem $f$ is always the same.
+It says that the average of the performance over all the optimizations on problem $f$ is always the same.
 
 There’s “no free lunch” in real life: you don’t get something for nothing.
-
 # —Supervised Learning—
-
 # 2. Linear Regression
 
-Some notation before starting:
-
-- $m$ = number of **training examples**
-- $x$ = input variable or **feature**
-- $y$ = output variable or **target**
-- $(x,y)$ = tuple that represent one training session
-- $(x^{(i)},y^{(i)})$ = $i^{th}$ training example
+> Some notation before starting:
+> - $m$ = number of **training examples**
+> - $x$ = input variable(s) or **feature**(s)
+> - $y$ = output variable or **target**
+> - $(x,y)$ = tuple that represent one training session
+> - $(x^{(i)},y^{(i)})$ = $i^{th}$ training example
 
 Given the training set and a learning algorithm, the main objective of linear regression is to build a function called **hypothesis** 
-
 $$
 h_\theta(x)=\theta_0+\theta_1x_1+\theta_2x_2...
 $$
-
 ## Univariate (Linear)
 
 The shape of the hypothesis with $\theta_i$ parameters is the following one:
@@ -196,179 +164,142 @@ The shape of the hypothesis with $\theta_i$ parameters is the following one:
 $$
 h_\theta(x)=\theta_0+\theta_1x
 $$
-
-![Untitled](assets/Untitled%203.png)
-
+![Untitled|500](assets/Untitled%203.png)
 N.B.: $\theta_0$ is also called **bias.**
 
 The idea is to find the best vector of parameters  $\theta$ so that $h(x)$ is as close as possible to the $y$s of the training example. In order to do that a **cost function** $J(\theta_0, \theta_1)$ is needed: $J$ gives the value of the error between the model using parameters $(\theta_0, \theta_1)$ and the training set.
-
 $$
 J(\theta_0, \theta_1)=
 J(\theta)=
 \frac1{2m}\sum_{i=1}^m(h_\theta(x^{(i)})-y^{(i)})^2
 $$
-
 $$
 \theta_{min}
 =\min[J(\theta_1, \theta_2)]
 =\min[J(\theta)]
 $$
-
-![Untitled](assets/Untitled%204.png)
-
+![Untitled|600](assets/Untitled%204.png)
 ## Multivariate (Linear)
-
 Some notation like the previous case and in addition:
-
-- $x_j^{(i)}$ value of $j^{th}$ feature in $i^{th}$ training example
-    
-    $$
-    h_\theta(x^{(i)})=\theta_0+\theta_1x_1^{(i)}+\theta_2x_2^{(i)}+...+\theta_nx_n^{(i)}
-    $$
-    
-    $$
-    \textbf{x}=
-    \begin{bmatrix} 
-    x_0 \\ 
-    x_1 \\ 
-    x_2 \\
-    \vdots \\
-    x_n
-    \end{bmatrix}
-    \in \R^{n+1}
-    \;\;
-    \theta=
-    \begin{bmatrix} 
-    \theta_0 \\ 
-    \theta_1 \\ 
-    \theta_2 \\
-    \vdots \\
-    \theta_n
-    \end{bmatrix}
-    \in \R^{n+1}
-    \\\:\\
-    h_\theta(x^{(i)})=\theta^T\textbf{x}|_{x_0=1}
-    $$
-    
-
+* $x_j^{(i)}$ value of $j^{th}$ feature in $i^{th}$ training example
+$$
+h_\theta(x^{(i)})=\theta_0+\theta_1x_1^{(i)}+\theta_2x_2^{(i)}+...+\theta_nx_n^{(i)}
+$$
+$$
+\textbf{x}=\begin{bmatrix} 
+x_0 \\
+x_1 \\
+x_2 \\
+\vdots \\
+x_n
+\end{bmatrix}
+\in \mathbb R^{n+1}
+\quad
+\theta=
+\begin{bmatrix} 
+\theta_0 \\ 
+\theta_1 \\ 
+\theta_2 \\
+\vdots \\
+\theta_n
+\end{bmatrix}
+\in \mathbb R^{n+1}
+\quad
+h_\theta(x^{(i)})=\theta^T\textbf{x}|_{x_0=1}
+$$
 ## Gradient Descent
-
 Also known as **steepest descent**.
 
-The **Gradient Descent Algorithm** is used to (iteratively) minimize $J(\theta_0, \theta_1)$ by changing $\theta_0$ and $\theta_1$. The steps are the following:
+The **Gradient Descent Algorithm** is used to (iteratively) minimize the cost function $J(\theta_0, \theta_1)$ by changing $\theta_0$ and $\theta_1$. The steps are the following:
 
 1. initialize $\theta_0$ and $\theta_1$ to some random values
 2. keep changing $\theta_0$ and $\theta_1$ to reduce $J(\theta_0, \theta_1)$, towards the minimum value, using the step update:
-
 $$
 \theta_j \coloneqq \theta_j - \alpha\frac{\partial}{\partial\theta_j}J(\theta_0, \theta_1)
 $$
+It’s crucial to set an appropriate value for the **learning rate** $\alpha$. The value to assign to it is a trade-off because:
+- if $\alpha$ s too small, then the algorithm will converge slowly
 
-It’s crucial to set an appropriate value for the **learning rate** $\alpha$. The value to assign to $\alpha$ is a trade-off because:
+![Untitled|400](assets/Untitled%205.png)
 
-- if it’s too small, then the algorithm will converge slowly
+- if $\alpha$ it’s too large, the algorithm may diverge
 
-![Untitled](assets/Untitled%205.png)
-
-- if it’s too large, the algorithm may diverge
-
-![Untitled](assets/Untitled%206.png)
+![Untitled|400](assets/Untitled%206.png)
 
 ![Untitled](assets/Untitled%207.png)
 
-Moreover, the gradient descent has a particular property: as long as the algorithm goes, the steps gets automatically lower because of the derivative component: it gets lower as well.
+> [!tip]
+> Moreover, the gradient descent has a particular property: as long as the algorithm goes, the steps gets automatically lower because of the derivative component: it gets lower as well.
 
 The following are three possibile implementations of the Gradient Descent Algorithm:
-
 ### Batch Gradient Descent
-
 1. Randomly initialize parameters $\theta$
-2. For each parameter, $\theta_j$ is updated using all the $m$ training data until convergence
-    
-    $$
-    \theta_j 
-    \coloneqq \theta_j - \alpha\frac{\partial}{\partial\theta_j}J(\theta_j)
-    = \theta_j - \alpha\frac1m\sum_{i=1}^m(h_\theta(\textbf{x}^{(i)})-y^{(i)})\textbf{x}_j^{(i)}
-    \\
-    for \: j=0,1,2,...,n
-    $$
-    
-
+2. For each parameter, the parameter $\theta_j$ is updated using all the $m$ training data until convergence (stop criteria is met)
+$$
+\theta_j 
+\coloneqq \theta_j - \alpha\frac{\partial}{\partial\theta_j}J(\theta_j)
+= \theta_j - \alpha\frac1m\sum_{i=1}^m(h_\theta(\textbf{x}^{(i)})-y^{(i)})\textbf{x}_j^{(i)}
+\\
+for \: j=0,1,2,...,n
+$$
 ### Stochastic Gradient Descent
 
 1. Randomly initialize parameters $\theta$
-2. For each sample data $i$, all $n$ parameters are updated until convergence
-    
-    $$
-    \theta_j 
-    \coloneqq  \theta_j - \alpha(h_\theta(\textbf{x}^{(i)})-y^{(i)})\textbf{x}_j^{(i)}
-    \\
-    for \: j=0,1,2,...,n
-    $$
-    
-
+2. For each sample data $i$, all $n$ parameters are updated all at once, until convergence (stop criteria is met)
+$$
+\theta_j 
+\coloneqq  \theta_j - \alpha(h_\theta(\textbf{x}^{(i)})-y^{(i)})\textbf{x}_j^{(i)}
+\\
+\quad
+\text{for} \space j=0,1,2,...,n
+$$
 It is called “stochastic” because, given the fact that parameters are all updated after each training example, the value of the gradient is always a “stochastic approximation” of the true cost gradient. 
 
 An **approximate gradient** means a faster but zig-zag-ish convergence, because the model “gets fixed” (all parameters are updated) each time a new data is used in the update step.
 
 For large datasets, stochastic gradient descent is preferred to batch gradient descent.
 
-![Untitled](assets/Untitled%208.png)
+![Untitled|600](assets/Untitled%208.png)
 
 ### Mini-Batch Gradient Descent
-
 This approach tries to take the advantages of batch and stochastic ones: 
-
 1. given a parameter $b\in[2,100]$ (usual values)
 2. all $n$ parameters are updated using $b$ samples among the totality of them (**mini-batch** sampled from the entire dataset)
-3. the 2. is repeated for every mini-batch, until all of them have been considered
+3. the step 2. is repeated for every mini-batch, until all of them have been considered
 
-In general, when a dataset is particularly big, the stochastic (o mini-batch) approach is preferred.
+In general, when a dataset is particularly big, the stochastic or mini-batch approaches are preferred.
 
-> **IMPORTANT**
-Each of the algorithm explained above stops until a [stop condition](https://www.notion.so/Machine-Learning-Notes-fd12021b7a554122bce07e4233196a54?pvs=21) is satisfied (desired convergence is reached) and not until all dataset has been scanned.
-Then, Stochastic and Mini-Batch GDs are more efficient on large datasets because of their significant smaller step w.r.t. the Batch GD while the (huge) number of steps comparable.
-> 
-
+> [!warning]
+> Each of the algorithm explained above stops until a stop condition (see [[#Stop Conditions]]) is satisfied - so desired convergence is reached - and not until all dataset has been scanned.
+> Then, Stochastic and Mini-Batch GDs are more efficient on large datasets because the number of steps needed to satisfy a stop condition is usually lesser than ones used by Batch GD. 
 ## Stop Conditions
-
 - **Max Iteration**: algorithm halts when a maximum number of iteration is reached
-- **Absolute tolerance**: algorithm halts when a certain error value is reached
-- **Relative tolerance**: algorithm halts when a certain delta error value (w.r.t. the previous one) is reached
+- **Absolute tolerance**: algorithm halts when a specific error value is reached
+- **Relative tolerance**: algorithm halts when a specific delta error value (difference w.r.t. the previous one) is reached
 - **Gradient Norm tolerance**: algorithm halts when the norm of the gradient is lower than a certain value
-
 ## Adding Features
-
 Sometimes the model cannot well-approximate the problem, maybe because “too linear”. The answer is to make the model less linear by adding new parameters or by substituting some of them.
 
 In order to have new parameters, new features $x_k$ must be added and there are 2 ways:
-
 - $x_k=x_i*x_j$
 - $x_k=x_i^k$
-
 ## Feature Scaling
-
 It is not rare that the features’ domains are not within the same interval: this can lead to a slower convergence of the gradient descent algorithm.
 
-![Untitled](assets/Untitled%209.png)
-
-### **Min-max normalization**
-
+![Untitled|500](assets/Untitled%209.png)
+### Min-max normalization
 Forces the values in a fixed interval $[a,b]$. Since the interval is fixed, a possibile new value outside the interval will negatively affect the interval itself.
-
 $$
 x'=\frac{x-x_{min}}{x_{max}-x_{min}}(b-a)+a\in[a,b]
 $$
-
-### **Z-score normalization**
-
+### Z-score normalization
+Forces the values in a fixed interval normally distributed between $[0,1]$. 
 $$
 z=\frac{x-mean(x)}{devstd(x)}=\frac{x-\mu_x}{\sigma_x} \approx \mathcal N(0,1)
 $$
-
 ## Proof of Normal equations
-
+If everything is represented as a matrix, in theory it’s possibile to immediately compute the optimal parameters’ matrix.
+The input dataset is made up of:
 $$
 \textbf{x}=
 \begin{bmatrix} 
@@ -388,7 +319,7 @@ y^{(3)} \\
 y^{(n)} \\ 
 \end{bmatrix}
 $$
-
+Then the cost function:
 $$
 J(\theta)
 =\frac12(\textbf{X}\theta-\textbf{y})^2
@@ -400,36 +331,27 @@ $$
 =\textbf{X}^T(\textbf{X}\theta-\textbf{y})
 =\textbf{X}^T\textbf{X}\theta-\textbf{X}^T\textbf{y}
 $$
-
 By imposing the resolutive condition of the cost function $\Delta J=0$ I have:
-
 $$
 \theta=(\textbf{X}^T\textbf{X})^{-1}\textbf{X}^T\textbf{y}
 $$
 
 Unfortunately, there are some drawbacks that make this computation unfeasible:
-
-- (huge) matrix inverse is expensive to compute
+- huge matrix inverse $(X^T X)^{-1}$ is expensive to compute
 - too many features
-
 ## Probabilistic interpretation
-
-The main assumption is that the predicted output value $y^{i}$ is:
-
+The main assumption is that the predicted output value $y^{i}$ is defined as:
 $$
 y^{(i)}=\theta^T\textbf{x}^{(i)}+e^{(i)}
 $$
+- $\theta^T\textbf x^{(i)}$ is the predicted value
+- $e^{(i)}$ is the prediction error
 
-- $\theta^T\textbf x^{(i)}$ is the value
-- $e^{(i)}$ is the error
-
-Assuming that all the samples are independent and identically distributed (**iid assumption**) between each other, I can approximate the error with an exponential random variable:
-
+Assuming that all the samples are independent and identically distributed (**iid assumption**) between each other, I can approximate the error with a normal random variable with 0 mean and $\sigma^2$ variance:
 $$
 p(e^{(i)})=\mathcal{N}(0,\sigma^2)=\frac1{\sqrt{2\pi}\sigma}e^{-\frac{(e^{(i)})^2}{2\sigma^2}}
 \;\;i=1...m
 $$
-
 $$
 e^{(i)}=y^{(i)}-\theta^T\textbf{x}^{(i)}
 \Rightarrow
@@ -438,9 +360,7 @@ e^{(i)}=y^{(i)}-\theta^T\textbf{x}^{(i)}
 p(y^{(i)}|\textbf{x}^{(i)};\theta^T)=\mathcal{N}(0,\sigma^2)=\frac1{\sqrt{2\pi}\sigma}e^{-\frac{(y^{(i)}-\theta^T\textbf{x}^{(i)})^2}{2\sigma^2}}
 \;\;i=1...m
 $$
-
 Let’s now introduce the **likelihood** function: it is parametrized by $\theta$ and returns the most probabile output, for each training case.
-
 $$
 L(\theta)=
 L(\theta;\textbf X, \textbf y)=
@@ -448,12 +368,13 @@ p(\textbf y|\textbf X;\theta)=
 \prod_{i=1}^m\frac1{\sqrt{2\pi}\sigma}e^{-\frac{(y^{(i)}-\theta^T\textbf{x}^{(i)})^2}{2\sigma^2}}
 $$
 
-> Important ⚠️
-Never condition probabilities on $\theta$ since it is not a random variable, it’s fixed.
-> 
+> [!warning]
+> Never condition probabilities on $\theta$ because it is not a random variable, it’s fixed value.
 
-Of course, the objective is to maximize $L(\theta)$:
+> [!tip]
+> $\theta$ gives the expressiveness of a model. The larger $\theta$, the more expressive the model is.
 
+Of course, the main goal is to maximize $L(\theta)$:
 $$
 \begin{align*}
 \hat\theta &= \max_\theta[L(\theta)]
@@ -467,13 +388,10 @@ $$
 \bigg)
 \end{align*}
 $$
-
-> Important ⚠️
-Adding $\log$ in the second step is purely a mathematical convenience that makes easier further calculations; it does not change the nature of the problem.
-> 
+> [!tip]
+> Adding $\log$ in the second step is purely a mathematical convenience that makes easier further calculations; it does not change the nature of the problem.
 
 Then, the final comparison:
-
 $$
 \min\bigg(
 \frac1{2m}\sum_{i=1}^m(h(x^{i})-y^{(i)})^2
@@ -484,48 +402,45 @@ $$
 \bigg)
 $$
 
-Two minimization problems are identical, but the constant $m$ which has practically no influence.
+The two minimization problems are identical (the constant $m$ has practically no influence).
 
-Minimizing the cost function means finding the best parameters that produce the output given the input.
+<u>Minimizing the cost function means finding the best parameters that produce the output given the input.</u>
 
-The entire demonstration of the probabilistic interpretation is reported on the slides.
-
+> [!info]
+> The complete demonstration of the probabilistic interpretation is reported on the slides.
 # 3. Logistic Regression
-
-Even it’s called “regression”, the **logistic regression** is used for classification tasks. The objective is to assign each data instance to a **class**, among a finite set of classes.
+Even it’s called “regression”, the **logistic regression** is <u>used for classification tasks</u>. The objective is to assign each data instance to a **class**, among a finite set of classes.
 
 There exists:
-
 - **Binary Logistic Regression** (2 classes)
 - **Multiple Classes Logistic Regression** (> 2 classes)
 
 This chapter is mainly focused on the first one.
 
-A classifier **threshold** is used in order to tell if a particular instance $x$ belongs to one class nor the other. In general, the following classes are used:
-
+A classifier **threshold** is used in order to tell if a particular instance $x$ belongs to one class nor the other. In general, the following *classes* are used:
 $$
 y = \{0,1\}
 $$
+Of course, we are not using two classes, but just one class:
+* if $y=0$ → data DO NOT belong to class
+* if $y=1$ → data DO belong to class
 
-The idea is to predict the following:
-
+The idea is to predict the following (suppose threshold is set to $0.5$):
 $$
-\text{If} \space h_\theta \ge0.5, \text{predict} \space y=1 \\
-\text{If} \space h_\theta <0.5, \text{predict} \space y=0
+\text{if} \space h_\theta \ge0.5 \Rightarrow \text{predict} \space y=1
+$$
+$$
+\text{if} \space h_\theta <0.5 \Rightarrow \text{predict} \space y=0
 $$
 
-The value of the threshold is usually $0.5$ in a binary classification problem, but it can be changed to improve classifier behavior.
+The value of the threshold is usually $0.5$ in a binary classification problem, but it can be changed if improves the classifier’s behavior.
 
-> Important ⚠️
-Changing the threshold of a logistic regression classifier can significantly affect the model’s performance, particularly in terms of how it balances precision, recall, and other performance metrics (see [Evaluation Metrics for Classification](https://www.notion.so/Machine-Learning-Notes-fd12021b7a554122bce07e4233196a54?pvs=21)).
-> 
-- **Example - Malignant Tumors**
-    
-    ![Untitled](assets/Untitled%2010.png)
-    
+> [!warning]
+> Changing the threshold of a logistic regression classifier can significantly affect the model’s performance, particularly in terms of how it balances precision, recall, and other performance metrics (see [[#Evaluation Metrics]]).
 
+**Example - Malignant Tumors**
+![Untitled|500](assets/Untitled%2010.png)
 ## Logistic Function
-
 $$
 \begin{align*}
 h_\theta(x)&=g(z)
