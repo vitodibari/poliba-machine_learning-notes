@@ -49,13 +49,13 @@ ML problems consists mostly in:
 - **Regression**: the goal is to <u>predict continuous (real) output values</u>.
 #### Examples
 **Housing price prediction**
-  ![Untitled|600](assets/Untitled.png)
+  ![Untitled|500](assets/Untitled.png)
   
   Given a finite set of data, I could consider a linear or quadratic model to predict the price, given the size of the house. In the supervised approach, the right answer will be given for each datapoint.
   This is a regression problem: I want the algorithm to predict the price of an house, a real value.
   
   **Breast cancer**
-![Untitled|600](assets/Untitled%201.png)
+![Untitled|500](assets/Untitled%201.png)
 I want the algorithm to decide if a tumor is malignant or not, given the size. 
 This is an example of (binary) classification problem: given a certain tumor size, the algorithm should be able to return the chance that the tumor is malignant (or not). The tumor size is the feature of the problem.
 
@@ -456,7 +456,7 @@ h_\theta(x)&=g(z)
 \end{align*}
 $$
 
-![Untitled](assets/Untitled%2011.png)
+![Untitled|400](assets/Untitled%2011.png)
 
 The **logistic (sigmoid) function** represents the probability $p$ that $y$ is equal $1$, given $x$ and parametrized by $\theta$. The probabilistic interpretation follows:
 $$
@@ -1190,7 +1190,7 @@ $R^2$ has values in the range $[0…1]$. The closer the value to 1, the better t
 A model with $R^2=0.75$ means that 75% of the variation in the dependent variable is explained by the model.
 ### Adjusted Coefficient of Determination
 > [!info]
-> https://www.datacamp.com/tutorial/adjusted-r-squared
+> - https://www.datacamp.com/tutorial/adjusted-r-squared
 
 <font color="#00b050">The r-squared value always increases or remains the same when more predictors are added to the model, even if those predictors do not significantly improve the model's explanatory power. This issue can create a misleading impression of the model's effectiveness.</font>
 
@@ -1203,25 +1203,18 @@ where:
 * $m$: number of observations
 * $n$: number of features
 # 6. Non-linear Hypotheses
+Most problems out there are relatively complex regression and multi-classification problems. These problems often need solutions based on non-linear hypothesis. A **feedforward neural network** (**NN**) - aka a **multi-layer perceptron** (**MLP**) - is a tool that solves this kind of problem: it can build a hypothesis which approximates a dataset following a non-linear behavior.
 
-Most problems out there are relatively complex regression and multi-classification problems. These problems often need solutions based on non-linear hypothesis. A **feedforward neural network** (**NN**), aka a **multi-layer perceptron** (**MLP**), is a tool that solves this kind of problem: it can build a hypothesis which approximates a dataset following a non-linear behavior.
+It basically consists of a multitude of logistic regressors stacked on top of each other. The idea is to determine a sufficiently complex function which allows the solving of complex regression problems or, by using proper activation functions, multi-classification problems as well.
 
-It basically consists of a multitude of logistic regressors stacked on top of each other. The idea is to determine a sufficiently complex function which allows can solve complex regression problems or, by using proper activation functions, multi-classification problems as well.
-
-Multi-classification problem
-
-![Untitled](assets/Untitled%2046.png)
-
-Regression problem
-
-![Untitled](assets/Untitled%2047.png)
-
+**Example: Multi-classification problem**
+![Untitled|500](assets/Untitled%2046.png)
+**Example: Regression problem**
+![Untitled|500](assets/Untitled%2047.png)
 ## Neuron
-
 It is the minimal unit in a neural network.
 
-It is represented as follows:
-
+It is defined as follows:
 $$
 \begin{align*}
 h_\theta(x)
@@ -1230,73 +1223,54 @@ h_\theta(x)
 &=g(\theta_{10}x_0+\theta_{11}x_1+\theta_{12}x_2+\theta_{13}x_3)
 \end{align*}
 $$
-
-where $g$ is the activation function (see [Activation Functions](https://www.notion.so/Machine-Learning-Notes-fd12021b7a554122bce07e4233196a54?pvs=21)).
-
-![Untitled](assets/Untitled%2048.png)
-
+where:
+* $g$ is the activation function (see [Activation Functions](https://www.notion.so/Machine-Learning-Notes-fd12021b7a554122bce07e4233196a54?pvs=21)).
+![Untitled|300](assets/Untitled%2048.png)
 ## Neural Network
-
 A neural network is, of course, a network made up of neurons stacked onto each other.
-
 It is structured in: **input layer**, a set of $L$ **hidden layers** and an **output layer**.
 
 Each neuron of the input layer is connected to each neuron of the first hidden layer (**pre-synaptic hidden layer**).
 Each neuron of the last hidden layer is connected to each neuron of the output layer (**post-synaptic hidden layer**).
 Each neuron of the hidden layer i is connected to each neuron of hidden layer $i+1$ and so on.
 
-The connection among neuron $i$ and neuron $j$ (belonging to two adjacent layers) is called **synapse** and can be more or less strong: a **weight $\theta_{ji}$** is used.
-For each couple of adjacent layers, a **weight matrix** can be found.
+The connection among neuron $i$ and neuron $j$ (belonging to two adjacent layers) is called **synapse** and can be more or less strong. This strength is parameterized by a **weight $\theta_{ji}$**.
+For each couple of adjacent layers, a **weight matrix** can be defined.
 
 ![Untitled](assets/Untitled%2049.png)
 
 A neural network is nothing more than a non-linear function: $n$ inputs (one for each feature) are pushed forward the network so it can produce one or more output value, defined in $\mathbb{R}$. 
 
 I can have two different setups, where the output layer has different number of nodes and different activation functions:
-
 - **NN for regression problems**
     - Just one node in the output layer, which value $y$ is defined in $\mathbb{R}$.
     - Output layer has a linear activation function (no non-linear) is used: $g(z)=z$
 - **NN for multi-classification problems**
     - $K$ nodes in the output layer, which value $\pmb o$ is defined in $\mathbb{R}$.
-    - Non-linear activation function is used (see [Activation Functions](https://www.notion.so/Machine-Learning-Notes-fd12021b7a554122bce07e4233196a54?pvs=21)). It may be different from the one used for hidden layers.
+    - Non-linear activation function is used (see [[#Activation Functions]]). It may be different from the one used for hidden layers.
     - The output layer is then followed by a function which perform the mapping $\pmb o \rightarrow \pmb y$, where y follows the *one-hot encoding* (${[1,0,0],[0,1,0],[0,0,1]}$ for $|K|=3$):
-        - **argmax**: (sometimes) used only in production. The highest value $o_i \in \pmb o$ will become the only $1$, while the others will be $0$s.
-        - **softmax**: used mainly in training and in production too. It scales the results in a range from 0 to 1, so the bigger value will be the only 1 (class chosen) while preserving other lower “probabilities”. This allows to have output values still suitable for the training process.
-
+        - **argmax**: (sometimes) used only in production. <u>The highest value will become the only 1, while the others will be 0s.</u>
+        - **softmax**: used mainly in training and in production too. <u>It scales the results in a range from 0 to 1, so the bigger value will be the only 1 (class chosen) while preserving other lower “probabilities”.</u> This allows to have output values still suitable for the training process.
 ## Forward Propagation
-
 It is the process of taking a set of input values and calculate the output(s) using a NN.
-
 ## Examples
+- **Example: Linear regression as single-layer NN** #TODO 
+- **Example: Logistic regression as single-layer NN** #TODO 
+- **Example: XOR function** #TODO 
 
-- **Example: Linear regression as single-layer NN**
-    
-    
-- **Example: Logistic regression as single-layer NN**
-    
-    
-- **Example: XOR function**
-    
-    https://medium.com/@stanleydukor/neural-representation-of-and-or-not-xor-and-xnor-logic-gates-perceptron-algorithm-b0275375fea1
-    
-
+> [!info]
+> - https://medium.com/@stanleydukor/neural-representation-of-and-or-not-xor-and-xnor-logic-gates-perceptron-algorithm-b0275375fea1
 ## Cost Function
+Cost function is expressed with $J(\Theta)$ and quantifies the distance from predicted to real values. The main idea is to find - one of - the optimal set of parameters $\Theta$ to minimize $J(\Theta)$.
 
-Cost function is expressed with $J(\Theta)$ and quantifies the distance from predicted to real values. The main idea is to find (one of) the optimal set of parameters $\Theta$ to minimize $J(\Theta)$.
-
-Cost function depends mainly by the output layer, so the mathematical form changes w.r.t. the problem the NN is solving.
-
+The cost function used depends mainly by the output layer, so the mathematical form changes w.r.t. the problem the NN is solving.
 ### Cost Function for Regression with Regularization
-
 $$
 J(\Theta)=
 \sum_{i=0}^m(h_\Theta(\mathbb x^{(i)})-y^{(i)})^2
 +\frac{\lambda}{2m}\sum_{l=0}^{L-1}\sum_{i=0}^{s_l}\sum_{j=0}^{s_{l+1}}{(\Theta^{(l)}_{ji})^2}
 $$
-
 ### Cost Function for Classification with Regularization
-
 $$
 J(\Theta)=
 -\frac1m\bigg[
@@ -1304,124 +1278,86 @@ J(\Theta)=
 +\frac{\lambda}{2m}\sum_{l=0}^{L-1}\sum_{i=0}^{s_l}\sum_{j=0}^{s_{l+1}}{(\Theta^{(l)}_{ji})^2}
 \bigg]
 $$
-
-<aside>
-⚠️ I have three summations because:
-sum for all $L$ layers, for each $s_l$ nodes, for each connection to $s_{l+1}$ nodes of next layer
-
-</aside>
-
+> [!warning] Why three summations?
+> Because the cost sums for all $L$ layers, for each $s_l$ nodes, for each connection to $s_{l+1}$ nodes of next layer
+> 
 ## Back-propagation
-
-https://towardsdatascience.com/understanding-backpropagation-algorithm-7bb3aa2f95fd
-
-https://www.youtube.com/watch?v=isPiE-DBagM&list=PL3FW7Lu3i5Jsnh1rnUwq_TcylNr7EkRe6
+> [!info]
+> - https://towardsdatascience.com/understanding-backpropagation-algorithm-7bb3aa2f95fd
+> - https://www.youtube.com/watch?v=isPiE-DBagM&list=PL3FW7Lu3i5Jsnh1rnUwq_TcylNr7EkRe6
 
 Backpropagation algorithm is the core of NNs: it combines Gradient Descent and the Chain Rule to find a (sub-)optimal set of parameters $\Theta$.
 
 The idea, of course, is to lower the cost (or loss or error) function by changing parameters, but this is not so trivial because:
-
 - cost function is non-linear. Non-linearity is given by “jumping” from one layer to the next one (implemented with non-linear activation functions);
 - error given by $i^{th}$ layer depends on the error given by the $(i-1)^{th}$ one.
 
 The following NN will be used as an example for the backpropagation algorithm.
-
-![Untitled](assets/Untitled%2050.png)
+![Untitled|400](assets/Untitled%2050.png)
 
 In this case:
-
 - $L=4$
 - $K=4$
 - $\Theta=[\Theta^1 \space \Theta^2 \space \Theta^3]^T$
 
 **Training algorithm**
-
-1. [random initialize](https://www.notion.so/Machine-Learning-Notes-fd12021b7a554122bce07e4233196a54?pvs=21) parameters $\Theta$
-    
-    
+1. randomly initialize (see [[#Random Initialization]]) parameters $\Theta$
     - $\Theta_{ji}^{(l)}$ is the weight for the connection between the $i$-th node on the $l$-th layer and the $j$-th node on the $(l-1)$-th one
-    
-    ![image.png](Personale/poliba-machine_learning-notes/assets/image%202.png)
-    
+    ![image.png|200](Personale/poliba-machine_learning-notes/assets/image%202.png)
 2. perform the (first) forward propagation step and collect the $K$ results:
     - $h_{\Theta}(x)=\{y_1,y_2,...,y_K\} \in \mathbb{R}^{K}$
 3. compute the loss function (e.g. using $MSE$)
-4. back-propagate: tune each model’s parameter to lower the loss calculated in the output layer.
-This is possible by calculating partial derivative of the loss function w.r.t. each parameter (one per edge, basically)
+4. back-propagate: tune each model’s parameter to lower the loss calculated in the output layer. This is possible by calculating partial derivative of the loss function w.r.t. each parameter (one per edge, basically)
     
-    
-    The general formula is given:
-    
-    $$
+    The general formula is: $$
     \frac{\partial J(\Theta)}{\partial \Theta_{ji}^{(l)}}
     =\delta_i^{(l+1)}a_j^{(l)}
     =\delta_i^{(l+1)}g(z_j^{(l)})
     $$
-    
     where:
-    
     - $\delta_i^{(l)}$: is defined as the **local gradient** and can be thought as the error contribution given by node $i$ on layer $l$ (which is function of all its connected nodes’ errors, towards the input layer)
-5. if stop condition is true, 
-then end training
-else goto 2.
-
+5. if stop condition is true, then end training
+   else goto stop 2.
 ## Random Initialization
-
-Basically, random initialization is used to break the **symmetry problem**: if all parameters are equals, gradient descent algorithm will produce the same adjustments for each parameter (by fixing the layer, all cost function’s derivatives w.r.t. each parameter will be the same).
+Basically, <u>random initialization is used to break the **symmetry problem**: if all parameters are equals, gradient descent algorithm will produce the same adjustments for each parameter</u> (by fixing the layer, all cost function’s derivatives w.r.t. each parameter will be the same).
 
 Picking just random numbers is not enough because other different problems may arise, like the **vanishing gradients one**. In order to prevent this, two more rules must be followed:
-
 - sum of all random values should be (close to) 0
 - variance of values should be the same across the layers
 
 Usually a small $\epsilon$ from a random distribution is picked:
-
 $$
 \theta_{ij}^{(l)}\in[-\epsilon, \epsilon]
 $$
-
 Distribution used are:
-
 - Standard Normal
 - Uniform
 - **Xavier** (or **Glorot**)
-This state-of-the-art technique takes into account the dimension of the neural network to determine the “scale of the random initialization”.
-It is the most effective one actually.
-
+  This state-of-the-art technique takes into account the dimension of the neural network to determine the “scale of the random initialization”.
+  It is the most effective one actually.
 ## Activation Functions
-
 Activation Functions are used to determine wether to “activate” a neuron or not, w.r.t. the value that it has produced.
 
 The activation function must have an “analog output” in the sense that should be able to determine how much to activate a neuron (so “50% activated” or “20% activated”). This is crucial to understand what neuron has the highest activation and then, if we are in the last layer of a neural network, it’s possible to apply softmax to perform classification.
 
-The activation function used must be non-linear, otherwise the entire network can collapse into a linear regression model (a neural network with 0 hidden layers, like the one in [Neuron](https://www.notion.so/Machine-Learning-Notes-fd12021b7a554122bce07e4233196a54?pvs=21) paragraph). Having a linear activation means that gradients won’t have any relationship w.r.t. the inputs, so the changes made by backpropagation will be constant and not depending on the change in input.
+The activation function used must be non-linear, otherwise the entire network can collapse into a linear regression model (a neural network with 0 hidden layers, like the one in [[#Neuron]] paragraph). Having a linear activation means that gradients won’t have any relationship w.r.t. the inputs, so the changes made by backpropagation will be constant and not depending on the change in input.
 
 Let’s have a look to some examples of activation function:
-
-**Sigmoid**
-
+### Sigmoid
 $$
 \sigma(x)=\frac{1}{1+e^{-x}}
 $$
-
-![Untitled](assets/Untitled%2051.png)
-
+![Untitled|200](assets/Untitled%2051.png)
 Sigmoid is one of the most used activation functions.
 
-It tends to bring the activations to either side of the curve ( above x = 2 and below x = -2 for example), making clear distinctions on prediction. Anyway, for input values greater [lower] than 2 [-2], activation tends to respond less because of the horizontal characteristic. When activation reach that part of the graph, vanishing gradients problem arises (because changes are not that evident).
-
-**tanh**
-
+It tends to bring the activations to either side of the curve ( above x = 2 and below x = -2 for example), making clear distinctions on prediction. Anyway, for input values greater \[lower\] than 2 \[-2\], activation tends to respond less because of the horizontal characteristic. When activation reach that part of the graph, vanishing gradients problem arises (because changes are not that evident).
+### tanh
 $$
 \tanh(x)=2\sigma(2x)-1=\frac{2}{1+e^{-2x}}-1
 $$
-
-![Untitled](assets/Untitled%2052.png)
-
+![Untitled|200](assets/Untitled%2052.png)
 tanh is very similar to Sigmoid. It basically a scaled Sigmoid function, with a stronger gradient.
-
-**ReLU**
-
+### ReLU
 $$
 ReLU(x)=\max(0,x)=
 \begin{cases}
@@ -1429,17 +1365,13 @@ x && \text{if } x\ge0 \\
 0 && \text{if } x<0
 \end{cases}
 $$
-
-![Screenshot 2024-08-03 alle 20.43.34.png](assets/Screenshot_2024-08-03_alle_20.43.34.png)
-
+![Screenshot 2024-08-03 alle 20.43.34.png|200](assets/Screenshot_2024-08-03_alle_20.43.34.png)
 $ReLU$ (Rectified Linear Unit) is defined over $[0,\text{Inf})$. It means that the activation may blow up.
 
-Le left part is interesting: $ReLU$ can assume value $0$, this means that a neuron can be turned off, deleted from the network. In the first istance, this can be though as a positive aspect: less neurons → lighter network → faster computation; and it’s true.
+Le left part is interesting: $ReLU$ can assume value $0$, this means that a neuron can be turned off, deleted from the network. In the first istance, this can be though as a positive aspect: less neurons → lighter network → faster computation. And it’s true.
 
 However, a turned off neuron won’t respond to any variation. This condition may extend to larger regions of neurons (**dying ReLU problem**). 
-
-**Leaky ReLU**
-
+### Leaky ReLU
 $$
 LReLU(x)=
 \begin{cases}
@@ -1447,23 +1379,16 @@ x && \text{if } x\ge0 \\
 0.1x && \text{if } x<0
 \end{cases}
 $$
-
-![Screenshot 2024-08-03 alle 21.02.35.png](assets/Screenshot_2024-08-03_alle_21.02.35.png)
+![Screenshot 2024-08-03 alle 21.02.35.png|200](assets/Screenshot_2024-08-03_alle_21.02.35.png)
 
 Leaky ReLU can be thought as an attempt to mitigate the dying ReLU problem, be making the horizontal line non-horizontal.
-
-**Maxout**
-
+### Maxout
 Maxout is an activation function that generalizes ReLU and Leaky ReLU. It's defined as:
-
 $$
 Maxout(x) = max(w_1^T x + b_1, w_2^T x + b_2)
 $$
-
 Where w and b are learned parameters. Maxout learns the activation function itself, potentially becoming a ReLU or Leaky ReLU depending on the learned parameters. This flexibility allows it to adapt to the data, but at the cost of increased computational complexity.
-
-**ELU**
-
+### ELU
 $$
 ELU(x) = 
 \begin{cases}
@@ -1471,28 +1396,19 @@ x & \text{if } x > 0 \\
 \alpha(e^x - 1) & \text{if } x \leq 0
 \end{cases}
 $$
-
 where:
-
 - $\alpha$ is a hyperparameter, typically set to 1
-
-![Screenshot 2024-10-31 alle 09.59.15.png](assets/Screenshot_2024-10-31_alle_09.59.15.png)
-
+![Screenshot 2024-10-31 alle 09.59.15.png|200](assets/Screenshot_2024-10-31_alle_09.59.15.png)
 $ELU$ (Exponential Linear Unit) is an activation function that aims to address some of the limitations of ReLU. It allows for negative values when the input is less than zero, which can help alleviate the dying ReLU problem. The exponential part of the function also ensures a smooth transition around zero, which can lead to faster learning in some cases.
 
 Key properties of ELU:
-
 - It can output negative values, allowing it to push mean unit activations closer to zero
 - It has a smooth curve for all inputs, which can help with gradient-based optimization methods
 - For positive inputs, it behaves identically to ReLU
 - It can suffer from the vanishing gradient problem for large negative inputs, but less so than sigmoid or tanh
-
 # 7. Decision Trees
-
 **Classification And Regression Trees** (**CART**) are **Decision Trees** which basically split input dataset, by defining a local model in each resulting **region** of input space.
-
 ## Regression Trees
-
 This concept is represented as a **tree** (which splits the dataset) with final **leafs** (regions).
 
 A Regression Tree is a Decision Tree which predicts numeric values.
