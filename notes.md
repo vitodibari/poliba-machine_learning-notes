@@ -17,6 +17,13 @@ The following ones must be memorized for the mid-term exam.
 3. [Derivative of $J(\theta)$](https://www.notion.so/Machine-Learning-Notes-fd12021b7a554122bce07e4233196a54?pvs=21)
 4. [Calculus of $J(\theta)$ for logistic regression](https://www.notion.so/Machine-Learning-Notes-fd12021b7a554122bce07e4233196a54?pvs=21)
 5. [[#Proof of Normal equations]]
+
+### Exercises
+1. [[#Feature Scaling]]
+2. [[#Gradient Descent]] by hand
+3. [[#Outlier removal - boxplot]]
+4. Curves (in general)
+5. [[#Learning Curves]]
 # 1. Introduction
 What is ML? **Machine Learning** is the field of study that gives to a program the ability to learn even if not explicitly programmed. 
 
@@ -583,7 +590,7 @@ h_\theta(\mathbf{x}^{(i)})-y^{(i)}
 \bigg)x_k^{(i)}=
 \frac1m\sum_{i=1}^m\bigg(e^{(i)}\bigg)x_k^{(i)}
 $$
-And then the update step (same as the linear regression):
+#Recall And then the update step (same as the linear regression):
 $$
 \theta_k=\theta_k-\alpha\frac{\partial J(\theta)}{\partial\theta_k}
 =\theta_k-\alpha\frac1m\sum_{i=1}^m\bigg(
@@ -606,55 +613,40 @@ h_\theta^{(i)}(x)=p(y=i|x;\theta)
 i=1,...,n
 $$
 # 4. Fitting
-It is quite evident that there is a certain amount of “freedom” in choosing the mathematical representation of the regressor/classifier: it can basically be more or less complex (no. of features used, polynomial grade, ecc.). Of course, not all models **fit** the situation.
+It is quite evident that there is a certain amount of “freedom” in choosing the mathematical representation of the regressor/classifier: it can be more or less complex (no. of features used, polynomial grade, ecc.). Of course, not all models **fit** the situation.
 
 In Machine Learning there are basically three scenarios:
-
 - **High bias** or **underfitting**: the model is too simple, so it doesn’t fit training data and does not learn.
 - **Just right** (it doesn’t have a formal name): tradeoff between a underfitted and a overfitted model.
 - **High variance** or **overfitting**: the model is too complex, so it performs (extremely) well on training data, but it cannot generalize (it cannot predict/classify on unseen data).
 
-**Regression**
-
+**Example on Regression**
 ![Untitled](assets/Untitled%2016.png)
-
-**Classification**
-
+**Example on Classification**
 ![Untitled](assets/Untitled%2017.png)
 
-There exists some procedures to automatically find the best model, among a class of them, but for now let’s focus on the bias and variance concepts.
-
+There exists some procedures to automatically find the best model among a bunch of them, but for now let’s focus on the bias and variance concepts.
 ## Bias and Variance trade-off
-
 Let’s assume a set of Datasets $D_i$ ($D_0,…,D_n$) each of size $m$, sampled from the original data distribution.
-
-Consider a fixed model trained on the several $D_i$: a corresponding number of hypothesis $h^{(D_i)}(x)$ is obtained.
-
-![Untitled](assets/Untitled%2018.png)
+![Untitled|400](assets/Untitled%2018.png)
+Consider a fixed model trained on all the several $D_i$: a corresponding number of hypothesis $h^{(D_i)}(x)$ is obtained.
 
 For each $D_i$, it’s possible to represent the **training set**:
-
 $$
 <\mathbf x^{(i)},y^{(i)}>
 $$
-
-Where $y^{(i)}$ can be expressed in the form of [prediction = ground truth + gaussian error] (iid assumption):
-
+Where $y^{(i)}$ can be expressed in the form of *prediction = ground truth + gaussian error* (under iid assumption):
 $$
 y^{(i)}=f(\mathbf x^{(i)})+e^{(i)}
 $$
-
-Each hypothesis $h^{(D_i)}(x)$ will be affected by an error in predicting values ($y^{(i)}$) w.r.t. the ground truth ($\mathbf x^{(i)}$). The error can be modeled in the form of a **Mean Squared Error** (**MSE**):
-
+Each hypothesis $h^{(D_i)}(x)$ will be affected by an error while predicting values ($y^{(i)}$), w.r.t. the ground truth ($\mathbf x^{(i)}$). The error can be modeled in the form of a **Mean Squared Error** (**MSE**):
 $$
 MSE(h^{(D_i)}(x))=
 E_x\bigg[
 (h^{(D_i)}(x)-f(x))^2
 \bigg]
 $$
-
 Moreover, it is interesting to evaluate the overall error, for each hypothesis found (respective of $D_i$), by calculating the **Generalization Error** (**GER**):
-
 $$
 \begin{align*}
 GER&=E_D[MSE] \\
@@ -666,39 +658,31 @@ GER&=E_D[MSE] \\
 \bigg]\bigg]
 \end{align*}
 $$
-
-> **Deep dive $h^{(D_i)}(x)$ vs $h^{(D)}(x^{(i)})$**
-
-The dataset can be represented as a set defined by the union of partitions: $D=D_0 \cup...\cup D_n$
-
-$h^{(D_i)}(x)$ is the hypothesis calculated on partition $D_i$
-$h^{(D)}(x) =h^{(D_0)}(x),...,h^{(D_n)}(x)$ is the set of all hypothesis calculated for each partition.
-
-With $h^{(D)}(x^{(i)})$ it is intended that the set of all hypothesis (calculated for each $D_i$) is used with the same training sample $x^{(i)}$, so a set of predicted values $y^{(i)}$ is returned.
-> 
-
-> **Deep dive $h^{(D_i)}(x)$ vs $h^{(D)}(x^{(i)})$**
-
-The dataset can be represented as a set defined by the union of partitions: $D=D_0 \cup...\cup D_n$
-
-$h^{(D_i)}(x)$ is the hypothesis calculated on partition $D_i$
-$h^{(D)}(x)$ is the hypothesis calculated on the entire dataset $D$.
-> 
-
 The last step is possible because of the linearity of the operator $E$.
 
-Let’s focus on term $E_D\bigg[
-(h^{(D)}(x^{(i)})-f(x^{(i)}))^2
-\bigg]$.
+> [!tip]
+> **Deep dive $h^{(D_i)}(x)$ vs $h^{(D)}(x^{(i)})$**
+> The dataset can be represented as a set defined by the union of partitions: $D=D_0 \cup...\cup D_n$
+> 
+> $h^{(D_i)}(x)$ is the hypothesis calculated on partition $D_i$
+> $h^{(D)}(x) =h^{(D_0)}(x),...,h^{(D_n)}(x)$ is the set of all hypothesis calculated for each partition.
+> 
+> With $h^{(D)}(x^{(i)})$ it is intended that the set of all hypothesis (calculated for each $D_i$) is used with the same training sample $x^{(i)}$, so a set of predicted values $y^{(i)}$ is returned.
 
+> [!tip]
+> **Deep dive $h^{(D_i)}(x)$ vs $h^{(D)}(x^{(i)})$**
+> 
+> The dataset can be represented as a set defined by the union of partitions: $D=D_0 \cup...\cup D_n$
+> 
+> $h^{(D_i)}(x)$ is the hypothesis calculated on partition $D_i$
+> $h^{(D)}(x)$ is the hypothesis calculated on the entire dataset $D$.
+
+Let’s now focus on term $E_D\bigg[(h^{(D)}(x^{(i)})-f(x^{(i)}))^2\bigg]$.
 I can define the **best estimation of $f(x^{(i)})$** by computing the mean of all hypothesis with the same training sample $x^{(i)}$:
-
 $$
 \bar h(x^{(i)}) = E_D\bigg[h^{(D)}(x^{(i)})\bigg]
 $$
-
 By performing some simple steps (reported on the slides), $MSE$ can be expressed as follows:
-
 $$
 \begin{align*}
 MSE(h^{(D)}(x^{(i)})) &= E_D\bigg[\bigg(\bar  h(x^{(i)})-f(x^{(i)}))^2 \bigg) + \bigg((h^{(D)}(x^{(i)})-\bar h(x^{(i)}))^2\bigg)\bigg]\\
@@ -708,7 +692,6 @@ MSE(h^{(D)}(x^{(i)})) &= E_D\bigg[\bigg(\bar  h(x^{(i)})-f(x^{(i)}))^2 \bigg) + 
 &= Bias^2(h^{(D)}(x^{(i)}))) + Var(h^{(D)}(x^{(i)}))
 \end{align*}
 $$
-
 $$
 \begin{align*}
 GER&=E_x[MSE(h^{(D)}(x^{(i)}))] \\
@@ -718,54 +701,38 @@ GER&=E_x[MSE(h^{(D)}(x^{(i)}))] \\
 $$
 
 The main objective is, of course, to reduce the Generalization Error. This is possible by reducing the bias or the variance.
-
-![Untitled](assets/Untitled%2019.png)
-
-- **Bias**: represents the systematic deviation of the estimator, so the (in)ability to capture the true relationship.
+![Untitled|500](assets/Untitled%2019.png)
+The **bias** <u>represents the systematic deviation of the estimator, so the (in)ability to capture the true relationship.</u>
 It tells how close the estimation can get to the ground truth.
 
 High bias $\Longrightarrow$ too-simple model which is not able to predict, whatever (test) dataset is given.
-
 $$
 Bias(h(X),f(X)) = (E[h(X)]-f(X))^2
 $$
-
-- **Variance**: represents the (squared mean) variation of predicted values w.r.t. the mean of predicted values them selves. It gives an intuition about (in)ability of the model to response well to unseen values.
+The **variance** <u>represents the (squared mean) variation of predicted values w.r.t. the mean of predicted values them selves.</u> It gives an intuition about (in)ability of the model to response well to unseen values.
 It tells how different a single estimation can get w.r.t. the best estimation.
 
-High variance $\Longrightarrow$ too-complex model which is not able to generalize. The same model, with different (test) datasets, will generate very different hypothesis.
-
+High variance $\Longrightarrow$ too-complex model which is not able to generalize. 
+The same model, with different (test) datasets, will generate very different hypothesis.
 $$
 Var(h(X))=E[h(X)-E[h(X)]]^2
 $$
-
-The ideal would be to find a model complexity able to maintain both bias and variance low. This possible only by finding a tradeoff: these values behave at the opposite w.r.t. the complexity of the model.
-
-![Untitled](assets/Untitled%2020.png)
-
-As the image suggests, the model that will be picked is the one which complexity is the best trade-off in lowering the sum bias + variance.
-
+<u>The ideal would be to find a model complexity able to maintain both bias and variance low. This possible only by finding a tradeoff</u>: these values behave at the opposite w.r.t. the complexity of the model.
+![Untitled|500](assets/Untitled%2020.png)
+As the image suggests, the model to pick is the one which complexity is the best trade-off in lowering the sum bias + variance.
 ### Training and Test set
-
 Once a model has been trained, its performances must be **tested**, in some way.
 
-A very basic way to test a model is to shuffle and then split the dataset into: **training set** (80% of data available) and **test set** (remaining 20%). This allow the model to be tested on unseen data w.r.t. the training ones. This method is called [holdout](https://www.notion.so/Machine-Learning-Notes-fd12021b7a554122bce07e4233196a54?pvs=21).
+A very basic way to test a model is to shuffle and then split the dataset into: **training set** (80% of data available) and **test set** (remaining 20%). This allow the model to be tested on unseen data w.r.t. the training ones. This method is called [[#Hold-out Cross Validation]].
 
-In the image, it’s possible to notice how training and test errors (typically) behave w.r.t. the model complexity and the relation with bias and variance.
-
-![Untitled](assets/Untitled%2021.png)
-
+In the image, it’s possible to notice how training and test errors - should typically - behave w.r.t. the model complexity and the relation with bias and variance.
+![Untitled|600](assets/Untitled%2021.png)
 ## Regularization (L2 Norm or Ridge)
-
-The model complexity can then be reduced by:
-
+In order to avoid overfitting, model complexity must be reduced. It can be done by:
 - 🚫 manually removing features. Anyhow, it’s not rare having to do with models of hundreds (of thousands maybe) features, so this method can become quite challenging (or impossible) to adopt;
 - ✅ **regularization**: a process that reduces some features’ influence on the model’s training (the most influent ones), but it keeps all of them.
-
 ![Untitled](assets/Untitled%2022.png)
-
 The idea is to reduce some parameters’ influence by injecting heavy terms to the high degree parameters into the minimization problem.
-
 $$
 \min_\theta J(\theta)=\min\frac{1}{2m}\sum_{i=1}^m(h(\mathbf x^{(i)}-y^{(i)}))^2
 \color{blue}
@@ -773,13 +740,9 @@ $$
 \color{black}
 \Rightarrow \theta_3, \theta_4\approx 0
 $$
-
 Small values for parameters ⇒ Simpler hypothesis ⇒ Less prone to overfitting
-
 ### Regularized Linear Regression
-
 The cost function $J(\theta)$ gets modified as follows:
-
 $$
 \begin{align*}
 J(\theta)&=
@@ -788,7 +751,6 @@ J(\theta)&=
 +\lambda||\theta||_2^2
 \color{black}
 \bigg) \\
-
 &=
 \frac1{2m}\sum_{i=1}^m\bigg((h_\theta(x^{(i)})-y^{(i)})^2
 \color{blue}
@@ -797,24 +759,21 @@ J(\theta)&=
 \bigg)
 \end{align*}
 $$
-
-Where $\lambda$ is the **regularization parameter** that controls the influence of regularization w.r.t. the hypothesis. To be noticed that the sum operator does not consider parameter $\theta_0$, which is never regularized.
+Where $\lambda$ is the **regularization parameter** that controls the influence of regularization w.r.t. the hypothesis. To be noticed that the sum operator does not consider the parameter $\theta_0$, the bias is never regularized.
 
 Bigger $\lambda$ ⇒ Smoother curve
 
 Of course, the value of parameter $\lambda$ is the result of a trade-off:
-
 - $\lambda$ too small ⇒ model keeps on overfitting
 - $\lambda$ too big ⇒ underfitting model
 
 Moreover, the **parameters’ update step** of the gradient descent algorithm for linear regression can be rewritten as follows:
-
 $$
 \begin{cases}
 \theta_0=\theta_0-\alpha\frac1m\sum_{i=1}^m(h_\theta(\mathbf x^{(i)})-y^{(i)})x_0^{(i)} \\
 
 \theta_j=\theta_j-\alpha\bigg[
-\frac1m\sum_{i=1}^m(h_\theta(\mathbf x^{(i)})-y^{(i)})x_j^{(i)}+\frac\lambda m\theta_j
+\frac1m\sum_{i=1}^m(h_\theta(\mathbf x^{(i)})-y^{(i)})x_j^{(i)}+\textcolor{blue}{\frac\lambda m\theta_j}
 \bigg]
 \space\space\space
 j=1,2,...,n
@@ -822,7 +781,6 @@ j=1,2,...,n
 $$
 
 A small deep-dive is required for the update of the $j^{th}$ parameter, which can be rewritten as follows:
-
 $$
 \theta_j=\theta_j\bigg(1
 \color{blue}
@@ -832,13 +790,10 @@ $$
 \space\space\space
 j=1,2,...,n
 $$
+![Untitled|300](assets/Untitled%2023.png)
+It is worth to notice that the newest term does not perturbate the gradient descent algorithm that much, it just shrinks a little $\theta_j \rightarrow 0$.
 
-![Untitled](assets/Untitled%2023.png)
-
-It is worth to notice that the newest term does not perturbate the gradient descent algorithm that much: it just shrinks a little $\theta_j \rightarrow 0$.
-
-**Regularization with Normal Equations**
-
+### Regularization with Normal Equations
 $$
 \theta=(X^TX+
 \color{blue}
@@ -854,44 +809,35 @@ $$
 \color{black}
 )^{-1}X^Ty
 $$
-
 ### Regularized Logistic Regression
-
 The cost function $J(\theta)$ gets modified as follows:
-
 $$
 J(\theta)=-\frac1m \sum_{i=1}^m \bigg(y^{(i)}\log h_\theta(\mathbf{x}^{(i)}) + (1-y^{(i)})\log(1-h_\theta(\mathbf{x}^{(i)}))\bigg)
 \color{blue}
 +\frac{\lambda}{2m}\sum_{j=1}^n\theta_j^2
 \color{black}
 $$
-
 The **parameters’ update step** of the gradient descent algorithm for logistic regression can be rewritten as follows:
-
 $$
 \begin{cases}
 \theta_0=\theta_0-\alpha\frac1m\sum_{i=1}^m(h_\theta(\mathbf x^{(i)})-y^{(i)})x_0^{(i)} \\
 
 \theta_j=\theta_j-\alpha\bigg[
-\frac1m\sum_{i=1}^m(h_\theta(\mathbf x^{(i)})-y^{(i)})x_j^{(i)}+\frac\lambda m\theta_j
+\frac1m\sum_{i=1}^m(h_\theta(\mathbf x^{(i)})-y^{(i)})x_j^{(i)}+\textcolor{blue}{\frac\lambda m\theta_j}
 \bigg]
 \space\space\space
 j=1,2,...,n
 \end{cases}
 $$
-
 ### Regularization with L1 Norm
-
-https://medium.com/@syoya/what-happens-in-sparse-autencoder-b9a5a69da5c6#c526
-
-https://www.stat.cmu.edu/~larry/=sml/sparsity.pdf
+> [!info]
+> https://medium.com/@syoya/what-happens-in-sparse-autencoder-b9a5a69da5c6#c526
+> https://www.stat.cmu.edu/~larry/=sml/sparsity.pdf
 
 Regularization with L1 norm, also known as Lasso regularization, is another approach to prevent overfitting in machine learning models. Unlike L2 regularization (Ridge), which uses the sum of squared values of the parameters, L1 regularization uses the sum of absolute values of the parameters.
-
 $$
 J(\theta) = MSE(\theta) + \lambda \sum_{i=1}^n |\theta_i|
 $$
-
 Where MSE is the Mean Squared Error and λ is the regularization parameter. The main difference between L1 and L2 regularization is that L1 tends to produce sparse models by forcing some parameters to be exactly zero, effectively performing feature selection.
 
 - **Advantages of L1 regularization:**
@@ -902,409 +848,287 @@ Where MSE is the Mean Squared Error and λ is the regularization parameter. The 
     - Less stable: Small changes in the data can lead to different features being selected.
 
 The choice between L1 and L2 regularization depends on the specific problem and desired outcomes. L1 is often preferred when feature selection is important or when dealing with high-dimensional data with many irrelevant features.
-
 ### Regularization vs Bias/Variance
-
 Finally, just a quick overview on how the value of $\lambda$ can influence the training and test error.
-
-![Untitled](assets/Untitled%2024.png)
-
+![Untitled|600](assets/Untitled%2024.png)
 # 5. How to Build and Deploy a ML System
-
-![(Naive) ML System Lifecycle](assets/Untitled%2025.png)
-
-(Naive) ML System Lifecycle
+![(Naive) ML System Lifecycle|500](assets/Untitled%2025.png)
+*(Naive) ML System Lifecycle*
 
 The **learning process** is based on 3 parts:
-
 - **Representation**: decide what family of algorithms to use and perform a first feature selection (linear regression, logistic regression, …);
-- **Optimization**: choose the method to train the model (gradient descent, greedy search…);
+- **Optimization**: choose the method to train the model (gradient descent, greedy search, …);
 - **Evaluation**: choose an evaluation function to distinguish a good learner from a bad one.
 
-After all, the main **goal** is to train a model able to ****generalize well from seen example (training set) to unseen examples (test set/production data).
-
+After all, the main **goal** is to train a model able to **generalize well from seen example (training set) to unseen examples (test set/production data)**.
 ## Data Analysis and Pre-processing
-
 **Cleaning and pre-processing data** is a fundamental first step, just because real world data are just dirty:
-
 - incomplete (some values or whole attributes missing)
 - inaccurate (wrong data due to inaccurate or partial observations)
 
 So, because of the **GIGO** (garbage in - garbage out) paradigm, an accurate data analysis and cleaning is required, even if can be a very long process.
 
 Some examples of data **pre-processing tools** practices are:
-
 - **cleaning data** (or removing data)
-    - [outliers removing](https://www.notion.so/Machine-Learning-Notes-fd12021b7a554122bce07e4233196a54?pvs=21)
+    - [[#Outlier removal - boxplot]]
     - noise removing
     - duplicates removing
 - **changing data**
     - discretize
     - aggregate
-    - [normalize/feature scaling](https://www.notion.so/Machine-Learning-Notes-fd12021b7a554122bce07e4233196a54?pvs=21)
+    - [[#Feature Scaling]] (normalization)
 - **creating data**
-    - [combine attributes](https://www.notion.so/Machine-Learning-Notes-fd12021b7a554122bce07e4233196a54?pvs=21)
+    - [[#Adding Features]]
 
 ### Outlier removal - boxplot
-
 The idea is to divide data in “boxes” and to calculate certain thresholds to filter datapoints.
-
-![Untitled](assets/Untitled%2026.png)
-
-**Algorithm to calculate generic fractile**
-
+![Untitled|600](assets/Untitled%2026.png)
+#### Algorithm to calculate generic fractile
 1. sort $n$ data points
 2. calculate $k=np$ where:
     - $p$ is the percentile
-    - $k$ is the index that will be used (in 3.) to calculate the $p$-th percentile is in the data distribution
+    - $k$ is the index that will be used (in step 3) to calculate the $p$-th percentile is in the data distribution
 3. pick (or calculate) the value from the data distribution:
     1. if $k$ is finite: percentile is computed as $\frac{k^{th}+k^{th+1}}{2}$
     2. if $k$ is not finite: percentile is the element which index is the next closest to $k$
 
 The **quartiles subdivision** is one of the most used.
+![image.png|600](Personale/poliba-machine_learning-notes/assets/image.png)
 
-![image.png](Personale/poliba-machine_learning-notes/assets/image.png)
-
-![image.png](Personale/poliba-machine_learning-notes/assets/image%201.png)
+![image.png|400](Personale/poliba-machine_learning-notes/assets/image%201.png)
 
 Quartiles
-
 - $Q_1$: median of values below $Q_2$
 - $Q_2$: median of the set
 - $Q_3$: median of values above $Q_2$
 
 $p$-values
-
 $p=0.25$
-
 $p=0.50$
-
 $p=0.75$
 
-- **Example**
-    
-    ![Untitled](assets/Untitled%2027.png)
-    
-
-**Algorithm to prune data (quartiles)**
-
-1. compute **InterQuartile Range**: tt tells us the spread of the (middle) 50% of the data.
-It is used to identify outliers.
-    
-    $$
+**Example**
+![Untitled|500](assets/Untitled%2027.png)
+#### Algorithm to prune data (quartiles)
+1. compute **InterQuartile Range**: tells us the spread of the (middle) 50% of the data. It is used to identify outliers. $$
     IQR=Q_3-Q_1
     $$
-    
-2. compute $L_{min}$, $L_{max}$:
-    
-    $$
+2. compute $L_{min}$, $L_{max}$: $$
+    \begin{align}
     L_{min}=Q_1-1.5 \cdot IQR \\
     L_{max}=Q_3+1.5 \cdot IQR
-    $$
-    
+    \end{align}
+       $$
 3. find outlayers to filter them out. A datapoint is an outlayer when:
     - $datapoint < L_{min}$
-        
         or
-        
     - $datapoint > L_{max}$
 
-> Important ⚠️
-> 
-> 
+> [!warning]
 > Outliers must not be forgotten because the can be useful to understand where the problem is, if any.
-> 
-
 ### Feature Selection
-
 It is the process by which relevant features for the learning task are selected.
 
 Why selecting features? Sometimes there are too many or some of them may be redundant or just irrelevant.
 
 The feature selection process can be carried out with some tools:
-
 - talking with **domain experts**
 - **filters**: mathematical tools that measure the *importance* of each feature w.r.t. the others (information gain, entropy, mutual information)
 - **wrappers**: iterative methods able to find a good subset of features
 - **dimensionality reduction** methods (PCA, SVD)
-
 ## Hypothesis Evaluation → Model Selection
-
 Given a dataset, the number models that can be trained with is enormous, so we needed a method to evaluate the best model among the ones calculated: an **hypothesis evaluation** method.
 
 🚫 So far, we already seen a proposal of hypothesis evaluation process. It starts with:
-
 1. shuffle data to avoid correlation
 2. split dataset into:
     - $training \space set$: 80% of dataset values
     - $test \space set$: 20% of dataset values
 3. learn parameters $\theta$ from $training \space set$
 4. compute the test set error
-    - for linear regression
-    
-    $$
+    - for linear regression $$
     J_{test}(\theta)=
     \frac1{2m_{test}}\sum_{i=1}^{m_{test}}(h_\theta(x^{(i)})-y^{(i)})^2
     $$
-    
-    - for logistic regression
-    
-    $$
+    - for logistic regression $$
     J_{test}(\theta)=-\frac1m_{test}\sum_{i=1}^{m_{test}}\bigg(y^{(i)}\log h_\theta(\mathbf{x}^{(i)}) + (1-y^{(i)})\log(1-h_\theta(\mathbf{x}^{(i)}))\bigg)
     $$
-    
-    > **Important ⚠️**
-    Be aware that this error does not need a regulation term because is calculated on the $test \space set$ only.
-    > 
-    
-    It is crucial to have a test set (or more) of unseen data, otherwise, supposing to have just the very low training error, it could be almost impossible to tell if the model is performing well or it’s overfitting.
-    
+
+> [!warning]
+> <u>Be aware that the test set error does not need a regulation term because is calculated on the training set error only</u>.
+
+It is crucial to have a test set (or more) of unseen data, otherwise, supposing to have just the very low training error, it could be almost impossible to tell if the model is performing well or it’s overfitting.
 
 ---
 
-The process just described is ok in the case we have just one model to evaluate, but most of the times there are several models to choose (the best one) from. In this case, an additional step is required in order to choose the best model among the ones calculated. In order to achieve this, an additional portion of data must be extracted from the original dataset (always with the idea of giving unseen data to the model). 
+The process just described is ok in the case we have just one model to evaluate, but most of the times there are several models to choose (the best one) from. In this case, an additional step is required to choose the best model among the ones calculated. In order to achieve this, an additional portion of data must be extracted from the original dataset (always with the idea of giving unseen data to the model). 
 
 ✅ The workflow becomes the following:
-
 1. shuffle data to avoid correlation;
 2. split dataset into:
-    - $\textbf{training \space set}$: 60% of dataset values, to train the several models;
-    - $\textbf{(cross) \space validation \space set}$: 20% of dataset values, to choose the best model with the lowest $J_{cv}(\theta)$. It can be used also to find the hyper-parameters (such as the regularization factor);
-    - $\textbf{test \space set}$: 20% of dataset values, to evaluate the best model;
-    
-    *- for all models -*
-    
-3. learn parameters $\theta$ from $training \space set$, by minimizing $J(\theta)=J_{train}(\theta)$;
-4. compute the **cross validation error** $J_{cv}(\theta)$ ($=J_{test}(\theta)$, but calculated on $cross \space validation \space set$), for each hypothesis found;
-*- for all models -*
+    - **training set**: 60% of dataset values, to train the several models;
+    - **cross validation set**: 20% of dataset values, to choose the best model with the lowest $J_{cv}(\theta)$. It can be used also to find the hyper-parameters (such as the regularization factor);
+    - **test set**: 20% of dataset values, to evaluate the best model;
+3. (for each model) learn parameters $\theta$ from $training \space set$, by minimizing $J(\theta)=J_{train}(\theta)$;
+4. (for each model) compute the **cross validation error** $J_{cv}(\theta)$ ($=J_{test}(\theta)$, but calculated on $cross \space validation \space set$);
 5. pick the model with the lowest $J_{cv}(\theta)$ and then evaluate it by calculating $J_{test}(\theta)$. This is useful in order to understand if the model really generalize well enough.
+
 In general, $test \space set$ is used only in the end, when the model is chosen and we want to finally evaluate it. 
 
-![Untitled](assets/Untitled%2028.png)
-
-> **Important ⚠️ - Best performances: Training Set vs Validation Set**
-> 
-> 
-> We MUST NOT choose a model just by considering performances on the Training Set → risk of overfitting because we’re basing the evaluation on already-seen data; underestimation of GER.
+![Untitled|400](assets/Untitled%2028.png)
+> [!warning] **Best performances: Training Set vs Validation Set**
+> A model MUST NOT be choosen just by considering performances on the Training Set → risk of overfitting because we’re basing the evaluation on already-seen data; underestimation of GER.
 > 
 > We MUST choose a model by considering performances on the Validation Set → the GER is evaluated on unseen data.
-> 
 
 A graphical summary of the process described can be the image below:
-
-![Untitled](assets/Untitled%2029.png)
+![Untitled|600](assets/Untitled%2029.png)
 
 Moreover, the first **ML System Lifecycle** represented can be expanded as below:
-
-![Untitled](assets/Untitled%2030.png)
+![Untitled|600](assets/Untitled%2030.png)
 
 Let’s now deep dive and understand how to split datasets. There are basically two methods of splitting a dataset.
-
 ## Dataset splitting
-
-### **Hold-out Cross Validation**
-
+### Hold-out Cross Validation
 Dataset is divided into subsets: (60-20)-20%. 
-N.B.: in general, $cross \space validation \space set$ may be considered as part of the $training \space set$.
+N.B.: in general, cross validation set may be considered as part of the training set.
 
-![Untitled](assets/Untitled%2031.png)
-
+![Untitled|400](assets/Untitled%2031.png)
+* training set: 80% of total
+* test set: 20% of total
 Anyway, some problems may occur: a class (of data) may not be represented equally in the two sets. In order to solve this problem, **stratification** method, represented below, is used.
-
 ![Untitled](assets/Untitled%2032.png)
-
 Sometimes it’s still not enough: data is not fully exploited. An attempt to do so is proposed in the next splitting practice, k-folds.
-
-### **K-folds Cross Validation**
-
+### K-folds Cross Validation
 The original dataset is randomly partitioned into $k$ equal sized subsets (**folds**). Of the $k$ folds, a single fold is retained as the test set, and the other folds are used together as training set. The cross-validation process is then repeated $k$ times, with each of the $k$ folds used exactly once as test set.
 
 The final **k-folds cross validation error** is calculated by averaging all $k$ errors found previously.
-
-![Untitled](assets/Untitled%2033.png)
-
+![Untitled|600](assets/Untitled%2033.png)
+As we can see:
+- test set: (for each experiment) the gray fold which split the dataset in $k-1$ (white) folds
+- training set: equal to the union of remaining (white) folds
 $$
 Error=\frac1k\sum_{i=1}^kError_i
 $$
+<u>k-folds has one relevant advantage</u>: all data is used to both train and test the ML system, and each observation is used exactly once → <u>reducing distortion</u>. So basically each data point has same importance because is used in both training and test process.
 
-$k$-folds has one relevant advantage: all data is used to both train and test the ML system, and each observation is used exactly once → reducing distortion.
-
-Of course, the advantage of using more data leads to a disadvantage: more time needed to complete the process.
-
-### **K-folds Cross Validation with Random Subsampling**
-
+Of course, the advantage of using more data leads to just one disadvantage: more time needed to complete the process.
+### K-folds Cross Validation with Random Subsampling
 It works just like $k$-folds seen above, but the folds are chosen differently, like in the image. This methods tries to be even more impartial (random) than the previous one.
-
-![Untitled](assets/Untitled%2034.png)
-
+![Untitled|600](assets/Untitled%2034.png)
 As we can see:
-
-- $test \space set$ is equal to the union of (gray) k-2 “sub-folds” which split the dataset in $k-1$ (white) folds;
-- $training \space set$ is equal to the union of remaining (white) folds.
-
+- test set: (for each experiment) equal to the union of (gray) $k-2$ “sub-folds”, which split the dataset in $k-1$ (white) folds
+- training set: equal to the union of remaining (white) folds
 ## Debugging a ML System
-
 Something extremely useful for a ML System is a **diagnostic tool**: it can return some useful insight about what is/isn’t working with the learning algorithm.
-
 ### Model Complexity - Error Graphs
-
 The following images represent good recaps about different values we can use to make a diagnostic for a model.
-
 ![Untitled](assets/Untitled%2035.png)
-
 ### Learning Curves
-
 The last image is about the **learning cures**, a good technique to sanity-check a model and to improve performance. In this case, a **Training Set Size - Error Graph** is plotted, with the following curves on:
-
 - **Train Learning Curve**: it gives an idea about how well the model is learning
-- **Validation Learning Curve**: ****it gives an idea about how well the model is generalizing
+- **Validation Learning Curve**: it gives an idea about how well the model is generalizing
 
-The idea is to diagnose the system by reading the shape of the graph given by those curves referring to a model’s performances whose hyper-parameters are fixed.
+<u>The idea is to diagnose the system by reading the shape of the graph given by those curves referring to a model’s performances whose hyper-parameters are fixed.</u>
 
-N.B.: sometimes you can find that score is represented on the $y$-axis, instead of the error, and of course the result would be a “flipped” graph.
+N.B.: sometimes the score is represented on the $y$-axis, instead of the error, and of course the result would be a “flipped” graph.
 
-**Underfit Learning Curves**
-
+**Underfitting Learning Curves**
 As a recap, underfitting occurs when model is inaccurate already for the training dataset (it’s not learning) → $J_{cv}(\theta) \rightarrow J_{train}(\theta)$ and both errors are high.
 
 Moreover, errors are already converging, so adding more examples won’t help.
-
-![Untitled](assets/Untitled%2036.png)
-
-**Overfit Learning Curves**
-
+![Untitled|500](assets/Untitled%2036.png)
+**Overfitting Learning Curves**
 As a recap, overfitting occurs when model is inaccurate for unseen data (is not generalizing) → $J_{cv}(\theta)$ error is high.
 
 Moreover, validation error is not converging, so adding more examples or applying regularization could help in order to make the $J_{cv}(\theta)$ curve lower.
-
-![Untitled](assets/Untitled%2037.png)
+![Untitled|500](assets/Untitled%2037.png)
 
 **Good Fit Learning Curves**
 In this case there is a convergence of the two errors on a (relatively) small error.
 
 ![Untitled](assets/Untitled%2038.png)
-
 ### Diagnostic Cheatsheets
-
-- Getting more training examples
-- Try smaller sets of features
-- Try getting additional features
-- Try adding polynomial features
-- Try decreasing $\lambda$
-- Try increasing $\lambda$
-
-→ fixes high variance
-because the model could have the right complexity, but it’s still not learning well from the training set
-
-→ fixes high variance
-because maybe there are some perturbing features that make the learning curve distorted
-
-→ fixes high bias
-because maybe the curve is not learning well from training data using actual features
-
-→ fixes high bias
-” “
-
-→ fixes high bias
-because, by increasing regularization factor, the influence of certain parameters is reduced (middle ground w.r.t. adding features)
-
-→ fixes high variance
-because, by increasing regularization factor, the influence of certain parameters is reduced (middle ground w.r.t. removing features)
-
+- Getting more training examples → fixes high variance 
+  the model could have the right complexity, but it’s still not learning well from the training set
+- Try smaller sets of features → fixes high variance
+  because maybe there are some perturbing features that make the learning curve distorted
+- Try getting additional features (es. adding polynomial features) → fixes high bias
+  because maybe the curve is not learning well from training data using actual features
+- Try decreasing $\lambda$ → fixes high bias
+  because, by increasing regularization factor, the influence of certain parameters is reduced (middle ground w.r.t. adding features)
+- Try increasing $\lambda$ → fixes high variance
+  because, by increasing regularization factor, the influence of certain parameters is reduced (middle ground w.r.t. removing features)
 ## Evaluation Metrics
-
 Being linear regression and logistic regression two different tools, different metrics are used to evaluate models belonging to each other.
-
 ### Evaluation Metrics for Regression
-
 All these metrics are based con the **residuals** definition: difference between predicted values and actual ones.
 
 Given a dataset of elements $<x_i,y_i>$:
-
 - $x_i$ is the input value
 - $y_i$ is the real output value
 - $y_i^*$ is the predicted output value
+![Untitled|500](assets/Untitled%2039.png)
 
-![Untitled](assets/Untitled%2039.png)
-
-| **Mean Absolute Error** | $MAE=\dfrac{\sum_{i=1}^m|y_i^*-y_i|}{m}$ |
-| --- | --- |
-| **Mean Squared Error** | $MSE=\dfrac{\sum_{i=1}^m(y_i^*-y_i)^2}{m}$ |
-| **Root Mean Squared Error**  | $RMSE=\sqrt{\dfrac{\sum_{i=1}^m(y_i^*-y_i)^2}{m}}$ |
-| $R^2$ | See [Coefficient of Determination](https://www.notion.so/Machine-Learning-Notes-fd12021b7a554122bce07e4233196a54?pvs=21) |
-| Adjusted $R^2$ | See [Adjusted Coefficient of Determination](https://www.notion.so/Machine-Learning-Notes-fd12021b7a554122bce07e4233196a54?pvs=21) |
+| **Mean Absolute Error**     | $MAE=\dfrac{\sum_{i=1}^my_i^*-y_i}{m}$                                                                                            |
+| --------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| **Mean Squared Error**      | $MSE=\dfrac{\sum_{i=1}^m(y_i^*-y_i)^2}{m}$                                                                                        |
+| **Root Mean Squared Error** | $RMSE=\sqrt{\dfrac{\sum_{i=1}^m(y_i^*-y_i)^2}{m}}$                                                                                |
+| $R^2$                       | See [Coefficient of Determination](https://www.notion.so/Machine-Learning-Notes-fd12021b7a554122bce07e4233196a54?pvs=21)          |
+| Adjusted $R^2$              | See [Adjusted Coefficient of Determination](https://www.notion.so/Machine-Learning-Notes-fd12021b7a554122bce07e4233196a54?pvs=21) |
 
 ### Evaluation Metrics for Classification
-
 All metrics reported in table below are calculated on values given by the confusion matrix of a classifier.
+#### Confusion Matrix
+![Untitled|400](assets/Untitled%2040.png)
+> [!tip]
+> There are some scenarios where the $FN$ class is very important, such as medical, fraud detection and security fields.
 
-**Confusion Matrix**
+| Accuracy                                        | $\Large\frac{TP+TN}{TP+TN+FP+FN}$                                |
+| ----------------------------------------------- | ---------------------------------------------------------------- |
+| Precision                                       | $\Large\frac{TP}{TP+FP}$                                         |
+| Recall / Sensitivity / True Positive Rate (TPR) | $\Large\frac{TP}{TP+FN}$                                         |
+| Specificity or True Negative Rate (TNR)         | $\Large\frac{TN}{TN+FP}$                                         |
+| Error Rate = 1 - Accuracy                       | $\Large\frac{FP+FN}{TP+TN+FP+FN}$                                |
+| F-Measure (or F1)                               | $2 \cdot \Large \frac{precision \cdot recall}{precision+recall}$ |
+| False Positive Rate (FPR) = 1 - Specificity     | $\Large\frac{FP}{TN+FP}$                                         |
 
-![Untitled](assets/Untitled%2040.png)
-
-> Important ⚠️
-There are some scenarios where the $FN$ class is very important, such as medical, fraud detection and security fields.
-> 
-
-| Accuracy | $\Large\frac{TP+TN}{TP+TN+FP+FN}$ |
-| --- | --- |
-| Precision | $\Large\frac{TP}{TP+FP}$ |
-| Recall / Sensitivity / True Positive Rate (TPR) | $\Large\frac{TP}{TP+FN}$ |
-| Specificity or True Negative Rate (TNR) | $\Large\frac{TN}{TN+FP}$ |
-| Error Rate = 1 - Accuracy | $\Large\frac{FP+FN}{TP+TN+FP+FN}$ |
-| F-Measure (or F1) | $2 \cdot \Large \frac{precision \cdot recall}{precision+recall}$ |
-| False Positive Rate (FPR) = 1 - Specificity | $\Large\frac{FP}{TN+FP}$ |
-
-**Receiver Operating Characteristic (ROC) Space**
-
+#### Receiver Operating Characteristic (ROC) Space
 **ROC Space** is a convenient way to evaluate all at once different classifiers, based on the respective confusion matrices’ results.
 
 Only $TPR$ and $FPR$ values are needed.
 
-A full example is provided below.
-
+**Example**
 ![Untitled](assets/Untitled%2041.png)
 
-It can be noticed that the squared graph is divided by a diagonal line, called **random guess**: each point of the line represents a classifier with $TPR=FPR$, which means that the portion of correctly classified data is equal to the incorrectly classified one (= the classifier classifies *randomly*).
+It can be noticed that the squared graph is divided by a diagonal line, called **random guess**: each point of the line represents a classifier with $TPR=FPR$, which means that <u>the portion of correctly classified data is equal to the incorrectly classified one</u> (= the classifier classifies *randomly*).
 
 Given a fixed classifier, By slightly changing the threshold of the classifier, such a graph should be the result:
-
-The line in blue is the **optimal ROC curve**: it represents the perfect classifier.
-
-The upper-left corner represents the **perfect classification**.
+![Untitled|500](assets/Untitled%2042.png)
+* The line in blue is the **optimal ROC curve**: it represents the perfect classifier.
+* The upper-left corner represents the **perfect classification**.
 
 The model to be chosen is the one whose threshold closer to the upper-left corner. 
 
-![Untitled](assets/Untitled%2042.png)
-
-Moreover, the ROC curve tool can be used to compare multiple classifiers, as shown.
-
-The bigger is the **Area Under the Curve** (**AUC**), the better is the classifier.
-
-![Untitled](assets/Untitled%2043.png)
-
+<u>In general, the ROC curve tool can be used to compare multiple classifiers set on different thresholds, as shown.</u>
+<u>The bigger is the **Area Under the Curve** (**AUC**), the better is the classifier.</u>
+![Untitled|300](assets/Untitled%2043.png)
 ## Results Validation
-
-Here a some tools that help us in understanding if a ML system is giving significant results.
-
+Here some tools that help us in understanding if a ML system is giving significant results.
 ### Paired T-Test
-
-It is a statistical procedure used to determine whether the performance difference between the models is statistically significant or just due to random variation. In order to apply this tool, a pair of observation coming from two different systems is required:
-
+<u>It is a statistical procedure used to determine whether the performance difference between the models is statistically significant or just due to random variation.</u> In order to apply this tool, a pair of observation coming from two different systems is required:
 $$
 \mathbf y^a=\{y^a_1,y^a_2,...,y^a_n\}
-\space\space\space\space\space
+\quad
 \mathbf y^b=\{y^b_1,y^b_2,...,y^b_n\}
 $$
-
-> In practice, values used with paired t-test are calculated metrics.
-E.g.: two models trained with k-folds ($n$ subsets) and accuracy is calculated. They can be compared with paired t-test to check whether one is better than the other.
-> 
-
+In practice, values used with paired t-test are calculated metrics.
 The paired t-test is only valid if the two models are evaluated on the exact same dataset or on directly comparable partitions, as in cross-validation.
 
-Like many statistical procedures, the paired sample *t*-test has two competing hypotheses, the null hypothesis and the alternative hypothesis:
+**Example**
+Two models are trained with k-folds method ($n$ subsets) and then $n$ accuracies are calculated for both. These accuracies can be compared with paired t-test to check whether one is better than the other.
 
+Like many statistical procedures, <u>the paired sample t-test has two competing hypotheses, the null hypothesis and the alternative hypothesis</u>:
 - **null hypothesis $H_0$**: *nothing has changed*; the 2 learning systems has same accuracy and all observable differences are explained with a random variation.
     - $H_0:\mu_d=0$
 - **alternative hypothesis $H_1$**: 2 learning systems are different, so one is more accurate than the other. This hypothesis can take different form w.r.t. the direction of the difference:
@@ -1315,79 +1139,69 @@ Like many statistical procedures, the paired sample *t*-test has two competing 
 The goal is then to use the paired t-test to determine the probability $p$ so that the null hypothesis is supported, which in mathematical terms means: 
 if $p$ is small enough (typically $< 0.05$) ⇒ reject the null hypothesis.
 
-This test can be applied to two trained models with $n$ partitions of the test set and reference value  could be (e.g.) the models’ accuracies.
+This test can be applied to two trained models with $n$ partitions of the test set and reference value that could be (e.g.) the models’ accuracies.
 
 The algorithm to follow is:
-
-1. calculate the sample mean
-    
-    $$
+1. calculate the sample mean $$
     \bar\delta=\frac1n\sum_{i=1}^n\delta_i
-    $$
-    
-    where:
-    
+    $$where:
     - $\delta_i=y_i^{a}-y_i^{b}$
-2. calculate the t statistic
-    
-    $$
+2. calculate the t statistic $$
     t=\frac{\bar\delta}{\sqrt{\frac{1}{n(n-1)}}\sum_{i=1}^n(\delta_i-\bar\delta)^2}
     $$
-    
 3. determine the corresponding $p$-value, by looking up $t$ in a table of values for the Student's t-distribution with $n-1$ degrees of freedom
 4. finally $p$ can be calculated w.r.t. the question we want to answer among the following ones:
-    
-    
-    | two-tailed | $p=2 \cdot \Pr(T>|t|)$ | Is the accuracy of the two systems different? |
-    | --- | --- | --- |
-    | one-tailed | $p=\Pr(T>t)$ (area after t)
-    $p=\Pr(T<t)$ (area before t) | Is the system A better than system B? |
-    
-    On the right it is represented the null hypothesis probability distribution. The $p$ value found at step 3 indicates how far out in a tail the statistic $t$ is.
+   On the right it is represented the null hypothesis probability distribution. The $p$ value found at step 3 indicates how far out in a tail the statistic $t$ is.
     
     Then, if $p$ value is sufficiently small, null hypothesis is rejected and system A is different from system B (one of them is better than the other).
-    
-    ![Untitled](assets/Untitled%2044.png)
-    
-
+    ![Untitled|400](assets/Untitled%2044.png)
 ### Coefficient of Determination
+The **coefficient of determination** is indicated with $R^2$ and <u>it is a statistical measure used to assess how well a regression model fits a dataset.</u>
 
-The **coefficient of determination** is indicated with $R^2$ and it is a statistical measure used to assess how well a regression model fits a dataset.
+$R^2$ is a measure of how much of the variance in the dependent variable ($Y$) is explained - or predictable - by the independent variable ($X$) in a regression model.
 
-$R^2$ is a measure of the proportion of the variance in the dependent variable that is predictable from the independent variable.
-
-| Total Deviation (Total Sum of Squares) | $Dev(T)=\sum_{i=1}^m(y_i-\bar y)^2$ |
-| --- | --- |
-| Regression Deviation | $Dev(R)=\sum_{i=1}^m(\hat y_i-\bar y)^2$ |
-| Residual Deviation (Residual Sum of Squares) | $Dev(E)=\sum_{i=1}^m(y_i-\hat y_i)^2$ |
+* Total Deviation (**Total Sum of Squares** or **TTS**) $$Dev(T)=\sum_{i=1}^m(y_i-\bar y)^2$$
+* Regression Deviation $$Dev(R)=\sum_{i=1}^m(\hat y_i-\bar y)^2$$
+* Residual Deviation (**Residual Sum of Squares** or **RSS**) $$Dev(E)=\sum_{i=1}^m(y_i-\hat y_i)^2$$
+where:
 - $\bar y$: mean of observed data
 - $y_i$: dataset $i$-th value
 - $\hat y_i$: $i$-th predicted value
 
+Finally, the coefficient of determination is defined as:
 $$
 R^2=1-\frac{RSS}{TSS}=\frac{Dev(R)}{Dev(T)}=1-\frac{Dev(E)}{Dev(T)}=\frac{cov(X,Y)^2}{Dev(X)Dev(Y)}
 $$
+A better intuition of what $R^2$ does can be found in the image below.
 
-A better intuition of what $R^2$ does can be found in the image on the right.
+![](assets/Untitled%2045.png)
+*(left) the areas in red represent the squared residuals w.r.t. the average value.*
+*(right) the areas in blue represent the squared residuals w.r.t. the linear regression.*
 
 $$
 R^2=1-
 \frac{\color{blue}RSS\color{black}}{\color{red}TSS\color{black}}
 $$
-
 The better the linear regression (on the right) fits the data in comparison to the simple average (on the left graph), the closer the value of $R^2$ is to 1.
-
-![(left) the areas in red represent the squared residuals w.r.t. the average value.
-(right) the areas in blue represent the squared residuals w.r.t. the linear regression.
-](assets/Untitled%2045.png)
-
-(left) the areas in red represent the squared residuals w.r.t. the average value.
-(right) the areas in blue represent the squared residuals w.r.t. the linear regression.
 
 $R^2$ has values in the range $[0…1]$. The closer the value to 1, the better the data fit the model.
 
+**Example**
+A model with $R^2=0.75$ means that 75% of the variation in the dependent variable is explained by the model.
 ### Adjusted Coefficient of Determination
+> [!info]
+> https://www.datacamp.com/tutorial/adjusted-r-squared
 
+<font color="#00b050">The r-squared value always increases or remains the same when more predictors are added to the model, even if those predictors do not significantly improve the model's explanatory power. This issue can create a misleading impression of the model's effectiveness.</font>
+
+<font color="#00b050">Adjusted r-squared adjusts the r-squared value to account for the number of independent variables in the model. The adjusted r-squared value can decrease if a new predictor does not improve the model's fit, making it a more reliable measure of model accuracy.</font>
+$$
+R_{adj}^2=\frac{m-1}{m-n-1}(1-R^2)
+$$
+where:
+* $R^2$: the [[#Coefficient of Determination]] of the model
+* $m$: number of observations
+* $n$: number of features
 # 6. Non-linear Hypotheses
 
 Most problems out there are relatively complex regression and multi-classification problems. These problems often need solutions based on non-linear hypothesis. A **feedforward neural network** (**NN**), aka a **multi-layer perceptron** (**MLP**), is a tool that solves this kind of problem: it can build a hypothesis which approximates a dataset following a non-linear behavior.
