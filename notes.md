@@ -1409,147 +1409,133 @@ Key properties of ELU:
 # 7. Decision Trees
 **Classification And Regression Trees** (**CART**) are **Decision Trees** which basically split input dataset, by defining a local model in each resulting **region** of input space.
 ## Regression Trees
-This concept is represented as a **tree** (which splits the dataset) with final **leafs** (regions).
+> [!info]
+> - https://youtu.be/g9c66TUylZ4
 
-A Regression Tree is a Decision Tree which predicts numeric values.
+This concept is represented as a **tree** (which splits the dataset) with final **leafs** (regions).
+A Regression Tree is a Decision Tree which predicts continuous numeric values.
 
 It is useful when input data does follows a non-linear behavior.
+![(left) Non-linear dataset split in regions; (right) respective regression tree|600](assets/Untitled%2053.png)
 
-![(left) Non-linear dataset split in regions; (right) respective regression tree](assets/Untitled%2053.png)
-
-(left) Non-linear dataset split in regions; (right) respective regression tree
-
+*(left) Non-linear dataset split in regions; (right) respective regression tree*
 ### Build a Regression Tree
-
 Considering a generic tree (multi-feature), the key is in: 
-
 - finding the right condition for the nodes (explained in the following), so the threshold type and its value;
-- define the *right* depth of the tree (see [Pruning](https://www.notion.so/Machine-Learning-Notes-fd12021b7a554122bce07e4233196a54?pvs=21)).
-
-**Single feature**
-
+- define the *right* depth of the tree (see [[#Pruning Regression Trees]]).
+#### Single feature
 Let’s define the **hypothesis** for a regression tree:
-
 $$
-h(x^{(i)})=\sum_{\hat x_{j-1}<x^{(i)}< x^{(i)} < \hat x_j}
-\frac{y^{(i)}}{|{x^{(i)}}:\hat x_{j-1} < x^{(i)} < \hat x_j|}
+h(x^{(i)})=\sum_{\hat x_{j-1}<x^{(i)} < \hat x_j}
+\frac{y^{(i)}}{|\{{x^{(i)}}:\hat x_{j-1} < x^{(i)} < \hat x_j\}|}
 $$
+The formula is basically saying that the prediction is equal to the average of values contained in the input value’s region.
 
 Given $h(x^{(i)})$, **Residual Sum of Squares** can now be defined:
-
+#Recall 
 $$
 RSS=\sum_{i=1}^m(h(x^{(i)})-y^{(i)})^2
 $$
+Starting from no regions, the idea is to find the threshold which minimizes the overall $RSS$ when splitting that region in two. Then, iterate for the two regions and so on.
 
-The idea is to find the threshold value which minimizes the overall $RSS$. To do so, we need to plot $RSS$ values for each input value.
-
-$RSS$ quantifies the *quality* of a split for a Regression Tree.
+In other words, the algorithm must find the thresholds that subdivide the scenario in several meaningful regions.
+$RSS$ is the measure used to represent the *quality* of a region split for a Regression Tree.
 
 The following algorithm tells how to determine the threshold for a generic node of the tree (one step).
-
 For each $x^{(i)}$:
-
-1. [ Check whether the region worth to be split, otherwise move to the next one ]
-2. Pick $x^{(i)}$ as the threshold anche split the current region (if we are in the root, the whole dataset) in two parts
+1. \[ Check whether the region worth to be split (see [[#Pruning Regression Trees]]), otherwise move to the next step \]
+2. Pick $x^{(i)}$ as the threshold anche split the current region (for initial step, the whole dataset) in two parts
 3. Calculate the $RSS$
 4. Select next un-splitted region and go back to 1.
 
-![Screenshot 2024-01-16 alle 19.41.55.png](assets/Screenshot_2024-01-16_alle_19.41.55.png)
-
-The resulting RSS plot will be something like the one on the right.
-
+![Screenshot 2024-01-16 alle 19.41.55.png|400](assets/Screenshot_2024-01-16_alle_19.41.55.png)
+![Untitled|400](assets/Untitled%2054.png)
+The resulting RSS plot will be something like the one above.
 The threshold chosen is the $x^{(i)}$ which gives the lowest $RSS$.
 
 Once the region have been split, we move to the next one, until only leafs are left at the end of the tree.
+#### Multiple Features
+Even if single-feature problems can be solved even by hand, it is not possible for multi-feature problems: here automatic computation is really convenient.
 
-![Untitled](assets/Untitled%2054.png)
-
-**Multiple Features**
-
-Even if single-feature problems can be solved even by hand, one cannot say the same for multi-feature problems: here automatic computation is really convenient.
-
-Each node of the tree can be 
-
-The algorithm can be seen as the generalization of the [one seen for the single-feature case](https://www.notion.so/Machine-Learning-Notes-fd12021b7a554122bce07e4233196a54?pvs=21):
-
+The algorithm can be seen as the generalization of the [[#Single feature]] one:
 For each feature of $n$:
-
-For each $x^{(i)}$:
-
-1. [ Check whether the region worth to be split, otherwise move to the next one ]
-2. Pick $x^{(i)}$ as the threshold anche split the current region (if we are in the root, the whole dataset) in two parts
-3. Calculate the $RSS$
-4. Select next un-splitted region and go back to 1.
+	For each $x^{(i)}$:
+	1. \[ Check whether the region worth to be split (see [[#Pruning Regression Trees]]), otherwise move to the next step \]
+	2. Pick $x^{(i)}$ as the threshold anche split the current region (if we are in the root, the whole dataset) in two parts
+	3. Calculate the $RSS$
+	4. Select next un-splitted region and go back to 1.
 
 At the end of this first iteration, $n$ $RSS$-plots are returned, one per feature.
 Then let’s consider the lowest RSS among all the plots: the corresponding feature will determine the threshold type and the corresponding input value will be the threshold value.
+And so on.
 
-![Untitled](assets/Untitled%2055.png)
+![Untitled|500](assets/Untitled%2055.png)
 
 ## Classification Trees
+> [!info]
+> - https://youtu.be/_L39rN6gz7Y
 
-A Regression Tree is a Decision Tree which classifies input categories.
-
+A Classification Tree is a Decision Tree which predicts discrete categories.
 In this case, a particular node’s branches are already given by all different classes defined for the respective node feature.
 
-Again, the key step is in:
-
+Again, the key steps are:
 - finding the most suitable feature to assign a particular node;
-- define the *right* depth of the tree (see [Pruning](https://www.notion.so/Machine-Learning-Notes-fd12021b7a554122bce07e4233196a54?pvs=21)).
-
+- define the *right* depth of the tree (see [[#Pruning Regression Trees]]).
 ### Build a Classification Tree
-
 What a node does is basically splitting data into subsets, w.r.t. the feature *contained* in the node.
 
-> The golden rule is: a good feature splits the examples into subsets where, *ideally,* all the elements share the same target feature’s values.
-A good feature (among others) is the one which gives more information about the classification than the others.
+> [!tip] The golden rule
+> A good feature splits the examples into subsets where, *ideally,* all the elements share the same values (see image below).
+> ![[Screenshot 2025-12-30 alle 19.49.14.png]]
+> A good feature (among others) is the one which gives more information about the classification than the others.
 > 
+> Of course, in reality this is not possibile, especially at the beginning of the tree.
 
-Of course, in reality this is not possibile, especially at the beginning of the tree.
-
-However, even for classification tree is possible to measure the quality of a split.
-
+Of course, also for classification tree is possible to measure the quality of a split.
 This can be done in different ways, such as:
-
 - **Entropy** and **Information gain**
 - **Gini index**
 
 There is no “preferred” measure.
-
-### - **Entropy** and **Information gain**
-
+### Entropy and Information gain #TODO 
 But first, some definitions: they are all measures and error measures that can be calculated for each dataset $D$ ($i$-th element represented with $i \in D$) w.r.t. a specific feature $C$ and its $|C|$  classes (each class of the feature is represented with $c \in C$).
+#### Entropy
+The entropy measures the homogeneity of data.
+$$
+\begin{align*}
+H[C] &=-\sum_{c \in C} p_c\log_2p_c
+\end{align*}
+$$
+where
+* $p_c$ is the probability for the elements $D$ to  belong to class $c$ (of a specific feature).
 
-**Surprise**:
-
+**Example for uniform distribution**
+Uniform distribution means $p_c=\dfrac1n$
+$H[C] = -\sum_{c \in C} \dfrac1n \log_2 \dfrac1n$
+#### Surprise
 $$
 S(p_c)=log_2\bigg(\frac{1}{p_i(c)} \bigg)
 $$
+![[Pasted image 20251230203115.png|300]]
+*Relation between probability and surprise*
 
-where $p_c$ si the probability for the elements $D$ to  belong to class $c$ (of a specific feature).
-
-**Entropy**, ****as the expected surprise:
-
+[[#Entropy]] can also be defined as the **expected surprise**. 
 $$
 \begin{align*}
-H[C] &=E[S(p_c)] \\ 
-&=-\sum_{c \in C} p_c\log_2p_c
+H[C] &=\sum_{c \in C} p_c S(p_{c}) \\
+&=E[S(p_c)]
 \end{align*}
 $$
-
-Entropy measures the impurity of data.
-
-**Reduction in Entropy** (aka **Conditional Entropy**)
-
+#### Conditional Entropy
+Also known as **Reduction in Entropy**:
 $$
 \begin{align*}
 (R(C)=)\space H[T|C] 
 &= \sum_{c \in C} H[T|C=c]
 \end{align*}
 $$
-
-**Information gain** (aka Kullback-Leiber divergence):
-
+#### Information gain
+Also known as **Kullback-Leiber divergence**:
 $$
 \begin{align*}
 IG[C] &= H[T]-R(C) \\
@@ -1557,286 +1543,221 @@ IG[C] &= H[T]-R(C) \\
 &= H[T]-\sum_{c \in C} H[T|C=c]
 \end{align*}
 $$
-
-where $T$ is the target attribute.
-
+where
+* $T$ is the target attribute.
 Information Gain measures the expected reduction in the entropy that we can notice if we partition the examples according to an attribute A.
 That’s why the $i$-th node must be based on the feature that allows the biggest entropy reduction, because we want to make subsets of data as “clean” as possible (target attribute with homogeneous values).
-
-### - Gini index
-
+### Gini index #TODO 
 Like entropy, it measures the impurity of data and it’s defined between $[0.5, 0]$:
-
 - $0.5$ means that the data used is NOT homogeneus (half and half) w.r.t. the class $c$ of the selected feature;
 - $0$ means that the data used is homogeneous w.r.t. the class $c$ of the selected feature.
-
 $$
 Gini(c)=1-p_c^2
 $$
-
 Then, **total gini impurity** is defined:
 
 Finally, the algorithm:
-
-1. [ Check whether the region worth to be split, otherwise move to the next one ]
+1. \[ Check whether the region worth to be split, otherwise move to the next one \]
 2. Calculate $IG[C]$ ($Gini(C)$) for each feature $C$
 3. Pick the feature which gives the lowest $IG$ and subdivide the dataset (or the region for > 1 step) into the chosen feature’s classes
 4. Select next un-splitted region and go back to 1.
 - **Example**
-    
     Here is represented the calculus of $IG[Pat]$
+    ![Untitled|500](assets/Untitled%2056.png)
     
-    ![Untitled](assets/Untitled%2056.png)
-    
-    ![Untitled](assets/Untitled%2057.png)
-    
+    ![Untitled|400](assets/Untitled%2057.png)
     ![Untitled](assets/Untitled%2058.png)
-    
     . . . 
-    
-    Then the feature chosen will be the one that maximizes
-    
-    $$
+    Then the feature chosen will be the one that maximizes $$
     \max(IG(Alt), IG(Bar),..., IG(Est))
     $$
-    
-
 ### Numerical Values
-
 Classification trees can be built even over features with numerical values, by following these steps:
-
-1. sort rows w.r.t. numerical values (asc)
+1. sort rows w.r.t. numerical values (ascending)
 2. compute the average for all adjacent couples of rows
 3. for each average calculated:
     1. consider the value as a node candidate
     2. calculate $IG$ (or $Gini$) w.r.t. to that value
-4. pick the average that better splits data (lowest impurity)
-
-![Untitled](assets/Untitled%2059.png)
+4. pick the average that better splits data (lowest impurity) 
+   ![Untitled|200](assets/Untitled%2059.png)
 
 ## Missing Values (in Dataset)
 
 Datasets are often incomplete. There are several (naive) procedures to fill missing input data:
-
-- **Missing categorical values**
-    
-    ![Untitled](assets/Untitled%2060.png)
-    
-    - Use the most frequent value w.r.t. other complete rows
-        
-        ![Untitled](assets/Untitled%2061.png)
-        
-    - Find a correlation between feature with incomplete values and another complete feature(s)
-        
-        ![Untitled](assets/Untitled%2062.png)
-        
-- **Missing continuous values**
-    - Find a correlation between feature with incomplete values and another complete feature(s) and make a prediction
-        
-        ![Untitled](assets/Untitled%2063.png)
-        
-
+### Missing categorical values
+Let us consider the example below.
+![Untitled|300](assets/Untitled%2060.png)
+ - Use the most frequent value w.r.t. other complete rows ![Untitled|300](assets/Untitled%2061.png)
+- Find a correlation between feature with incomplete values and another complete feature(s) ![Untitled|300](assets/Untitled%2062.png)
+### Missing continuous values
+- Find a correlation between feature with incomplete values and another complete feature(s) and make a prediction ![Untitled](assets/Untitled%2063.png)
 ## Pruning Regression Trees
-
-Pruning a tree aims to reducing overfitting, which is something that trees are quite prone to.
+Pruning a tree <u>aims to reducing overfitting</u>, which is something that trees are quite prone to.
 It essentially consists in cutting off leafs or entire branches and then attach new leafs, which are going to be more impure than the previous ones.
 
 There are several ways to prune trees:
-
 - **pre-pruning**: basically early stopping techniques, such as:
     - setting a **max depth**
     - setting the **min no. of samples** for a region (leaf)
     - etc.
 - **post-pruning**
-    - **Weakest Link Pruning**, explained below
+    - [[#Weakest Link Pruning]], explained below
+### Weakest Link Pruning
+> [!info]
+> - https://youtu.be/Tg2OGohaUTc
 
-### **Weakest Link Pruning (Cost Complexity Pruning)**
-
+It is also called **Cost Complexity Pruning** (**CCP**).
 ![Before pruning](assets/Untitled%2064.png)
-
-Before pruning
-
+*Before pruning*
 ![After pruning](assets/Untitled%2065.png)
+*After pruning*
 
-After pruning
+Of course, there is no way to know a priori what’s the most efficient way of creating a tree (aka the right number of nodes). In fact, the standard approach is to create the full tree and then perform pruning.
 
-Of course, there is no way to know a priori what’s the most efficient way of creating a tree (aka the right number of nods). In fact, the standard approach is to create the full tree and then perform pruning.
-
-The main idea is building a bunch of trees and then choose the best one, by using an appropriate metric which takes in the number of nodes created and tree’s performances.
+<u>The main idea is building a bunch of trees and then choose the best one, by using an appropriate metric which takes in the number of nodes created and tree’s performances.</u>
 
 This metric is called **Tree Score**:
-
 $$
 TreeScore=RSS+\alpha \cdot |\hat T|
 $$
+where
+* $\alpha \cdot T$ is the **Tree Complexity Penalty**;
+- $\alpha$ is a tuning **complexity parameter** that controls the bias-variance trade-off and it’s determined by a cross-validation process (see [[#How to Evaluate $ alpha$]]). Moreover, <u>each</u> $\alpha$ <u>has an associated tree</u> $T_\alpha$;
+	- if $\alpha=0 \Rightarrow RSS \to 0$ then $T_\alpha \equiv T_0$,
+	- if $\alpha$ grows, then tree $T_\alpha$ complexity reduces
+- $|\hat T|$ is related to **tree complexity**. It can be the num of nodes, num of leafs, etc.
+  Usually is the number of leafs (called terminal nodes, as well).
 
-Where $\alpha \cdot T$ is the **Tree Complexity Penalty**:
-
-- $\alpha$ is a tuning parameter;
-- $|\hat T|$ is related to tree complexity. Can be no. of nodes, no. of leafs, etc.
-
-The algorithm is called Weakest Link Pruning and is made up of following steps:
-
-1. define $\alpha$ (see [How to Evaluate $\alpha$](https://www.notion.so/Machine-Learning-Notes-fd12021b7a554122bce07e4233196a54?pvs=21));
+The algorithm is called **Weakest Link Pruning** and is made up of following steps:
+1. define $\alpha$ (see [[#How to Evaluate $ alpha$]]);
 2. compute the full tree $T_{max}$ (with just training dataset);
 3. start pruning the tree $T_{max}$ and make several instances with different subtrees $T<T_{max}$.
-Note: it is computationally optimal starting from $T_{max}$ and then pruning upward, in order to get a sequence of subtrees like $T_1>T_2>…>T_{max}$; this means that $T_{i+1}$ is calculated starting from $T_i$, so the computation won’t start again from $T_{max}$;
+
+> [!tip]
+> It is computationally optimal starting from $T_{max}$ and then pruning upward, in order to get a sequence of subtrees like $T_1>T_2>…>T_{max}$; this means that $T_{i+1}$ is calculated starting from $T_i$, so the computation won’t start again from $T_{max}$.
+
 4. calculate $TreeScore$ for each tree;
 5. pick the tree with lowest $TreeScore$ (less error with less complexity).
-
 ![Untitled](assets/Untitled%2066.png)
 
+> [!warning] Correct definition of $\alpha$
+> The value of $\alpha$ must be found properly (see below), otherwise the full tree will always be the choice.
 ### How to Evaluate $\alpha$
+#TODO 
+The algorithm to find the best value for $\alpha$ is:
+1. Create the full tree using the full dataset (not just training as before)
+   This tree’s $TreeScore$ will assume the lowest value iff $\alpha=0$
+2. Increase $\alpha$ till pruning leafs is necessary to get a lower $TreeScore$
+3. Do step 2. till a tree with just one leaf is obtained
+4. - Now the cross validation steps -
+   Divide the dataset in training and testing sets
+5. 
+# 8. Random Forests
+> [!info]
+> - https://youtu.be/J4Wdy0Wc_xQ
 
-# 9. Random Forests
+<u>Decision trees are really simple</u> to interpret and flexible (data-type-wise) machine learning tools, <u>but they are unstable: minor changes in input dataset could imply large effects on the nature of the tree.</u>
 
-Decision trees are really simple to interpret and flexible (data-type-wise) machine learning tools, but they are unstable: minor changes in input dataset could imply large effects on the nature of the tree.
+One can say that trees have a low-bias nature, so a way to lower variance too must be found. 
 
-One can say that trees have a low-bias nature, so a way to lower variance must be found. 
-
-**Bootstrap Datasets** can be used: they are derived dataset given by randomly choosing entries from the original dataset. In general bootstrap datasets cardinality is the same as original dataset, but it’s not a strict rule.
+**Bootstrap Datasets** can be used: they are <u>derived dataset given by randomly choosing entries from the original dataset</u>. In general bootstrap datasets cardinality is the same as original dataset, but it’s not a strict rule.
 A single entry can occur multiple times.
 A single entry can occur neither once; then it will occur in the so called **Out-of-bag Dataset**.
 
 Averaging results of trees built with (different) bootstrapped datasets can do the job; this is defined as **bagging** (or **bootstrap aggregation**).
 It can be applied to regression and classification trees.
-It consists in building a bunch of different trees over $B$ bootstrapped datasets and then averaging their results:
-
+<u>It consists in building a bunch of different trees over $B$ bootstrapped datasets and then averaging their results</u>:
 - for regression trees, averaging consists trivial mathematical average of the numeric results;
 - for classification trees, averaging consists in picking the most voted result.
 
+> [!tip]
 > Nature of trees ⇒ keep bias relatively low
-Averaging results ⇒ lowering variance
-> 
+> Averaging results ⇒ lowering variance
 
 Bagging is not enough: bootstrapped datasets are still correlated.
 
 **Random Forest** is an improved (variance-wise) way of averaging results.
 It consists in using bootstrapped datasets to build decorrelated trees, by using random feature subsets selection technique during the building process of each tree.
 
-> Random Forest
-= Bootstrapped datasets + aggregation + tree decorrelation
-= bagging + tree decorrelation
-> 
+> [!tip] Random Forests
+> = (Bootstrapped datasets + aggregation) + tree decorrelation
+> = bagging + tree decorrelation
 
 ## Build Random Forest
-
-Follow this algorithm in order to build one random forest:
-
+Follow this algorithm in order to build a random forest:
 1. Create a bootstrapped dataset
-2. Build a tree following an edited algorithm:
-    1. check if region worth splitting, otherwise goto d.
+2. Build a bunch of full trees by following an edited algorithm:
+    1. check if region has more than one datapoin, otherwise goto step 2.4
     2. select a subset of features as candidates for $i$-th node
-    3. define the most appropriate feature for that node (using algorithms explained in [Building a Regression Tree](https://www.notion.so/Machine-Learning-Notes-fd12021b7a554122bce07e4233196a54?pvs=21) or [Building a Classification Tree](https://www.notion.so/Machine-Learning-Notes-fd12021b7a554122bce07e4233196a54?pvs=21))
-    4. select next region and goto a.
-3. goto .1 until a certain number of trees is built
-
+    3. define the most appropriate feature for that node (using algorithms explained in [[#Build a Regression Tree]] or [[#Build a Classification Tree]])
+    4. select next region and goto step 2.1
+3. goto step 1 until a certain number of trees is built
 ![Untitled](assets/Untitled%2067.png)
-
-### ( Use Random Forest )
-
+### Use Random Forest
 Now, we have a bunch of decorrelated trees. Once a particular data is fed, the result will be the average of all results produced by each tree of the forest (using techniques explained at the beginning of the chapter).
-The process of bootstrapping data and then using aggregate to make a decision is called **bagging**.
-
 ### Evaluate Random Forest
-
 A random forest having $N$ trees, has $N$ respective bootstrapped datasets, hence $N$ respective out-of-bag datasets.
 
-For all N trees:
-
-1. define the $i$-th tree’s out-of-bag dataset
+For all $N$ trees:
+1. define the $i$-th tree’s out-of-bag dataset ( #Recall dataset made up by elements not chosen for the $i$-th bagged dataset )
 2. validate the tree with the dataset, so keep track of correctly and incorrectly labeled entries
 
 In the end, some metrics to evaluate the quality of a random forest:
-
 - **Accuracy** is given by the proportion of correctly labeled out-of-bag entries;
 - **Out-of-bag Error** is given by the proportion of incorrectly labeled out-of-bag entries.
-
 ## Refining Missing Values
-
-Random Forest can be considered a way to refine values used to fill missing data.
-
+In random forests there are two cases where missing data can occur.
 ### Missing Values from Original Dataset
-
-![Untitled](assets/Untitled%2068.png)
-
-First, use one of the methods explained in [Missing Values](https://www.notion.so/Machine-Learning-Notes-fd12021b7a554122bce07e4233196a54?pvs=21) to find an initial version of missing data. Then, build a random forest.
-
-A way to improve these mainly naive techniques is to consider the similarity of incomplete entries w.r.t. the others.
+![Untitled|300](assets/Untitled%2068.png)
+First, use one of the methods explained in [[#Missing Values (in Dataset)]] to find an initial version of missing data. Then, build a random forest with the initial guess of complete dataset.
+![[Screenshot 2026-01-02 alle 18.51.25.png|300]]
+A way to improve these mainly naive techniques is to <u>consider the similarity of incomplete entries w.r.t. the others</u>.
 
 A really convenient tool used with random forests is the **Proximity Matrix**: it keeps track of the similarity $x \in\mathbb R: [0,1]$ for each dataset’s entry w.r.t. all the others.
-
+![Untitled|200](assets/Untitled%2069.png)
 Similarity for entries $i$ and $j$ for a proximity matrix $M$ calculated over a random forest with $N$ trees $[T_1, …, T_N]$ is evaluated as follows: 
-
 $$
 M[i,j]=\frac{1}{N}\sum_{t=0}^N\mathbb I(y_t^i=y_t^j)
 $$
-
-![Untitled](assets/Untitled%2069.png)
-
 where:
-
 - $y_t^i$ is the target value for entry $i$ in tree $t$
 - $y_t^j$ is the target value for entry $j$ in tree $t$
 
 Now it’s possibile to ponder initial predictions made on missing values, by using similarity (between dirty entry w.r.t. the others) as a weight.
+#### Missing categorical values    
+New value is the one with the highest similarity-weighted relative frequency.
 
-- **Missing categorical values**
-    
-    New value is the one with the highest similarity-weighted relative frequency.
-    
-    In the example, new value for “Blocked Arteries” can be YES either NO, so:
-    
-    $YES = \frac 23\cdot0.1=0.03$
-    
-    $NO = \frac 13\cdot0.9=0.6$
-    
-    $NO$ is chosen.
-    
-- **Missing continuous values**
-    
-    Even trivially, new continuous values are given by the similarity-wighted average of other values.
-    
-    In the example, new value for “Weight” is given by:
-    
-    $w=125\cdot0.1+280+0.1\cdot210\cdot0.8=198.5$
-    
+In the example, new value for “Blocked Arteries” can be YES either NO, so:
+$YES = \frac 23\cdot0.1=0.03$
+$NO = \frac 13\cdot0.9=0.6$
 
-### **Curiosity: Distance Matrix**
+$NO$ is chosen.
+#### Missing continuous values
+Even trivially, new continuous values are given by the similarity-wighted average of other values.
 
+In the example, new value for “Weight” is given by:
+$w=125\cdot0.1+280+0.1\cdot210\cdot0.8=198.5$
+#### Curiosity: Distance Matrix
 It is possible to directly obtain a new matrix useful for metrics: **Distance Matrix**.
-
 A distance matrix $D$ is trivially given by $1-M$.
-
-![Screenshot 2024-01-26 alle 12.11.50.png](assets/Screenshot_2024-01-26_alle_12.11.50.png)
-
+![Screenshot 2024-01-26 alle 12.11.50.png|200](assets/Screenshot_2024-01-26_alle_12.11.50.png)
 ### Missing Values from New Data
-
 Assume that a random forest has already been trained and consider target feature $A$, which can assume $N$ different values $[A_1,…,A_N]$.
-
 1. Create as many copies of the sample as the classes of the target (hence, $N$ copies);
 2. Populate each copy’s target value $i$ with $A_i$;
-    
     ![Untitled](assets/Untitled%2070.png)
-    
-3. Apply [Missing Values from Original Dataset](https://www.notion.so/Machine-Learning-Notes-fd12021b7a554122bce07e4233196a54?pvs=21) techniques to guess a value for each copy;
-4. Run all the copies through the random forest and keep track of how many times target value (set in 2.) matches the random forest trees’ output;
-    
+3. Apply techniques seen in [[#Missing Values from Original Dataset]] to guess a value for each copy;
+4. Run all the copies through the random forest and keep track of how many times target value (set in step 2) matches the random forest trees’ output;
     ![Untitled](assets/Untitled%2071.png)
-    
 5. Pick the sample with highest score.
-
-# 10. Support Vector Machines
-
-[16. Learning: Support Vector Machines](https://youtu.be/_PwhiWxHK8o)
+# 9. Support Vector Machines
+> [!info]
+> - https://youtu.be/_PwhiWxHK8o
 
 What this tool wants to achieve is to derive an algorithm whose purpose is finding the largest gap able to separate data labeled differently, as much as possible (that’s why we want the largest).
-
 ## Linearly separable dataset
-
 Let’s consider the dataset on the right, made up by negative and positive samples.
-
-What is wanted is finding a line (or, in general, an hyperplane) that better splits the dataset. 
+The goal is finding a line (or, in general, an hyperplane) that better splits the dataset. 
 
 Then **optimal hyperplane** is that lies in between of (and parallel to) the largest “street” separating data. There are infinite “working” planes, but there is only one optimal hyperplane.
 
@@ -1845,54 +1766,37 @@ if $\vec w \cdot\vec u +b \ge 0$ then *positive*
 otherwise *negative.*
 
 The optimal separating hyperplane is given by:
-
 $$
 \vec w \cdot\vec x+b=0
 $$
-
-![Untitled](assets/Untitled%2072.png)
-
-![Untitled](assets/Untitled%2073.png)
-
+![Untitled|300](assets/Untitled%2072.png)![Untitled|300](assets/Untitled%2073.png)z
 However, the idea is that when input data is given, the model should be confident whenever input belongs to positive or negative area. So, we want to know if the input sample is significantly above or below the street:
-
 - for positive samples: $\vec w \cdot\vec x_++b \ge 1$
 - for negative samples: $\vec w \cdot\vec x_-+b \le -1$
 
 In order to make math simpler, everything can be reduced to:
-
 $$
 y^{(i)}(\vec w \cdot\vec x_++b) -1\ge 0
 $$
-
 where:
-
-$y^{(i)}=
-\begin{cases}
-\begin{aligned}
-1 \text{ (for positive samples) }\\
--1 \text{ (for negative samples) }
-\end{aligned}
-\end{cases}$.
+* $y^{(i)}=1$ for positive samples
+	or
+* $y^{(i)}=-1$ for negative samples
 
 Back again to the problem, the idea is to maximize the width of the street. So:
-
 $$
 \begin{align*}
-&\max \frac{|(\vec w\cdot\vec x)+b|}{||\vec w||}= \\
-&\max \frac{1}{||\vec w||}= \\
-&\min\frac12||\vec w||^2
+\max \frac{|(\vec w\cdot\vec x)+b|}{||\vec w||} &= \\
+&=\max \frac{1}{||\vec w||}= \\
+&=\min\frac12||\vec w||^2
 \end{align*}
 $$
 
 The basic definition of the problem is then:
 
 $$
-\begin{align*}
-&\min\frac12||\vec w||^2 \\
-& s.t. \quad y^{(i)}(\vec w \cdot\vec x^{(i)}+b)\ge1
+\min\frac12||\vec w||^2 \quad s.t. \quad y^{(i)}(\vec w \cdot\vec x^{(i)}+b)\ge1
 \quad\forall i=1...m
-\end{align*}
 $$
 
 Literally: find the street with maximum width s.t. the dataset is entirely split into two parts (all samples are - correctly - classified).
@@ -2025,12 +1929,9 @@ The idea is to map input space (defined over $\mathbb R^d$) into a feature space
 
 # —Unsupervised Learning—
 
-# 11. Clustering
-
+# 10. Clustering
 Clustering is one of the two principal applications of Unsupervised Learning. It aims at discovering data clusters (aggregations of data) in a non-labeled dataset.
-
 ## K-Means
-
 Given a $n$-dimensional dataset, the idea is to find exactly $k$ **clusters** of data. 
 
 Each cluster is identified by its own **centroid** $\mu_k$, which is an $n$-dimensional point, like the samples.
@@ -2463,7 +2364,7 @@ for each couple of clusters (C2, C3) and respective parent C1,
 
 - still some parameters must be set by hand
 
-# 12. Dimensionality Reduction
+# 11. Dimensionality Reduction
 
 ## Curse of Dimensionality
 
