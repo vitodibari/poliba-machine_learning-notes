@@ -1,8 +1,7 @@
-
 # Machine Learning Notes
 A.Y. 2023-2024, Polytechnic of Bari
-Author: Vito Di Bari
 Professor: Tommaso di Noia
+Author: Vito Di Bari
 ## Reading suggestions
 <aside>
 <font color="#6425d0">⚠️ Purple sections are AI-generated</font>
@@ -1753,182 +1752,227 @@ Assume that a random forest has already been trained and consider target feature
 # 9. Support Vector Machines
 > [!info]
 > - https://youtu.be/_PwhiWxHK8o
+> - https://www.youtube.com/watch?v=efR1C6CvhmE
 
-What this tool wants to achieve is to derive an algorithm whose purpose is finding the largest gap able to separate data labeled differently, as much as possible (that’s why we want the largest).
+The purpose of this tool is to achieve an algorithm able to find the largest gap able to separate data labeled differently, as much as possible (that’s why we want the largest).
 ## Linearly separable dataset
-Let’s consider the dataset on the right, made up by negative and positive samples.
+Let’s consider the dataset seen in the graph on the right (see images below), made up by negative and positive samples.
 The goal is finding a line (or, in general, an hyperplane) that better splits the dataset. 
-
-Then **optimal hyperplane** is that lies in between of (and parallel to) the largest “street” separating data. There are infinite “working” planes, but there is only one optimal hyperplane.
-
-Hence the decision rule is going to be:
-if $\vec w \cdot\vec u +b \ge 0$ then *positive*
-otherwise *negative.*
-
-The optimal separating hyperplane is given by:
+![Untitled|300](assets/Untitled%2072.png)![Untitled|300](assets/Untitled%2073.png)
+Then **optimal hyperplane** is the one that lies in between of (and parallel to) the largest “street” separating data. There are infinite “working” planes, but there is only one optimal hyperplane with largest street above the others.
+The separating hyperplane that we want to be optimal is given by:
 $$
 \vec w \cdot\vec x+b=0
 $$
-![Untitled|300](assets/Untitled%2072.png)![Untitled|300](assets/Untitled%2073.png)z
-However, the idea is that when input data is given, the model should be confident whenever input belongs to positive or negative area. So, we want to know if the input sample is significantly above or below the street:
-- for positive samples: $\vec w \cdot\vec x_++b \ge 1$
-- for negative samples: $\vec w \cdot\vec x_-+b \le -1$
+Hence, given a generic point $\vec u$, the decision rule is going to be:
+if $\vec w \cdot\vec u +b \ge 0$ then classify as *positive*
+otherwise as *negative.*
 
+However, <u>the idea is that when input data is given, the model should be confident whenever input belongs to positive or negative area.</u> So, we want to know if the input sample is significantly above or below the street:
+- for positive samples $\vec x_+$: $\vec w \cdot\vec x_++b \ge 1$
+- for negative samples $\vec x_-$: $\vec w \cdot\vec x_-+b \le -1$
 In order to make math simpler, everything can be reduced to:
 $$
-y^{(i)}(\vec w \cdot\vec x_++b) -1\ge 0
+y^{(i)}(\vec w \cdot\vec x_i +b) -1\ge 0
 $$
 where:
+* $\vec x_i$ input data
 * $y^{(i)}=1$ for positive samples
 	or
 * $y^{(i)}=-1$ for negative samples
 
-Back again to the problem, the idea is to maximize the width of the street. So:
+Of course, when datapoint is on the borders:
+$$y^{(i)}(\vec w \cdot\vec x_i +b) =1$$
+Back again to the problem, the idea is to maximize the width of the street. 
+So let’s start from the distance of a generic point $x_i$ from the hyperplane:
+$$
+\frac{|(\vec w\cdot\vec x)+b|}{||\vec w||}
+$$
+Then let’s assume that point $x_i$ is on the border and the objective is to find a plane that maximize that distance, so:
 $$
 \begin{align*}
-\max \frac{|(\vec w\cdot\vec x)+b|}{||\vec w||} &= \\
+&\max \frac{|(\vec w\cdot\vec x)+b|}{||\vec w||} = \\
 &=\max \frac{1}{||\vec w||}= \\
-&=\min\frac12||\vec w||^2
+&=\min\frac{||\vec w||^2}2
 \end{align*}
 $$
+> [!tip]
+> The last step is, again, for mathematical convenience
 
 The basic definition of the problem is then:
-
 $$
-\min\frac12||\vec w||^2 \quad s.t. \quad y^{(i)}(\vec w \cdot\vec x^{(i)}+b)\ge1
-\quad\forall i=1...m
+\begin{align}
+& \min\frac12||\vec w||^2\\
+& y^{(i)}(\vec w \cdot\vec x^{(i)}+b)\ge1 \quad\forall i=1...m
+\end{align}
 $$
-
 Literally: find the street with maximum width s.t. the dataset is entirely split into two parts (all samples are - correctly - classified).
 
-- **Lagrange Duality**
-    
-    By using Laplace duality, the problem can be represented in a different way:
-    
-    $$
-    \begin{split}
-    \min f(\omega)\\
-    g(\omega)\ge0
-    \end{split}
-    \quad\Rightarrow\quad \begin{split}
-    \max L(\omega,\alpha)\\
-    \alpha\ge0\\
-    \end{split}
-    $$
-    
-    where $L(\omega,\alpha)=f(\omega)+\alpha  \cdot g(\omega)$.
-    
-    I can be proved that:
-    
-    $$
-    \exists \omega^*= \min_\omega f(\omega)
-    $$
-    
-    which satisfies the following condition, too:
-    
-    $$
-    \begin{align*}
-    \exists \alpha^* s.t. & \frac{\partial L(\omega^*,\alpha^*)}{\partial\omega} = 0 \\
-    & \frac{\partial L(\omega^*,\alpha^*)}{\partial\alpha} = 0
-    \end{align*}
-    $$
-    
+### Lagrange Duality
+By using Laplace duality, the problem can be represented in a different way:
+$$
+\begin{split}
+\min f(\omega)\\
+g(\omega)\ge0
+\end{split}
+\quad\Rightarrow\quad 
+\begin{split}
+\max L(\omega,\alpha)\\
+\alpha\ge0\\
+\end{split}
+$$
+where
+* $L(\omega,\alpha)=f(\omega)+\alpha  \cdot g(\omega)$.
+* $f(\omega)$ is the convex objective function of the primal problem
+* $g(\omega)$ is the convex constraint function of the primal problem
+* $L(\omega, \alpha)$ is the concave objective function of the dual problem
+* $\alpha>0$ is the constraint of the dual problem
 
+It can be proved that:
+$$
+\exists \omega^*= \min_\omega f(\omega)
+$$
+which satisfies the following condition, too:
+$$
+\begin{align*}
+\exists \alpha^* s.t. & \frac{\partial L(\omega^*,\alpha^*)}{\partial\omega} = 0 \\
+& \frac{\partial L(\omega^*,\alpha^*)}{\partial\alpha} = 0
+\end{align*}
+$$
+---
 Applying Lagrange duality to the current problem gives the following $L$:
-
 $$
 L=\frac12||\vec w||^2-\sum_i\alpha_i[y_i(\vec w\cdot\vec x+b)-1]
 $$
+where:
+* $\frac 12 ||\omega||^2$ is the concave objective function of the primal
+* $\sum_i\alpha_i[y_i(\vec w\cdot\vec x+b)-1]$ is the sum of all constraints of the primal
 
 The objective is to maximize $L$, then let’s put its partial derivatives equal to 0:
-
-$\cfrac{\partial L}{\partial\vec w}=0 \Rightarrow \vec w=\sum_i\alpha_i y_i\vec x_i$
-
-$\cfrac{\partial L}{\partial b}=0 \Rightarrow \sum_i\alpha_i y_i=0$
-
+$$
+\begin{align}
+& \cfrac{\partial L}{\partial\vec w}=0 \Rightarrow \vec w=\sum_i\alpha_i y_i\vec x_i \\
+& \cfrac{\partial L}{\partial b}=0 \Rightarrow \sum_i\alpha_i y_i=0
+\end{align}
+$$
 Then, plug these results in $L$ and the final result is the following problem:
-
 $$
 \begin{align*}
-& \max_\alpha L=\max_\alpha\sum_i\alpha_i-\frac 12\sum_i\sum_j\alpha_i\alpha_jy_iy_j
-\underbrace{\vec x_i\cdot\vec x_j}_{samples} \\
-& s.t. \quad
-\begin{align*}
+& \max_\alpha L \\
+& =\max_\alpha\sum_i\alpha_i-\frac12\sum_i\sum_j\alpha_i\alpha_j y_i y_j
+\underbrace{\vec x_i\cdot\vec x_j}_{\text{ samples }} \\
 & \alpha_i\ge0 \quad\forall i \\
 & \sum_i\alpha_iy^{(i)}=0
 \end{align*}
-\end{align*}
 $$
+The most important thing derivable from the last result is that the whole optimization problem depends only on pair of $\text{samples}$ from input dataset.
 
-The most important thing derivable from the last result is that the whole optimization problem depends only on pair of $samples$ from input dataset.
-
-Once that all $\alpha$s have been found, the separator can be obtained:
-
+Once that all $\alpha$’s have been found, the separator can be obtained:
 $$
 \vec w\cdot\vec x +b=\sum_i\alpha_iy_i\vec x_i \cdot\vec x+b
 $$
-
+where:
+* all samples $\vec x_i$ used are only **support vectors**
 ## Non-linearly separable dataset
-
 Of course, in reality, data is often non-linearly separable. This means that, without changing the problem formulation, there will not be any optimal hyperplane because no plane will be able to split data without any misclassification.
-
-![Untitled](assets/Untitled%2074.png)
-
+![Untitled|300](assets/Untitled%2074.png)
+### Soft-Margin SVM
 The idea is then try to loose some of the constraints of the previously defined optimization problem. In order to “loose” the problem, are then introduced:
-
 - some **slack variables $\xi^{(i)}$** for each constraint;
 - the **regularization parameter** $C$ which tunes the misclassification:
     - $C$ big $\Rightarrow$ stronger error penalization
     - $C$ small $\Rightarrow$ weaker error penalization
-
 $$
 \begin{align*}
 &\min\frac12||\vec w||^2 + C\sum_i\xi^{(i)}\\
-& s.t. \quad
-\begin{align*}
 & y^{(i)}(\vec w \cdot\vec x^{(i)}+b)\ge1-\xi^{(i)}
 \quad\forall i=1...m \\
 & \xi^{(i)}\ge0
 \end{align*}
-\end{align*}
 $$
-
 While the dual problem becomes:
-
 $$
 \begin{align*}
 &\max_\alpha\sum_i\alpha_i-\frac 12\sum_i\sum_j\alpha_i\alpha_jy_iy_j
 \underbrace{\vec x_i\cdot\vec x_j}_{samples} \\
-& s.t. \quad
-\begin{align*}
 & 0\le\alpha\le C\quad\forall i=1...m \\
 & \sum_i\alpha_iy^{(i)}=0
 \end{align*}
-\end{align*}
+\tag{3}
 $$
+> [!tip]
+> $C$ is bounding the value of $\alpha$.
 
-Note how $C$ is bounding the value of $\alpha$.
+However, this first alternative formalization is often not enough, specifically in situations like the ones below.
+![Untitled|300](assets/Untitled%2075.png)![Untitled|300](assets/Untitled%2076.png)
 
-However, this first alternative formalization is often not enough, specifically in situations like the ones on right.
-
-However, this first alternative formalization is often not enough, specifically in situations like the ones on right.
-
-![Untitled](assets/Untitled%2075.png)
-
-![Untitled](assets/Untitled%2076.png)
-
-> **Cover’s theorem** can help: 
-”A complex pattern-classification problem cast in a high-dimensional space non-linearly is more likely to be linearly separable than in a low-dimensional space”
-> 
+### Kernel SVM
+**Cover’s theorem** can help: ”A complex pattern-classification problem cast in a high-dimensional space non-linearly is more likely to be linearly separable than in a low-dimensional space”
 
 The idea is to map input space (defined over $\mathbb R^d$) into a feature space with higher dimension (defined over $\mathbb R^p$ where $p>d$) using the function (called **feature map**) $\Phi(x):\mathbb R^d \rightarrow \mathbb R^{p}$. The optimal hyperplane will be defined within the feature space ($\mathbb R^{p-1}$).
 
-### Kernelization
+🚫 The naive way to augment dimensions would be, given two data points $x_1$ and $x_2$, to calculate $\Phi(x_1)$ and $\Phi(x_2)$, and then compute $\Phi(x_1) \cdot \Phi(x_2)$, as needed in the dual problem $(3)$.
 
+✅ However, there exists a more efficient way to augment dimensions.
+Since just we need the full scalar product $\Phi(x_1) \cdot \Phi(x_2)$ and not just the singles $\Phi(x_1)$ and $\Phi(x_2)$, **kernels** are used: they are functions that implements the **kernel trick**.
+These functions implicitly map features from the original to the higher-dimensional space, without actually computing the inner product, but returning directly its equivalent result.
+$$
+K(x_i,x_j)=\Phi(\vec x_i) \cdot \Phi(\vec x_j)
+$$
+The optimization problem becomes:
+$$
+\begin{align*}
+&\max_\alpha\sum_i\alpha_i-\frac 12\sum_i\sum_j\alpha_i\alpha_jy_iy_j
+k(\vec x_i\cdot\vec x_j) \\
+& 0\le\alpha\le C\quad\forall i=1...m \\
+& \sum_i\alpha_iy^{(i)}=0
+\end{align*}
+$$
+As we can see, the definition of $\Phi$ is completely ignored.
+
+> [!tip] SVM vs NNs
+> In KSVMs, non-linearities are involved as well, by transforming the feature space and without using activation functions.
+
+#### Kernel functions
+* **Linear kernel** $$K(x_i, x_j)=(\vec x_i \cdot \vec x_j)$$
+* **Polynomial kernel** $$K(x_i, x_j)=(\vec x_i \cdot \vec x_j+c)^d$$
+* **Multi-Layer Perceptron Tanh** $$K(x_i, x_j)=\tanh(b(\vec x_i \cdot \vec x_j)-c)$$
+* **Radial Basis Function (RBF) kernel**  $$K(x_i, x_j)=e^{-\dfrac {||\vec x_i - \vec x_j||} \sigma}$$
+* **Gaussian Radial Basis Function (GRBF) kernel**  $$K(x_i, x_j)=e^{-\dfrac {(\vec x_i - \vec x_j)^2} {{2\sigma}^2}}$$![[Screenshot 2026-01-03 alle 16.39.55.png]]
+### Parameters tuning
+As previously seen, some parameters must be defined before applying SVMs:
+* kernel function
+* kernel function’s parameters
+* regularization term $C$ value
+In general, they are all determined using cross-validation.
+### Pros
+* There are no local minima, just a single global minimum. This means that the optimization problem is quadratic, so there must exist a optimal solution.
+* The optimal solution can be found in polynomial time.
+* There are just a few parameters to set up.
+* Solution is stable (ex. there is no problem of randomly initializing of weights just as in Neural Networks).
+* Solution is sparse: it just involves support vectors.
 ## Generalized Linear Models (GLMs)
+Before talking about kernels, some functions $\Phi(x)$ were mentioned: they are used to augment dimensionality of data $x$. They are called **basic functions**.
 
+They allow moving from a linear hypothesis
+$$
+h(x)=\sum_{i=0}^n \theta_i \cdot x_i=\theta^Tx
+$$
+to linear models that allow nonlinear transformation of the input:
+$$
+h(x)=\sum_{i=0}^n \theta_i \cdot \phi(x_i)=\theta^T \Phi(x)
+$$
+### Basic functions
+* **Linear** $$\phi(x)=x$$
+* **Polynomial** $$\phi(x)=x^p$$
+* **Gaussian $$\phi_{i}(x)=e^{-\dfrac{x-\mu_i}{2 \sigma^2}}$$**
+* **Sigmoidal** $$\phi_i(x)=\dfrac{1}{1+e^{-\dfrac{x-\mu_i}{2 \sigma^2}}}$$
+![[Screenshot 2026-01-03 alle 17.29.35.png|600]]
+Graphs above represent how values are changed by basic functions. The different color shows:
+* Polynomial while varying $p$
+* Gaussian while varying $\mu_i$
+* Sigmoidal while varying $\mu_i$
 # —Unsupervised Learning—
-
 # 10. Clustering
 Clustering is one of the two principal applications of Unsupervised Learning. It aims at discovering data clusters (aggregations of data) in a non-labeled dataset.
 ## K-Means
