@@ -1621,14 +1621,12 @@ TreeScore=RSS+\alpha \cdot |\hat T|
 $$
 where
 * $\alpha \cdot T$ is the **Tree Complexity Penalty**;
-- $\alpha$ is a tuning **complexity parameter** that controls the bias-variance trade-off and it’s determined by a cross-validation process (see [[#How to Evaluate $ alpha$]]). Moreover, <u>each</u> $\alpha$ <u>has an associated tree</u> $T_\alpha$;
-	- if $\alpha=0 \Rightarrow RSS \to 0$ then $T_\alpha \equiv T_0$,
-	- if $\alpha$ grows, then tree $T_\alpha$ complexity reduces
+- $\alpha$ is a tuning **complexity parameter** that controls the bias-variance trade-off and it’s determined by a cross-validation process (see [[#How to Evaluate $ alpha$]]).
 - $|\hat T|$ is related to **tree complexity**. It can be the num of nodes, num of leafs, etc.
   Usually is the number of leafs (called terminal nodes, as well).
 
 The algorithm is called **Weakest Link Pruning** and is made up of following steps:
-1. define $\alpha$ (see [[#How to Evaluate $ alpha$]]);
+1. define $\alpha$ (see [[#How to Evaluate $\alpha$]]);
 2. compute the full tree $T_{max}$ (with just training dataset);
 3. start pruning the tree $T_{max}$ and make several instances with different subtrees $T<T_{max}$.
 
@@ -1638,19 +1636,33 @@ The algorithm is called **Weakest Link Pruning** and is made up of following ste
 4. calculate $TreeScore$ for each tree;
 5. pick the tree with lowest $TreeScore$ (less error with less complexity).
 ![Untitled](assets/Untitled%2066.png)
+In the example the value of $\alpha$ found was $10000$:
+$\begin{align}& RSS(T_0)=543.8+10000 \cdot 4 \\& RSS(T_1)=5494.8+10000 \cdot 3 \\& RSS(T_2)=19563.7+10000 \cdot 2 \\& RSS(T_3)=28897.2+10000 \cdot 1\end{align}$
 
 > [!warning] Correct definition of $\alpha$
 > The value of $\alpha$ must be found properly (see below), otherwise the full tree will always be the choice.
 ### How to Evaluate $\alpha$
-#TODO 
 The algorithm to find the best value for $\alpha$ is:
-1. Create the full tree using the full dataset (not just training as before)
+1. \[ Init phase \]
+   Create the full tree using the full dataset (not just training set as before)
    This tree’s $TreeScore$ will assume the lowest value iff $\alpha=0$
-2. Increase $\alpha$ till pruning leafs is necessary to get a lower $TreeScore$
-3. Do step 2. till a tree with just one leaf is obtained
-4. - Now the cross validation steps -
-   Divide the dataset in training and testing sets
-5. 
+   In general, one can say that <u>each tree (complexity) has an associated</u> $\alpha$;
+	- if $\alpha=0 \Rightarrow RSS \to 0$ then $T_\alpha \equiv T_0$,
+	- if $\alpha$ grows, then tree $T_i$ complexity reduces and $RSS$ grows
+2. while current tree has more than one leaf:
+   Create a new tree by pruning the last level of the last built one
+3. Determine $\alpha_{i}$ s.t. current tree’s score is lower than the previous one when using current tree’s $\alpha_{i}$ value: $$TS_{i}(\alpha_{i})<TS_{i-1}(\alpha_{i})$$
+4. goto step 2.
+5. \[ Cross validation phase \]
+   Delete all trees generated with full set but keep the alpha associated to their depth
+6. Apply [[#K-folds Cross Validation]] and for each k-th fold:
+   6.1. generate full tree using training set
+   6.2. build the other trees by pruning full tree’s leafs and associate $\alpha$’s found in \[ Init phase \] to trees with same depth
+   6.3. compute $RSS$ for all the trees using testing data only
+   6.4. vote the tree (then the $\alpha$) with lower $RSS$
+   6.5. goto 6.1. with a new fold
+7. the final value for $\alpha$ is the most voted one in the \[ Cross validation phase \]
+8. #TODO pick the tree with the best $\alpha$, found in step 7.
 # 8. Random Forests
 > [!info]
 > - https://youtu.be/J4Wdy0Wc_xQ
