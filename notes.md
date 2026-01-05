@@ -1987,113 +1987,133 @@ Graphs above represent how values are changed by basic functions. The different 
 # —Unsupervised Learning—
 # 10. Clustering
 Clustering is one of the two principal applications of Unsupervised Learning. It aims at discovering data clusters (aggregations of data) in a non-labeled dataset.
+
+Clustering approaches can be divided into:
+* **Centroid based**: where shape of clusters is assumed
+* **Density based**: where shape of clusters if found by the algorithm
+
+Or into:
+* **Flat**: return single relationships between data
+* **Hierarchical**: return nested relationships between data
+
+|                    | Flat                                                                 | Hierarchical          |
+| ------------------ | -------------------------------------------------------------------- | --------------------- |
+| **Centroid based** | [[#K-Means]]<br>[[#K-Medoids]]<br>[[#Gaussian Mixture Models (GMM)]] | [[#Ward’s criterion]] |
+| **Density based**  | [[#DBSCAN]]                                                          | [[#HDBSCAN]]          |
 ## K-Means
 Given a $n$-dimensional dataset, the idea is to find exactly $k$ **clusters** of data. 
 
-Each cluster is identified by its own **centroid** $\mu_k$, which is an $n$-dimensional point, like the samples.
+Each cluster is identified by its own **centroid** $\mu_k$, which is an $n$-dimensional point, like the samples. The centroid should identify the cluster, in some way.
 
 The math problem can be written as follows:
-
 $$
-\min_{a,\mu}L=\sum^K_{k=1}\sum^m_{i=1}a_{ik}||x^{(i)}-\mu_k||^2
+\min_{a,\mu}L=\min_{a,\mu}\sum^K_{k=1}\sum^m_{i=1}a_{ik}||x^{(i)}-\mu_k||^2
 $$
-
 where:
-
 - $x^{(i)}$ is the $i$-th sample
 - $\mu_k$ is the $k$-th cluster’s centroid
-- $a_{ik}=
-\begin{cases}
-1 \text{ if }x^{(i)} \in C_k\\
-0 \text{ otherwise }
-\end{cases}$ linking variable which tells if $x^{(i)}$ is contained in $k$-th cluster or not
+- $a_{ik}=\begin{cases}1 \text{ if }x^{(i)} \in C_k\\0 \text{ otherwise }\end{cases}$ **linking variable** which tells if $x^{(i)}$ is contained in $k$-th cluster or not
+- $K$ is the given number of centroids
 
-The algorithms aims at finding those centroids and linking variables (then association centroid-samples which define clusters) that lower the sum of all centroid-sample distances.
+<u>The algorithms aims at finding those centroids and linking variables that lower the sum of all centroid-sample distances.</u>
 
+The K-Means algorithm belongs to the set of [[#Expectation-Maximization (EM) Algorithms]], seen below.
 ### Expectation-Maximization (EM) Algorithms
-
-K-Means belongs to the EM algorithm class. EM algorithms are made up of two main steps:
-
+EM algorithms are made up of two main steps:
 - **Expectation step**: expected value of likelihood function is calculated, conditioned by input dataset and parameters computed in previous cycle
 - **Maximization step**: current cycle’s parameters set is the one that maximizes the expectation computed in the previous step
 
 It aims at maximizing likelihood function by iteratively re-computing parameters set using expectation, until parameters converge. Only for initial cycle, parameters are randomly generated.
 
-Likelihood function is not convex, then this algorithm is not guaranteed to converge to a global maximum: several random restarts are required.
+Since likelihood function is not convex, then this algorithm is not guaranteed to converge to a global maximum: several random restarts are required.
+### K-Means algorithm
+Suppose a $n$-dimensional dataset with $m$ samples and $K$ given
+1. randomly initialize $K$ centroids $\mu_1,…,\mu_K \in\mathbb R^n$ by setting them equal to random samples (possible iff $K < m$)
+2. \[Expectation step\]
+	for $i=1$ to $m$
+	    find the nearest centroid to $x^{(i)}$ with $c^{i}=\arg\min_l||x^{(i)}-\mu_l||^2$
+3. \[Maximization step\]
+	for $k=1$ to $K$
+		compute new centroid as $\mu_k=\frac{1}{|C_k|}\sum_{x^{(i)}\in C_k}x^{(i)}=\frac{1}{|C_k|}\sum_{i=1}^ma_{ik}x^{(i)}$
+4. goto step 2. until convergence
+5. compute current $J$ (see below)
+6. goto step 1. multiple times until computed $J$ satisfies requirements (see below)
 
-### **K-Means algorithm**
+*$a_{ik}=\begin{cases}1 \text{ if }c^{i}=k\\0 \text{ otherwise }\end{cases}$
 
-Suppose a $n$-dimensional dataset
-
-1. randomly initialize $K$ centroids $\mu_1,…,\mu_K \in\mathbb R^n$ by setting them equal to $K$ random samples (possible iff $k < m$)
-2. [Expectation step]
-for $i=1$ to $m$
-     find the nearest centroid to $x^{(i)}$ with $c^{i}=\argmin_l||x^{(i)}-\mu_l||$*
-3. [Maximization step]
-for $k=1$ to $K$
-     compute new centroid as $\mu_k=\frac{1}{|C_k|}\sum_{x^{(i)}\in C_k}x^{(i)}
-=\frac{1}{|C_k|}\sum_{i=1}^ma_{ik}x^{(i)}$
-4. goto 2. until convergence
-
-* $a_{ik}=
-\begin{cases}
-1 \text{ if }c^{i}=k\\
-0 \text{ otherwise }
-\end{cases}$
-
-As written in [Expectation-Maximization (EM) Algorithms](https://www.notion.so/Machine-Learning-Notes-fd12021b7a554122bce07e4233196a54?pvs=21), K-Means is subject to local minima problem. In order to solve it, a (non-convex as well) **distortion function** $J$ is defined which represent somewhat the cost of the model and it has to be minimized.
-
+As one may expect from a [[#Expectation-Maximization (EM) Algorithms]], K-Means is subject to local minima problem. In order to solve it, a (non-convex as well) **distortion function** $J$ is defined which represent somewhat the cost of the model and it has to be minimized.
 $$
 J(c^1,...,c^m, \mu_1,...,\mu_K)=\frac 1m\sum_{i=1}^m||x^{(i)}-\mu_{c^i}||^2
+\tag{4}
 $$
-
-So, the final idea is to run K-Means several times and keep track of n-th $J$. Finally, choose the clustering whose $J$ is lower among the others.
-
+So, the final idea is to run K-Means several times and keep track of $n$-th $J$. Finally, choose the clustering whose $J$ is lower among the others.
 ### Pros and Cons
-
 **Pros**
-
 - simple and efficient
-
+- always terminates
 **Cons**
-
 - optimal clustering not guaranteed
-- k must be specified
+- number of centroids $K$ must be specified
 - sensible to noise and outliers
 - fails on non-linearly separable datasets
-- cannot detect overlapping clusters (hard clustering)
-
-## K-Medoids (or PAM)
-
-The idea for **K-Medoids** (aka Partitioning Around Medoids) is really similar to the K-Means one, but ($K$) clusters have now their respective medoid (instead of centroids): they are points overlapping $K$ (of $m$) samples.
-
+- **hard clustering**: cannot detect overlapping clusters
+## K-Medoids
+The idea for **K-Medoids** (aka **Partitioning Around Medoids** or **PAM**) is really similar to the K-Means one, but ($K$) clusters have now their respective **medoid** (instead of centroids): <u>they are not artificial points, but picked from samples</u>.
+### K-Medoids algorithm
+Suppose a $n$-dimensional dataset with $m$ samples and $K$ given
+1. \[Init phase\]
+   randomly initialize $K$ medoids $\mu_1,…,\mu_K \in\mathbb R^n$ by setting them equal to random samples picked from dataset 
+   (possible iff $K < m$)
+2. Define the set of medoids $M$
+   $M=\bigcup_{k=1}^K \mu_k$
+3. for $i=1$ to $m$
+	    find the nearest centroid to $x^{(i)}$ with $c^{i}=\arg\min_l||x^{(i)}-\mu_l||^2$
+4. \[Loop phase\]
+   for $k=1$ to $K$
+	    foreach $x^{(i)} \in X-M$ (foreach data sample except medoids)
+		    4.1. swap $x^{(i)}$ with $\mu$
+			4.2. repeat steps 2. and 3. to compute new medoids
+			4.3. compute new cost $J$ as seen in $(4)$
+			4.4. if cost IS NOT lower, then undo step 4.1.
+			4.5. goto 4.1.
 ### Pros and Cons
-
 **Pros**
-
 - a bit less sensitive to outliers than K-Means
-
 **Cons**
-
 - optimal clustering not guaranteed
-- k must be specified
+- $K$ must be specified
 - sensible to noise and outliers (still)
 - fails on non-linearly separable datasets
 - less efficient than K-Means
-- cannot detect overlapping clusters (hard clustering)
-
+- hard clustering: cannot detect overlapping clusters
 ## Gaussian Mixture Models (GMM)
-
-A Gaussian Mixture Model is a probabilistic model that assumes all the $n$-dimensional data points are generated from a mixture of a finite number of gaussian distributions.
+A Gaussian Mixture Model is a probabilistic model that assumes all the $n$-dimensional data points are generated from a mixture of a finite number of $K$ gaussian distributions.
 
 Each dataset dimension can be represented with a **gaussian mixture**: a probability density function represented as a weighted linear combination of $K$ Gaussian component densities.
-
 ![Untitled](assets/Untitled%2077.png)
+*This is a single dimension of a multi-variate dataset modeled, with a mixture of 2 gaussians.*
 
-GMM is an example of **soft clustering**: a sample can belong to multiple clusters, with different confidence. **Hard clustering** algorithms, such as K-Means and K-Medoids, does not allow it: a sample belongs to just one cluster.
+Multivariate gaussian probabilities are defined as:
+$$
+p(x, \mu, \Sigma)=\frac{e^{\displaystyle ( -\tfrac12(x-\mu)^T\Sigma^{-1}(x-\mu) )}}{\sqrt{ (2\pi)^n |\Sigma| }}
+$$
+where:
+* $x \in \mathbb R^n$
+* $\mu \in \mathbb R^n$ mean values matrix
+* $\Sigma \in \mathbb R^{n \times n}$ covariance matrix
 
-In general, datasets are multivariate ($n>1$-dimensional), then a multivariate gaussian mixture is used. The probability of a $n$-dimensional sample in a mixture is given by the sum of the $K$ **marginal probabilities** in each $n$-dimensional gaussian.
+> [!warning]
+> If $m \le n$ (number of samples is less than the number of dimensions), then $\Sigma$ is not invertible
 
+![[Screenshot 2026-01-04 alle 17.00.55.png]]
+![[Screenshot 2026-01-04 alle 17.00.34.png]]
+*Some examples of multivariate gaussian distributions.*
+
+GMM is an example of **soft clustering**: <u>a sample can belong to multiple clusters, with different confidence.</u> Hard clustering algorithms, such as K-Means and K-Medoids, do not allow it.
+
+In general, datasets are multivariate ($n>1$-dimensional), then a multivariate gaussian mixture is used. The probability of a $n$-dimensional sample in a mixture is given by the sum of the $K$ **marginal probabilities** for each $n$-dimensional gaussian.
+
+Each gaussian is a **component** of the mixture.
 $$
 \begin{align*}
 p(x)
@@ -2104,324 +2124,311 @@ p(x)
 &=\sum_{j=1}^K \pi_j\frac{e^{-\frac12(x-\mu)^T\Sigma^{-1}(x-\mu)}}{\sqrt{(2\pi)^K|\Sigma|}} \\
 \end{align*}
 $$
-
-![Untitled](assets/Untitled%2078.png)
-
 where:
-
 - $x\in\mathbb R^n$ is the dataset sample
-- $\mu\in\mathbb R^n$
-- $\Sigma\in\mathbb R^{n \times n}$
-- $z$
-- $\pi_j$ is called **mixing coefficient** and it behaves as a weight for $j$-th gaussian in the mixture and respects the condition $\sum_j\pi_j=1$
-- $\theta_j=[\mu_j,\Sigma_j]^T$
-- $p(z=j)=\pi_j$ is the probability of the $j$-th gaussian wrt the others in the mixture
-- $p(x|z=j)=p_j(x)$ is the pdf of the $j$-th gaussian
+- $\mu\in\mathbb R^n$ mean values matrix
+- $\Sigma\in\mathbb R^{n \times n}$ covariance matrix
+- $z$ #TODO 
+- $p(z=j)=\pi_j$ is called **mixing coefficient** and it behaves as a weight for $j$-th gaussian in the mixture
+  all the weights respect the condition $\sum_j\pi_j=1$
+  **Example**: if a component has a weight of $0.1234$, around $12.34 \%$ of the data belongs to that component.
+- $\theta_j=[\mu_j,\Sigma_j]^T$ is just the set of parameters to be tuned (with $\pi_j$)
+- $p(x|z=j)=p_j(x)=p_j(x;\theta_j)=\mathcal N(x^{(i)}|\mu_j,\Sigma_j)$ is the pdf of the $j$-th gaussian
 
-### **GMM algorithm**
+> [!info]
+> Even if the total number of gaussians is indicated with $K$, their index is indicated with $j$, as seen on the slides of the course.
+> Counterintuitive? Yep.
 
-The GMM is an follows the EM algorithm framework and it aims at finding all $\mu$s and $\Sigma$s of all $K$ $n$-dimensional gaussians.
+![Untitled|400](assets/Untitled%2078.png)
+*How two gaussians are used to model a univariate dataset (o a dimension of a multivariate one).*
 
+Before digging into the algorithm used, let’s see how the matrices of medium values and covariance are defined in the multivariate case:
+$$
+\begin{align}
+& \hat \mu_j = \frac 1{|C|} \sum_{\ \mathbf x^{(i)} \in C_j}\mathbf x^{(i)} \\
+& \hat \Sigma_j = \frac 1{|C_j|-1} \sum_{\mathbf{x^{(i)}}\in C_j}(\mathbf x^{(i)}-\mathbf{\hat \mu_j})^T(\mathbf x^{(i)}-\mathbf{\hat \mu_j})
+\end{align}
+$$
+### GMM algorithm
+The GMM algorithm follows the EM framework and it aims at finding all $\mu$’s and $\Sigma$’s of all $K$ $n$-dimensional gaussians.
 1. randomly initialize parameters $[\mu_j, \Sigma_j, \pi_j]$ for all $K$ gaussians
-2. [Expectation step]
-for $i=1…m$
-    for $j=1…K$
-calculate **responsibility** $r_{ij}$ which quantifies how much the $i$-th point is related to the $j$-th gaussian wrt the entire mixture.
-    
-    $$
+2. \[ Expectation step \]
+	for $i=1…m$
+	    for $j=1…K$
+			calculate **responsibility coefficient** $r_{ij}$: quantifies how much the $i$-th point is related to the $j$-th gaussian wrt the entire mixture. $$
     r_{ij}:=p(z=j|x^{(i)}, \theta^{t-1})
     =\cfrac{\pi_j p_j(x^{(i)}|\theta_j^{(t-1)})}{\sum_{j=1}^k\pi_j p_j(x^{(i)}|\theta_j^{(t-1)})}
     $$
-    
-3. [Maximization step]
-Recompute parameters in order to maximize likelihood
-for $j=1…K$
-    
-    $$
-    \pi_j=\frac1m\sum_{i=1}^mr_{ij} \\
-    \mu_j=\cfrac{\sum_{i=1}^mr_{ij}x^{(i)}}{\sum_{i=1}^m r_{ij}} \\
-    \Sigma_j=\frac{\sum_{i=1}^mr_{ij}(x^{(i)}-\mu_j)^T(x^{(i)}-\mu_j)}{\sum_{i=1}^mr_{ij}}
-    $$
-    
-4. goto 2. until convergence
-
+3. \[ Maximization step \]
+	Recompute parameters as function of the responsibility coefficient, in order to maximize likelihood
+	for $j=1…K$ $$
+\begin{align}
+& \pi_j=\frac1m\sum_{i=1}^mr_{ij} \\
+& \mu_j=\cfrac{\sum_{i=1}^mr_{ij}x^{(i)}}{\sum_{i=1}^m r_{ij}} \\
+& \Sigma_j=\frac{\sum_{i=1}^mr_{ij}(x^{(i)}-\mu_j)^T(x^{(i)}-\mu_j)}{\sum_{i=1}^mr_{ij}}
+\end{align}
+$$
+4. goto step 2. until convergence
 ### Pros and Cons
-
 **Pros**
-
 - can detect overlapping clusters (soft clustering)
 - less sensitive to outliers
-
 **Cons**
-
 - can diverge if there few points wrt the overall mixture
-
-## KL-Divergence
-
-**Kullback-Leibler** (**KL**) **Divergence** (or **relative entropy**) is a method used to measure the difference between two probability distributions (better, between a “true” distribution $P(i)$ wrt the expected one $Q(i)$, representing a ML model).
-
-$$
-D_{KL}(P || Q) = \sum_{i=1}^m P(i) \log\bigg(\frac{P(i)}{Q(i)}\bigg)
-$$
-
-- It is purposely **non-symmetric**: $D_{KL}(P || Q) \ne D_{KL}(Q||P)$.
-- It is always non-negative, and it is equal to zero only when P and Q are the same distribution.
-- Deep dive: why $P(i) \log\bigg(\frac{P(i)}{Q(i)}\bigg)$?
-
+- all the flexibility of the model is always used, even when not needed
 ## Choosing value of K
-
 ### Elbow method
-
 The elbow method is a heuristic used in determining the number of clusters in a data set.
 
 The idea consists of plotting the explained variation* as a function of the number of clusters and picking the elbow of the curve as the number of clusters to use. 
 
-* multiple heuristic can be used. The one in the figure is calculated by summing up all the distances for each sample from centroid (or medoid) of respective cluster. In fact, for $K=m$, $0$ will be given.
-
-![Untitled](assets/Untitled%2079.png)
-
-<aside>
-💡 The same method can be used to choose the number of parameters in other data-driven models, such as the number of principal components to describe a data set.
-
-</aside>
-
+\*multiple heuristic can be used. The one in the figure below is calculated by summing up all the distances for each sample from centroid (or medoid) of respective cluster. In fact, for $K=m$, $0$ will be given.
+![Untitled|400](assets/Untitled%2079.png)
+> [!tip]
+> The same method can be used to choose the number of parameters in other data-driven models, such as the number of principal components to describe a data set.
 ### Fixed K
-
 Sometimes K can be an authentic external constraint (e.g. t-shirt sizing).
+![Untitled|500](assets/Untitled%2080.png)
+### Information criterion approach
+#TODO 
+### Silhouette Coefficient
+#TODO 
+## KL-Divergence
+**Kullback-Leibler** (**KL**) **Divergence** (or **relative entropy**) is a method used to measure the difference between two probability distributions (better, between a “true” distribution $P(i)$ wrt the expected one $Q(i)$, representing a ML model).
+$$
+D_{KL}(P || Q) = \sum_{i=1}^m P(i) \log\bigg(\frac{P(i)}{Q(i)}\bigg)
+$$
+- It is **non-symmetric**: $D_{KL}(P || Q) \ne D_{KL}(Q||P)$.
+- It is always non-negative, and it is equal to zero only when P and Q are the same distribution.
 
-![Untitled](assets/Untitled%2080.png)
-
+<font color="#00b050">Deep dive:</font> why $P(i) \log\bigg(\frac{P(i)}{Q(i)}\bigg)$?
+#TODO 
 ## Hierarchical Clustering
-
-The idea is to group similar objects into clusters, then group similar clusters into a single one and so on, starting from a cluster for each point to end up with a single cluster (which groups all objects).
+Hierarchical clustering involves building a hierarchy of (potentially overlapping) clusters. The approach can be:
+* **Agglomerative** (bottom-up, from samples to clusters)
+  The idea is to group similar objects into clusters, then group similar clusters into a single one and so on, starting from a cluster for each point to end up with a single cluster (which groups all objects).
+* **Divisive** (top-down, from a huge single cluster to samples). Generally not used.
 
 This process can be represented with a **dendogram** (see figure below).
-
-An immediate application of hierarchical clustering is by **cutting** (red line) the dendogram with a line and picking up clusters left below.
-
 ![Untitled](assets/Untitled%2081.png)
+An immediate application of hierarchical clustering is by **cutting** the dendogram with a line - the red one in the image - and picking up clusters left below.
+![Untitled|400](assets/Untitled%2082.png)
 
-![Untitled](assets/Untitled%2082.png)
+> [!tip]
+> In general, hierarchical algorithms are more heavy to run, but the produce more useful outputs.
 
-In general, hierarchical algorithms are more heavy to run, but the produce more useful outputs.
-
-Other non-hierarchical clustering algorithms belongs to **flat** (or **partitional**) **clustering** techniques, which aims at partition dataset into disjoint sets.
-
-Merging/splitting two clusters is decided with two metrics:
-
-- **similarity measure/metric** which tells how to calculate distance
+Merging or splitting two clusters depends by two components:
+- **similarity measure/metric** which tells how to calculate distance between two points
     - Euclidian distance
     - Mahalanobis distance
     - Manhattan distance
     - …
-- **linkage criterion** which tells how to determine from where distance is computed, after a distance metric has been selected
+- **linkage criterion** which tells how to calculate distance between clusters
     - **distance based**
-        - max distance
-        - min distance
-        - avg distance
+        - Complete linkage: uses distance between the <u>furthest</u> points between two clusters
+        - [[#Single Linkage criterion]]:  uses distance between the <u>closest</u> points between two clusters
+        - Average linkage: uses distance between the points in the <u>middle</u> of two clusters
     - **probability based**
-    - …
+    - graph-degree based: uses the product of the in-and-out degree of a note
+    - instance-based constraints (see [Wagstaff 2000](https://www.cs.cornell.edu/home/cardie/papers/icml-2000.pdf))
 
-Some hierarchical clustering algorithms are:
-
-- Complete linkage (euclidian distance + max distance)
-- Single linkage (euclidian distance + min distance)
-- Average linkage (euclidian distance + avg distance)
-- Ward’s criterion
-
+> [!tip]
+> Other non-hierarchical clustering algorithms belongs to **flat** (or **partitional**) **clustering** techniques, which aims at partition dataset into disjoint sets.
 ### Single Linkage criterion
-
 Similarity metric: Euclidian distance
 Linkage criterion: min distance (distance between closest object of two clusters)
 
+Algorithm:
 1. start with $m$ clusters (one per sample)
 2. merge two closest clusters in a single cluster
-3. goto 2. until one cluster made up all samples is left
-
+3. goto step 2. until one cluster - made up by all samples - is left
 ### Ward’s criterion
-
 High-level algorithm is really similar to the single linkage criterion one except for, of course, the way clusters are merged.
 
 This criterion has a more probabilistic approach: it aims to minimize the total within-cluster variance. In other words, it merges the pair of clusters that results in the smallest increase in total within-cluster variance after merging.
 
+---
+#Recap 
 ![Untitled](assets/Untitled%2083.png)
-
 ## DBSCAN
+> [!info]
+> - https://www.youtube.com/watch?v=RDZUdRSDOok
 
-It stands for **Density Based Spatial Clustering of Applications with Noise** (**DBSCAN**). The idea is to identify as cluster(s) region(s) characterized by high density agglomerations of data from low density areas.
+It stands for **Density Based Spatial Clustering of Applications with Noise** (**DBSCAN**) and it’s another approach to clustering, completely different from [[#Hierarchical Clustering]]. <u>The idea is to identify as cluster(s) region(s) characterized by high density agglomerations of data from low density areas.</u>
 
-**Density** is defined using the number of points within specified radius ($\varepsilon$).
+**Density** is defined using the <u>number of points within specified radius</u> ($\varepsilon$).
 A point’s **$\varepsilon$-neighborhood** are the samples within a radius of $\varepsilon$ from that point.
 A sample is a **core point** when there are $≥ minPts$ samples within its **$\varepsilon$-neighborhood**.
 A sample is a **border point** when there are $< minPts$ samples within its **$\varepsilon$-neighborhood** and it’s in a core point’s **$\varepsilon$-neighborhood**.
 Otherwise, a sample is a **noise point**.
-
+![[arv3b3Um_Opu_zOECGwt6w.png|600]]
 Two core points within each other’s $\varepsilon$-neighborhood will be in the same cluster.
 Any border point being within a core point’s $\varepsilon$-neighborhood will be in the core point’s cluster.
 Noise points do not belong to any cluster.
 
 The object $q$ is **directly density-reachable** from object $p$ $\iff$$q$ is within $p$’s $\varepsilon$-neighborhood and $p$ is a core point.
-The object $q$ is **density-connected** to object $q$ $\iff$$\exists$ an object $r$ s.t. both $p$ and $q$ are directly density-reachable from $r$ (both $p$ and $q$ belong to - at least - $minPts$ set of points within $r$’s $\varepsilon$-neighborhood).
-
+![[Screenshot 2026-01-04 alle 19.45.22.png|400]]
+The object $q$ is **density-connected** to object $p$ $\iff$$\exists$ an object $r$ s.t. both $p$ and $q$ are directly density-reachable from $r$ (both $p$ and $q$ belong to - at least - $minPts$ set of points within $r$’s $\varepsilon$-neighborhood).
+![[Screenshot 2026-01-04 alle 19.45.41.png|400]]
 ![Screenshot 2024-02-21 alle 21.09.24.png](assets/Screenshot_2024-02-21_alle_21.09.24.png)
 
 In total, there are two parameters to set:
-
 - $minPts$: there are some empirical rules such as
     - $minPts \ge n+1$
-    - $minPts=
-    \begin{cases}
-    2 \cdot n & \text{if } n\ge2 \\
-    4 & \text{otherwise }
-    \end{cases}$
+    - $minPts=\begin{cases}2 \cdot n & \text{if } n\ge2 \\4 & \text{otherwise }\end{cases}$
     - …
 - $\varepsilon$: it is generally chosen by using a k-distance graph where $k=minPts$
-
 ### DBSCAN Algorithm
-
-1. [find all core points]
-for $x^{(i)}\in X$
-    if |set of objects directly density-reachable from $x^{(i)}$| ≥ $minPts$ $\Rightarrow$ $x^{(i)}$ is a core point
-2. [define clusters]
-for $x^{(i)} \in corePoints$
-    retrieve all connected points and merge clusters found
-3. [process remaining border/noise points (= dataset - corePoints)]
-for $x^{(i)} \in X \setminus corePoints$
-    if $x^{(i)}$ is in the $\varepsilon$-neighborhood of a core point
-        $x^{(i)}$ joins the core point’s cluster
-    else
-        $x^{(i)}$ becomes a noise point
-
+1. \[ find all core points \]
+	for $x^{(i)}\in X$
+	    if |set of objects directly density-reachable from $x^{(i)}$| ≥ $minPts$ $\Rightarrow$ $x^{(i)}$ is a core point
+2. \[ define clusters \]
+	for $x^{(i)} \in corePoints$
+	    retrieve all connected core points and merge those clusters found
+	    (because they belong to the same cluster)
+3. \[ process remaining border/noise points (= dataset - corePoints) \]
+	for $x^{(i)} \in X \setminus corePoints$
+	    if $x^{(i)}$ is in the $\varepsilon$-neighborhood of a core point
+	        $x^{(i)}$ joins the core point’s cluster
+	    else
+	        $x^{(i)}$ becomes a noise point
 ### Pros and Cons
-
 **Pros**
-
 - $k$ does not required to be specified
 - cluster shape can be various
 - robust: there is notion of noise
 - minPts and $\varepsilon$ can be set by a domain expert
-
 **Cons**
-
 - not entirely deterministic: in step 3 of the algorithm, border points may be in the $\varepsilon$-neighborhood of many core points, but they are assigned to the cluster of the first core point’s found
 - cannot cluster data belonging to clusters with different densities
-
 ### Complexity
-
 - Time complexity: $O(n^2)$
 - Space complexity: $O(n)$
-
-It can be shown that DBSCAN is equivalent to cutting the dendogram obtained with a Robust Single Linkage Algorithm, at height $\varepsilon$.
-
 ## HDBSCAN
+> [!info]
+> - https://youtu.be/dGsxd67IFiU
 
-It stands for **Hierarchical Density Based Spatial Clustering of Applications with Noise** (**HDBSCAN**). The idea is to be able to derive a dendogram of clusters (a clusters hierarchy) by aggregating higher density areas.
+It can be shown that DBSCAN is equivalent to cutting the dendogram obtained with a Robust Single Linkage Algorithm, at height $\varepsilon$. That is why is considered as a *flat extraction method* (see the table at [[#10. Clustering]]).
 
-The density concept is different from the DBSCAN one.
-
-### HDBSCAN Algorithm
-
-1. **Transform the space according to density**
-
-The **core distance** $core_k(x)$ is the distance from $x$ to the $k$-th nearest neighbor. The core distance is smaller [bigger] for points in denser [sparser] regions. The core distance gives the new (and easy to calculate) interpretation of density.
+HDBSCAN stands for **Hierarchical Density Based Spatial Clustering of Applications with Noise** (**HDBSCAN**) and the idea is to be able to derive a dendogram of clusters (a clusters hierarchy) by aggregating higher density areas.
+In other words, the hierachical approach allow the dendogram to be cut at *different heights*, not just by a single one.
+### Mutual reachability distance
+The density concept is different from the DBSCAN one, so a new - and still efficient - approach to compute distance must be defined.
 
 The **mutual reachability distance** is defined:
-
 $$
-d_{mreach,k}=
+d_{mreach,k}(a,b)=
 \max\{core_k(a),core_k(b), d(a,b)\}
 $$
-
 where:
-
+- $core_k(x)$ is the **core distance**: distance from $x$ to the $k$-th nearest neighbor.
+  The core distance is smaller \[bigger\] for points in denser \[sparser\] regions.
+  **Example**: if $k=4$, $core_4(x)$ is the distance between $x$ and its $4$-th nearest neighbor, or the distance needed to have a neighborhood of at least $4$ points.
 - $d(a,b)$ is the euclidian distance from $a$ to $b$
+- $d(a,b)=0$ if $a \equiv b$, of course
+
+> [!tip]
+> It can be proved that triangle inequality is satisfied.
 
 If a and b are far from each other, then they are “pushed away” by their $d_{mreach,k}(a,b)$, in order to enhance the fact that they are not in a dense region.
 
-DBSCAN
-
-HDBSCAN
-
 ![Untitled](assets/Untitled%2084.png)
+*DBSCAN vs HDBSCAN*
 
-1. **Build the minimum spanning tree**
+**Example: distance between green and blue**
+![[distance4a.svg|500]]
+Here the mutual reachability distance between green and blue is equal to the core distance of green.
+**Example: distance between green and red**
+![[distance5.svg|500]]
+Here the mutual reachability distance between green and red is equal to the - euclidian - distance the two.
+### HDBSCAN Algorithm
+> [!info]
+> - https://hdbscan.readthedocs.io/en/latest/how_hdbscan_works.html
 
-Once each $d_{mreach,k}(a,b)$ has been defined for all couples $(a,b)$, the minimum spanning tree can be built, by using a proper algorithm (Prim’s, Kruskal’s, Borůvka’s).
+> [!tip] Sea and land
+> The official documentation of the HDBSCAN algorithm implementation often uses the terms:
+> - **sea**: noise points - in low density areas - that we want to separate as much as possible from more valuable ones
+> - **land**: points in - relatively - high density areas that we want to make them emerge from the sea
 
-![Untitled](assets/Untitled%2085.png)
+1. \[ Transform the space according to **density** \]
+   foreach $x^{(i)} \in X$
+		compute the distance between $x^{(i)}$ and its $k$-th closest neighbor $d_{mreach,k}(x^{(i)})$
+		(see [[#Mutual reachability distance]])
+2. \[ Build the **minimum spanning tree** \]
+   The idea is to build a <u>wighted graph where with data points as vertices and an edge between any two points with weight equal to the mutual reachability distance of those points.</u>
+   We can build the minimum spanning tree very efficiently via Prim’s algorithm: we build the tree one edge at a time, always adding the lowest weight edge that connects the current tree to a vertex not yet in the tree. (Prim’s)   
+	   Algorithms available are:
+		- Prim’s algorithm
+		- Kruskal’s algorithm
+		- Borůvka’s algorithm
+	![Untitled|500](assets/Untitled%2085.png)
+3. \[ Build the **cluster hierarchy** \]
+   Now the minimum spanning tree must be converted into a hierarchy of connected components.
+   This is most easily done in the reverse order: <u>sort the edges of the tree by distance (in increasing order) and then iterate through, creating a new merged cluster for each edge</u> (see image below).
+   ![Untitled](assets/Untitled%2086.png)
+4. \[ Condense the cluster tree \]
+   The overall output of the algorithm must be flat, so let’s start from making the dendogram simpler.
+   Pick a new parameter $minClusterSize$ to prune clusters which cardinality is lower.
+   ![Untitled|600](assets/Untitled%2087.png)
+   *In the image above, minClusterSize=5. See how all the regions end up in the same color, around value 5.*
+   What DBSCAN would do is cutting the dendogram with one single line and all clusters identified would have same density.
+   ---
+   What HDBSCAN does is actually more sophisticated: it cuts the dendogram in “different places”, trying to identify several clusters with different densities.
+   
+   🚫 One cut…
+   ![Untitled|500](assets/Untitled%2088.png)
+   ![Untitled|400](assets/Untitled%2089.png)
+   ✅ …vs Different cuts
+   ![[Pasted image 20260105181020.png|400]]
+5. \[ Flat the clusters \]
+   We still have an hierarchical representation of clusters, even if more selective.
+   A final selection of clusters must be done, recalling that if a cluster is selected, then all the descendant cannot be selected, because are included in the selected one. <u>The idea is to select the most persistent clusters.</u>
+   
+   Persistence must be defined: $$\lambda=\frac{1}{distance}$$
+   In order to perform what images above are showing, a **stability-based cluster validation method** is needed. In other words, what we want to “select the clusters in the plot with the largest total ink area” of the simplified dendogram.
+   
+   Looking back at the simplified dendogram, several quantities can be defined:
+   $\lambda_{birth,k}$: $\lambda$ value where k-th cluster is created
+   $\lambda_{death,k}$: $\lambda$ value where k-th cluster is splitted into two more clusters or, if at the end of dendogram, ends
+   $\lambda_p$: $\lambda$ value where sample $p$ falls out of its cluster
+   
+   Now, **stability** can defined for each cluster: $$stability_k=\sum_{p \in cluster_k}(\lambda_p-\lambda_{birth})$$
+   5.1. Scan the dendogram bottom-up and suppose all leaf nodes are clusters, then apply the following procedure in order to find all stable clusters. When a cluster is defined as stable, its descendants are unselected as clusters.
+   #TODO sistemare algoritmo stabilità
+   5.2 for each couple of clusters (C2, C3) and respective parent C1, 
+	    if $stability(C2) + stability(C3) > stability(C1)$
+	        $C1$ is not stable
+	        $stability(C1) = stability(C2) + stability(C3)$
+	    else
+	        $C1$ is stable
+	![[how_hdbscan_works_18_1.webp|600]]
 
-1. **Build the cluster hierarchy (dendogram)**
-
-In this step, a dendogram based on mutual reachability distances is built.
-
-![Untitled](assets/Untitled%2086.png)
-
-1. **Condense the cluster tree**
-
-Now let’s make the dendogram simpler, by picking a new parameter $minClusterSize$ in order to prune clusters which caridinality is lower.
-
-![Untitled](assets/Untitled%2087.png)
-
-where:
-
-- **persistence** $\lambda=\frac{1}{distance}$
-
-What DBSCAN would do is cutting the dendogram with one single line and all clusters identified would have same density.
-What HDBSCAN does is actually more sophisticated: it cuts the dendogram in “different places”, trying to identify several clusters with different densities.
-
-One cut
-
-![Untitled](assets/Untitled%2088.png)
-
-![Untitled](assets/Untitled%2089.png)
-
-Different cuts
-
-![Untitled](assets/Untitled%2090.png)
-
-1. **Flat the clusters**
-
-What it is really needed is an output which is a flat clustering, not a hierarchical one.
-
-In order to perform what images above are showing, a **stability-based cluster validation method** is needed. In other words, what we want to “select the clusters in the plot with the largest total ink area” of the simplified dendogram.
-
-Looking back at the simplified dendogram, several quantities can be defined:
-
-- $\lambda_{birth,k}$: $\lambda$ value where k-th cluster is created
-- $\lambda_{death,k}$: $\lambda$ value where k-th cluster is splitted into two more clusters or, if at the end of dendogram, ends
-- $\lambda_p$: $\lambda$ value where sample $p$ splits out of the cluster
-
-Now, **stability** can defined for each cluster:
-
-$$
-stability_k=\sum_{p \in cluster_k}
-(\lambda_p-\lambda_{birth})
-$$
-
-Dendogram is scanned bottom-up and suppose all leaf nodes are clusters, then apply the following procedure in order to find all stable clusters. When a cluster is defined as stable, its descendants are unselected as clusters.
-
-for each couple of clusters (C2, C3) and respective parent C1, 
-
-    if stability(C2) + stability(C3) > stability(C1)
-        C1 is not stable
-        stability(C1) = stability(C2) + stability(C3)
-    else
-        C1 is stable
-
+Then, the final outcome:
+![[how_hdbscan_works_20_1.webp|500]]
 ### Pros and Cons
-
 **Pros**
-
 - can handle varying densities (main pro)
 - robust to outliers
 - notion of noise (like DBSCAN)
-
 **Cons**
-
 - still some parameters must be set by hand
+### Complexity
+- Time complexity: $O(n^2)$
+- Space complexity: $O(n^2)$
 
+> [!info] [Accelerated HDBSCAN](https://arxiv.org/pdf/1705.07321)
+> 
+
+> [!tip]
+> **Partitioning vs Clustering**
+> Partitioning approaches do not allow noise points, so [[#K-Means]], [[#K-Medoids]], [[#Gaussian Mixture Models (GMM)]], [[#Ward’s criterion]].
+> Clustering approaches allow noise points, so [[#DBSCAN]], [[#HDBSCAN]].
+## Visual comparison
+> [!note]
+> - https://scikit-learn.org/stable/modules/clustering.html
+
+![[sphx_glr_plot_cluster_comparison_001.png]]
 # 11. Dimensionality Reduction
-
 ## Curse of Dimensionality
 
 Given what we saw so far, sometimes feature given are not enough to create a optimal classifier.
