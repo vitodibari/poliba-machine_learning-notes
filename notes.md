@@ -2169,6 +2169,9 @@ The GMM algorithm follows the EM framework and it aims at finding all $\mu$’s 
 \end{align}
 $$
 4. goto step 2. until convergence
+### Anomaly Detection
+#2025-2026
+#TODO 
 ### Pros and Cons
 **Pros**
 - can detect overlapping clusters (soft clustering)
@@ -2430,114 +2433,126 @@ Then, the final outcome:
 ![[sphx_glr_plot_cluster_comparison_001.png]]
 # 11. Dimensionality Reduction
 ## Curse of Dimensionality
-
 Given what we saw so far, sometimes feature given are not enough to create a optimal classifier.
-Some features may be derived from the ones given, but data becomes sparser exponentially, so classifier gets worse (see figure below). More data is needed, but retrieving (exponentially) more data is not always possible (rare actually).
+Some features may be derived from the ones given. 
+<u>However data becomes sparser exponentially as dimensionality increases, so classifier gets worse (see figure below).</u> More data is needed, but retrieving - exponentially - more data is very expensive or not always possible.
+![Untitled|400](assets/Untitled%2091.png)
+The **course of dimensionality** says that: the more features we use, the *sparser* the data becomes, and estimating accurately the classifier’s parameters becomes more difficult.
 
-![Untitled](assets/Untitled%2091.png)
+In order to solve the curse of dimensionality, **dimensionality reduction** algorithms are used. They are is the second main application of unsupervised learning approach.
+The idea is to map $\mathbb R^n$-dimensional data into $\mathbb R^m$-dimensional space where $m < n$, loosing the less amount of information possible.
 
-The **course of dimensionality** uses the “sparseness” concept: the more features we use, the sparser the data becomes, and estimating accurately the classifier’s parameters becomes more difficult.
+This process allow to - smartly - compress a dataset, in order to be more focused on the *real essence of data* - one dimension can be carry more information than another one - so to have smaller dataset, allowing a faster computation.
+![Untitled|500](assets/Untitled%2092.png)
 
-In order to solve the curse of dimensionality, **dimensionality reduction** algorithms are needed: it is the second main application of unsupervised learning approach.
-The idea is to map $\R^n$-dimensional data into $\R^m$-dimensional space where $m < n$, loosing the less amount of data possible.
-
-This process allow to (smartly) compress a dataset in order to be more focused on the “real essence of data” (one dimension can be carry more information than another one) so to have smaller dataset, allowing a faster computation.
-
-![Untitled](assets/Untitled%2092.png)
-
-Dimensionality reduction allows:
-
-- faster training
-- to avoid overfitting (too features → too complex models)
-- better data visualization
+Dimensionality reduction approaches allow:
+- <u>data compression</u> 
+  → avoid overfitting (too features → too complex models)
+  → faster training
+- <u>better data visualization</u>
+  → data can be compressed in 2D so graphs can be used for visualization
 - to solve **multicollinearity problem** (when one or more features are highly correlated)
 - to remove some noise
-- to transform non-linear data into a linearly-separable form (see [Kernel PCA](https://www.notion.so/Machine-Learning-Notes-fd12021b7a554122bce07e4233196a54?pvs=21))
-
+- to transform non-linear data into a linearly-separable form (see [[#Kernel PCA]])
 ## Principal Component Analysis (PCA)
-
 The idea behind PCA is to transform the correlated features in the dataset into a set of linearly independent (orthogonal) features. This allow to reduce the irrelevant features or dimensionality while enhancing relevant ones.
-
 ![Untitled](assets/Untitled%2093.png)
-
-The first principal component (PC1) always captures the most variation in the data and the second component captures the maximum variance that is orthogonal to the first component and so on for other components.
-
+<u>The first principal component (PC1) always captures the most variation in the data and the second component captures the maximum variance that is orthogonal to the first component and so on for other components.</u>
+Its also possibile to quantify how much of the total variance a PC is representing.
+### Singular Value Decomposition (SVD)
+#TODO estrai ed approfondisci da step 3. qui giù
 ### PCA Algorithm
+> [!info]
+> - https://youtu.be/vSczTbgc8Rc (SVD)
+> - https://youtu.be/FgakZw6K1QQ (PCA)
 
 1. **Standardization**
-
-PCA works under the assumption that data is normally distributed, then data must be standardized using [z-score normalization](https://www.notion.so/Machine-Learning-Notes-fd12021b7a554122bce07e4233196a54?pvs=21).
-
-1. **Compute covariance matrices**
-
-Calculation of all covariance matrix can be “parallelized”, using vectorial notation:
-
-$$
-\Sigma=\frac 1m\sum_{l=1}^m x^{(l)} \cdot x^{(l)^T} \in \R^{n \times n}
-$$
-
-For each couple of features $(i,j)$, covariance matrix component $\Sigma_{ij}$ is defined as follows:
-
-$$
-\begin{align*}
-\Sigma_{ij} &= Cov(x_i,x_j) \\
-&= E[(x_i-\mu_i)(x_j-\mu_j)] \\
-&= \frac 1m \sum_{l=1}^m (x_i-\mu_i)(x_j-\mu_j) \\
-&= E[(x_i)(x_j)]\in \R
-\end{align*}
-$$
-
-1. **Compute SVD**
-    
+   PCA works under the assumption that data is normally distributed, then data must be standardized using [[#Z-score normalization]].
+2. \[ **Compute covariance matrices** \]
+   Calculation of all covariance matrix can be parallelized, using vectorial notation:$$
+   \Sigma=\frac 1m\sum_{l=1}^m x^{(l)} \cdot x^{(l)^T} \in \mathbb R^{n \times n}$$For each couple of features $(i,j)$, covariance matrix component $\Sigma_{ij}$ is defined as follows: $$
+	\begin{align*}
+	\Sigma_{ij} &= Cov(x_i,x_j) \\
+	&= E[(x_i-\mu_i)(x_j-\mu_j)] \\
+	&= \frac 1m \sum_{l=1}^m (x_i-\mu_i)(x_j-\mu_j) \\
+	&= E[(x_i)(x_j)]\in \mathbb R
+	\end{align*}
+	$$
+	Again, let’s vectorize: $$\Sigma = \frac 1m \sum_{l=1}^m x^{(l)}\cdot x^{{(l)}^T}$$
+3. \[ **Compute SVD** \]
     Next step is to determine the Principal Components that fit the highest variance of the data, based on covariance matrix’s eigenvectors and eigenvalues.
     
-    In order to compute eigenvectors, **Singular Value Decomposition** (**SVD**) is used:
-    
-    $$
-    [U,S,V]=svd(A)
-    $$
-    
-    $svd$ takes a matrix $A\in\R^{m,n}$ as input and outputs a factorization s.t. $A=U \cdot S \cdot V^T$ where:
-    
-    - $U \in \R^{m \times m}$ **left eigenvectors**: orthogonal matrix with orthonormal eigenvectors chosen from $AA^T$
-    - $S \in \R^{m \times n}$ **singular values**: diagonal matrix where first $m$ diagonal components are $AA^T$’s squared eigenvalues, others are 0
-    - $V \in \R^{n \times n}$ **right eigenvectors**: orthogonal matrix with orthonormal eigenvectors chosen from $A^TA$
-    
-    ![Untitled](assets/Untitled%2094.png)
-    
-    $\Sigma$’s elements are ordered according (to their importance): $\sigma_1 \ge \sigma_2 \ge…\ge \sigma_m$. Each eigenvector has a respective eigenvalue, this means that eigenvectors associated to 
-    
-    In other words,
-    
-    Anyways, $svd$ is calculated over covariance matrix $\Sigma$ which is symmetric ($\Sigma=\Sigma^T$), then the process gets simpler:
-    
-    - $\Sigma\Sigma^T=\Sigma^T\Sigma=\Sigma^2$
-    - $U=V$
-    - $S \in \R^{m \times n}$ diagonal matrix where n diagonal components are $\Sigma$ eigenvalues
-    
-    $$
-    \Sigma=U \cdot S \cdot U^T
-    $$
-    
-    **Eigenvectors and Eigenvalues recap**
-    
-    Given $A \in \R^{n \times n}, X \ne0 \in \mathbb C^n, \lambda\in\R$ s.t.
-    
-    $$
-    AX=\lambda X
-    $$
-    
-    then, $\lambda$ is an **eigenvalue** for $A$ and $X$ is an **eigenvector** associated to $\lambda$ for $A$.
-    
-2. **Transform data in new space**
+    In order to compute eigenvectors, **Singular Value Decomposition** (**SVD**) is used: $$
+    svd(A)=[U,S,V]$$
+        $svd$ takes a matrix $A\in\mathbb R^{m,n}$ as input and outputs a factorization s.t. $A=U \cdot S \cdot V^T$ where:
+	    - $U \in \mathbb R^{m \times m}$ **left eigenvectors**: orthogonal matrix with orthonormal eigenvectors chosen from $AA^T$
+	    - $S \in \mathbb R^{m \times n}$ **singular values**: diagonal matrix where first $m$ diagonal components are $AA^T$’s squared eigenvalues, others are 0
+	    - $V \in \mathbb R^{n \times n}$ **right eigenvectors**: orthogonal matrix with orthonormal eigenvectors chosen from $A^TA$  
+	    ![Untitled](assets/Untitled%2094.png)
+	  $\Sigma$’s elements are ordered according to their importance: $\sigma_1 \ge \sigma_2 \ge…\ge \sigma_m$. Specifically, the <u>magnitude of each singular value are related to the variance captured by each principal component</u>.
+	  
+	  <u>Each eigenvector has a respective eigenvalue</u>: eigenvectors associated to larger singular values correspond to directions where the data is more spread out (higher variance), while eigenvectors associated to small singular values correspond to directions where the data varies little.
+      
+      In other words, SVD decomposes the linear transformation A into:
+	      • a rotation of the input space ($V^T$)
+	      • a scaling along orthogonal axes ($S$)
+	      • a rotation of the output space ($U$)
+      
+      Since $svd$ is calculated over covariance matrix $\Sigma$ which is symmetric ($\Sigma=\Sigma^T$), then the process gets simpler: $$
+      \begin{align}
+& svd(\Sigma)=[U,S,V]=[U,S,U] \\
+& \Sigma = U \cdot S \cdot U^T
+\end{align}$$
+	    - $\Sigma\Sigma^T=\Sigma^T\Sigma=\Sigma^2$
+	    - $U=V$
+	    - $S \in \mathbb R^{m \times n}$ diagonal matrix where n diagonal components are $\Sigma$ eigenvalues
+1. \[ **Select the number of dimensions to keep** \]
+   Now $k$ dimensions must be picked from $U$, s.t. $k \le n$. (see [[#Choose k]])![[Pasted image 20260106123138.png]]
+   A new, reduced, matrix is defined: $$U_{\text{reduced}}=U(:,1:k)$$
+2. \[ **Map data in new space** \] $$
+   \begin{align}
+& z^{(i)}=U_{\text{reduced}}^T \cdot x^{(i)} \\
+& Z=U^T_{\text{reduced}} \cdot X
+\end{align}
+   $$
+3. \[ **OPTIONAL: Approx. pap data back into original space** \] $$\begin{align}
+& x_{\text{approx}}^{(i)}=U_{\text{reduced}}^T \cdot z^{(i)} \\
+& X_{\text{approx}}=U^T_{\text{reduced}} \cdot Z
+\end{align}$$
+   
+> [!note] #Recall **Eigenvectors and Eigenvalues**
+> Given $A \in \mathbb R^{n \times n}, X \ne0 \in \mathbb C^n, \lambda\in\mathbb R$ s.t. $$     AX=\lambda X     $$ 	    then, $\lambda$ is an **eigenvalue** for $A$ and $X$ is an **eigenvector** associated to $\lambda$ for $A$
+### Choose k
+The usual approach to define $k$ is to pick the lowest $k$ that satisfies: 
+$$
+\frac{\tfrac 1m \sum_{i=1}^m ||x^{(i)}- x_{\text{approx}}^{(i)}||^2 }{\tfrac 1m \sum_{i=1}^m ||x^{(i)}||^2} \le 0.01
+\tag{5}
+$$
+where:
+* $\tfrac 1m \sum_{i=1}^m ||x^{(i)}- x_{\text{approx}}^{(i)}||^2$ is the **average squared projection error**
+* $\tfrac 1m \sum_{i=1}^m ||x^{(i)}||^2$  is the **total variation** of data
 
-<aside>
-💡 PCA is also used for data visualization: given an hyperdimensional dataset, it’s possible to visualize it in 2D by reducing its feature set to two.
+In other words, the $k$ to use is the lowest one s.t. the $99\%$ of variance is retained in the generated reduced space.
 
-</aside>
+It is found in a simple iterative fashion:
+1. $k=1$
+2. compute PCA and keep $k$ dimensions
+3. check condition in $(5)$
+   then stop
+   else $k=k+1$ and goto step 2. 
+### Pros and Cons
+**Pros**
+* can handle varying densities of data
+* stability
+* robust
+
+**Cons**
+* some parameters must be set by hand (in choosing $k$)
+## Kernel PCA
+
+This is the first example of non-linear dimensionality reduction.
 
 ## Independent Component Analysis (ICA)
-
 ICA algorithm is used in cases where there is some data $s \in \R^d$ (signals) generated by $d$ indipendent sources, but what it is observed is a mix $x$ of these signals:
 
 $$
@@ -2571,10 +2586,6 @@ In general, ICA works if number of observed mixtures ≥ original signals: mixin
 There are some special matrices called **permutation matrices** $P$ s.t., for a vector $z$, if I calculate $z'=P \cdot z$, 
 
 Example of permutation matrices
-
-## Kernel PCA
-
-This is the first example of non-linear dimensionality reduction.
 
 ## Embeddings
 
@@ -2649,7 +2660,6 @@ Another key idea is that **context** represents the meaning of a word. In other 
 **Word2Vec** is a method to construct such an embedding. It can be obtained using two methods (both involving Neural Networks):
 
 - **Common Bag Of Words** (**CBOW**): it takes the context of each word (a window of adjacent words containing the focused word) as input and tries to predict the “missing” word.
-    
     ![Untitled](assets/Untitled%20102.png)
     
     In the image above, context is made up by two words: cat __ on ⇒ cat sat on.
