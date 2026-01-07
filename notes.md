@@ -2637,117 +2637,142 @@ So, in the example above: $p_x(x)=(0.5)1\{0 \leq x \leq 2 \}$
 Finally, the algorithm:
 #TODO 
 ## Embeddings
+#TODO trova un titolo migliore
 > [!info]
 > - https://machinelearningmastery.com/what-are-word-embeddings/
 
 Given a word, several (numeric) vector representation could be derived. 
 
 It is not enough to represent words numerically, but the notion of **relatedness** between two embeddings must be encoded in some way. Moreover, this relatedness must be mathematically computable.
-
-- **document occurrence vectors**: identify documents in which the word occurs
-    
-    ![Untitled](assets/Untitled%2095.png)
-    
-    relatedness is calculated using **topic similarity**:
-    
-    ![Untitled](assets/Untitled%2096.png)
-    
-- **word context vectors**: identify neighboring word context with respect to the following two documents
-    
-    ![Untitled](assets/Untitled%2097.png)
-    
-    relatedness is calculated using **typical similarity**:
-    
-    ![Untitled](assets/Untitled%2098.png)
-    
-- **character trigram vectors**: identify trigrams in the word itself
-    
-    ![Untitled](assets/Untitled%2099.png)
-    
-    relatedness is calculated using **string edit-distance**:
-    
-    ![Untitled](assets/Untitled%20100.png)
+### Document occurrence vectors
+Identify documents in which the word occurs
+![Untitled!|500](assets/Untitled%2095.png)
+relatedness is calculated using **topic similarity**:
+![Untitled|300](assets/Untitled%2096.png)
+### Word context vectors
+Identify neighboring word context with respect to the following two documents
+![Untitled|500](assets/Untitled%2097.png)
+relatedness is calculated using **typical similarity**:
+![Untitled|400](assets/Untitled%2098.png)
+### Character trigram vectors
+Identify trigrams in the word itself    
+![Untitled|500](assets/Untitled%2099.png)
+relatedness is calculated using **string edit-distance**:
+![Untitled|400](assets/Untitled%20100.png)
     
 - and so on…
-
 All representations above are not that efficient in reality: they are very high-dimensional and sparse representations that would lead to really slow training processes. A way to reduce dimensionality is needed.
-
+### Embeddings
 An **embedding** is a dense and lower-dimensional vector representation for a word, which uses the same intuitions seen above.
 
 There are several ways to develop systems able to make use of embeddings:
 
-- **NNs**: NNs with bottlenecks that allows the embedding. In this case there are two approaches: words as input and context (embedding) as output or viceversa. (Ex: [Word2Vec](https://www.notion.so/Machine-Learning-Notes-fd12021b7a554122bce07e4233196a54?pvs=21))
-    
-    ![Screenshot 2024-04-03 alle 16.04.31.png](assets/Screenshot_2024-04-03_alle_16.04.31.png)
-    
+- **NNs**: NNs with bottlenecks that creates the embedding in the latent space. In this case there are two approaches: words as input and context (embedding) as output, or viceversa. (Ex: [[#Word2Vec]])
+    ![Screenshot 2024-04-03 alle 16.04.31.png|300](assets/Screenshot_2024-04-03_alle_16.04.31.png)
 - **Matrix factorization**: source x target matrix.
-    
-    ![Screenshot 2024-04-03 alle 16.04.49.png](assets/Screenshot_2024-04-03_alle_16.04.49.png)
-    
-- [ **Bi-partite graps** ]
-
+    ![[Screenshot 2026-01-07 alle 09.49.17.png|300]]
+- **Bi-partite graps**
 ### Word2Vec
+> [!info]
+> - https://youtu.be/QyrUentbkvw
+> - https://arxiv.org/pdf/1301.3781.pdf
 
-- Ref
-    
-    [Understanding Word2Vec](https://youtu.be/QyrUentbkvw)
-    
-    [https://arxiv.org/pdf/1301.3781.pdf](https://arxiv.org/pdf/1301.3781.pdf)
-    
-
-The main idea is to define a space where vectors (embedded words) are closer when dependance between respective words is strong. We want to quantify dependance between vectors and, if we have a space full of vectors, it can be done using **cosine similarity**.
+<u>The main idea is to define a space where vectors (embedded words) are closer when dependance between respective words is strong.</u> We want to quantify dependance between vectors and, if we have a space full of vectors, it can be done using **cosine similarity**.
 
 Of course, this cannot be done while words are represented using one-hot encoding: they would exist only in their own dimension (they are independent).
-
-![Untitled](assets/Untitled%20101.png)
-
+![Untitled|300](assets/Untitled%20101.png)
 Another key idea is that **context** represents the meaning of a word. In other words, the embedding of a word is given by the context of the word itself.
 
-**Word2Vec** is a method to construct such an embedding. It can be obtained using two methods (both involving Neural Networks):
+**Word2Vec** is a method to construct such an embedding. It can be obtained using two methods (both involving Neural Networks): using [[#Common Bag Of Words (CBOW)]] and **Skip Gram**.
+#### Common Bag Of Words (CBOW)
+It takes the context of each word (a window of adjacent words containing the focused word) as input and tries to predict the “missing” word.
+![Untitled|500](assets/Untitled%20102.png)
+*In the image above, context is made up by two words: cat __ on ⇒ cat sat on.*
 
-- **Common Bag Of Words** (**CBOW**): it takes the context of each word (a window of adjacent words containing the focused word) as input and tries to predict the “missing” word.
-    ![Untitled](assets/Untitled%20102.png)
-    
-    In the image above, context is made up by two words: cat __ on ⇒ cat sat on.
-    
-    In general, context can be made up of $C$ words, represented in one-hot encoding of $V$ bits.
-    
-    - $C$ dimension of the context
-    - $V$ number of words in the dictionary
-    - $N$ dimensions of the embedding
-    - $x_{cat}$ [$V$-dim] is the one-hot encoding for the word “cat”
-    - $x_{on}$ [$V$-dim] is the one-hot encoding for the word “on”
-    - $\hat y_{sat}$ [$V$-dim] is the one-hot encoding for the word “sat”
-    - $\hat v_{cat}$ [$N$-dim] is the embedding for the word “cat”
-    - $\hat v_{on}$ [$N$-dim] is the embedding for the word “on”
-    - $W_{V \times N}$ is the weight matrix that maps the input to the hidden layer. Note that the matrix contains all the embeddings for each word in the dictionary along the columns and they are updated during the training phase
-    - $W'_{V \times N}$ is the weight matrix that maps the hidden layer outputs to the final output layer
-    
-    Weight matrices ($W_{V \times N}$ and $W'_{V \times N}$) are calculated
-    
-    There is no activation function. The only non-linearity is the softmax calculations in the output layer.
-    
-    As said before, the idea is to predict the word given its context: basically the algorithm is the following:
-    
-    1. calculate embeddings for each word of the context
-    2. average vectorial sum of embeddings
-    3. predicted word is given by the softmax of resulting embedding
-- **[ Skip Gram ]**
+In general, context can be made up of $C$ words, represented in one-hot encoding of $V$ bits.
+- $C$ dimension of the context
+- $V$ number of words in the dictionary
+- $N$ dimensions of the embedding
+- $x_{cat} \in \mathbb R^V$ is the one-hot encoding for the word “cat”
+- $x_{on} \in \mathbb R^V$ is the one-hot encoding for the word “on”
+- $\hat y_{sat} \in \mathbb R^V$ is the one-hot encoding for the word “sat”
+- $\hat v_{cat} \in \mathbb R^N$ is the embedding for the word “cat”
+- $\hat v_{on} \in \mathbb R^N$ is the embedding for the word “on”
+- $W_{V \times N}$ is the weight matrix that maps the input to the hidden layer. Note that the matrix contains all the embeddings for each word in the dictionary along the columns and they are updated during the training phase
+- $W'_{V \times N}$ is the weight matrix that maps the hidden layer outputs to the final output layer
 
+Weight matrices ($W_{V \times N}$ and $W'_{V \times N}$) are calculated
+
+<u>There is no activation function</u>. The only non-linearity is the softmax calculations in the output layer.
+
+As said before, the idea is to predict the word given its context: basically the algorithm is the following:
+1. calculate embeddings for each word of the context
+2. average vectorial sum of embeddings
+3. predicted word is given by the softmax of resulting embedding
+4. backpropagate
 ### Autoencoders
-
-An **autoencoder** is nothing more than a NN trained to predict its own input, so input and output layers have the same dimension. In order to prevent the system from learning the trivial identity function, hidden layer is constrained to a lower dimension (called **bottleneck**).
+An **autoencoder** is nothing more than a NN trained to predict its own input, so input and output layers must have the same dimension. The idea is that the NN must learn the identity function while hidden layer is constrained to a lower dimension (called **bottleneck**).
+As shown later, the embeddings will be extracted from the bottleneck.
 
 Autoencoders are made up by two sequential parts: **encoder** (create a low-dimensional representation of the input) and **decoder** (predicts the output starting from the low-dimensional information).
+![[Screenshot 2026-01-07 alle 15.47.09.png|300]]
+The bottleneck effect can be implemented in two ways, so by:
+* constraining the dimensionality of hidden layer (standard **autoencoder**)
+  the first layer performs the transformation
+* constraining the sparsity for the hidden layer (**sparse autoencoder**)
 
-![Untitled](assets/Untitled%20103.png)
+What happens is that the first layer maps the input $x$ to a hidden representation $y$:
+$$
+y=s(Wx+b)
+$$
+where:
+* $x \in \mathbb [0,1]^d$
+* $y \in \mathbb [0,1]^{d'}$
+* $d < d’$
+* $s$ is a non-linear activation function
+* $W$ is a learned matrix
+Then, $y$ is mapped back into a reconstruction of $x$, called $z$:
+$$
+z=s(W'y+b')
+$$
+where:
+* $y \in \mathbb [0,1]^{d'}$
+* $z \in \mathbb [0,1]^d$
+* $d < d’$
+* $s$ is a non-linear activation function
+* $W'$ is a learned matrix
+Ona can say that $z$ is a prediction of $x$.
 
 Autoencoders can be used as a **non-linear dimensionality reduction** approach: hidden layer will contain a compressed representation of the input.
 
 Autoencoders are also used in practice to perform:
-
 - **Feature extraction**
 - **Denoising**: by inputting some artificially noised data and force the model to reconstruct the original one
+  ![[Screenshot 2026-01-07 alle 16.33.01.png|400]]
 - **Anomaly detection**: once that the autoencoder has been trained, is possible to feed
+#### Sparse Autoencoders
+A **sparse autoencoder** <u>is a standard autoencoder plus a sparsity constraint on the hidden layer(s).</u>
+Instead of forcing compression only by fewer neurons, it forces most neurons to be inactive (near zero) for any given input.
 
-[https://www.notion.so](https://www.notion.so)
+This is done by adding a **sparsity penalty** to the loss, so the objective becomes:
+$$
+\min_{\theta}[ \space ||h_{\theta}(x)-x||^2+\lambda \sum_i|a_i| \space ]
+$$
+where:
+* $||h_{\theta}(x)-x||^2$ is the **reconstruction error**
+* $\lambda \sum_i|a_i|$ is the **L1 sparsity**
+#### Stacked (or Deep) Autoencoders
+> [!info]
+> - https://apxml.com/courses/applied-autoencoders-feature-extraction/chapter-4-advanced-autoencoder-architectures/layer-wise-training-stacked-autoencoders
+
+This is a spoiler of the Deep Learning course: autoencoders can have <u>multiple stacked hidden layers</u>, so they are called **deep autoencoders**.
+
+However, while training such architectures, the problem of vanishing gradients can arise. Nowadays many inventions can help such training, like modern activation functions and weights initializations.
+
+Back when autoencoders were invented non of the things said above existed, so researches came up with **layerwise training**:
+1. train an autoencoder with just one hidden layer
+2. cut the output layer and keep fixed the weights just trained
+3. add a new hidden layer (and an output one) and train it with to reconstruct the last hidden layer’s output
+4. goto step 2. till the stack has reached the desired depth
+5. now that all weights have meaningful values, they will be used as initialization.
+   So finally train the whole stack to lower the total loss.
