@@ -16,7 +16,6 @@ The following ones must be memorized for the mid-term exam.
 3. [Derivative of $J(\theta)$](https://www.notion.so/Machine-Learning-Notes-fd12021b7a554122bce07e4233196a54?pvs=21)
 4. [Calculus of $J(\theta)$ for logistic regression](https://www.notion.so/Machine-Learning-Notes-fd12021b7a554122bce07e4233196a54?pvs=21)
 5. [[#Proof of Normal equations]]
-
 ### Exercises
 1. [[#Feature Scaling]]
 2. [[#Gradient Descent]] by hand
@@ -151,8 +150,7 @@ It says that the average of the performance over all the optimizations on proble
 There’s “no free lunch” in real life: you don’t get something for nothing.
 # —Supervised Learning—
 # 2. Linear Regression
-
-> Some notation before starting:
+> [!info] Notation
 > - $m$ = number of **training examples**
 > - $x$ = input variable(s) or **feature**(s)
 > - $y$ = output variable or **target**
@@ -164,9 +162,7 @@ $$
 h_\theta(x)=\theta_0+\theta_1x_1+\theta_2x_2...
 $$
 ## Univariate (Linear)
-
 The shape of the hypothesis with $\theta_i$ parameters is the following one:
-
 $$
 h_\theta(x)=\theta_0+\theta_1x
 $$
