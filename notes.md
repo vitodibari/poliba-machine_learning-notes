@@ -1785,8 +1785,11 @@ Assume that a random forest has already been trained and consider target feature
 > [!info]
 > - https://youtu.be/_PwhiWxHK8o
 > - https://www.youtube.com/watch?v=efR1C6CvhmE
+> - https://web.mit.edu/6.034/wwwbob/svm-notes-long-08.pdf
 
-The purpose of this tool is to achieve an algorithm able to find the largest gap able to separate data labeled differently, as much as possible (that’s why we want the largest).
+TheThis is a **constrained optimization problem**
+
+It can be solved by the Lagrangian multipler method purpose of this tool is to achieve an algorithm able to find the largest gap able to separate data labeled differently, as much as possible (that’s why we want the largest).
 ## Linearly separable dataset
 Let’s consider the dataset seen in the graph on the right (see images below), made up by negative and positive samples.
 The goal is finding a line (or, in general, an hyperplane) that better splits the dataset. 
@@ -1838,27 +1841,28 @@ $$
 & y^{(i)}(\vec w \cdot\vec x^{(i)}+b)\ge1 \quad\forall i=1...m
 \end{align}
 $$
-Literally: find the street with maximum width s.t. the dataset is entirely split into two parts (all samples are - correctly - classified).
-
+Literally: find the street with maximum width s.t. the dataset is entirely split into two parts, with correctly classified data and no data is between two street’s borders.
 ### Lagrange Duality
+Since this is a **constrained optimization problem**, it can be solved by the Lagrangian multiplier method.
 By using Laplace duality, the problem can be represented in a different way:
 $$
 \begin{split}
-\min f(\omega)\\
-g(\omega)\ge0
+&\min f(\omega) \\
+&g(\omega)\ge0
 \end{split}
 \quad\Rightarrow\quad 
 \begin{split}
-\max L(\omega,\alpha)\\
-\alpha\ge0\\
+& \max L(\omega,\alpha) = L(\omega,\alpha)=f(\omega)+\alpha  \cdot g(\omega) \\
+& \alpha\ge0\\
 \end{split}
 $$
 where
-* $L(\omega,\alpha)=f(\omega)+\alpha  \cdot g(\omega)$.
 * $f(\omega)$ is the convex objective function of the primal problem
 * $g(\omega)$ is the convex constraint function of the primal problem
 * $L(\omega, \alpha)$ is the concave objective function of the dual problem
-* $\alpha>0$ is the constraint of the dual problem
+* $\alpha>0$ are the the constraint of the dual problem, called **lagrangian multipliers**
+
+This transformation is used because the dual problem is way easier to solve, even when in high dimensional spaces. Moreover
 
 It can be proved that:
 $$
@@ -1874,38 +1878,61 @@ $$
 ---
 Applying Lagrange duality to the current problem gives the following $L$:
 $$
-L=\frac12||\vec w||^2-\sum_i\alpha_i[y_i(\vec w\cdot\vec x_{i}+b)-1]
+L(\omega, b, \alpha)=\frac12||\vec w||^2-\sum_i\alpha_i[y_i(\vec w\cdot\vec x_{i}+b)-1]
 $$
 where:
 * $\frac 12 ||\omega||^2$ is the concave objective function of the primal
 * $\sum_i\alpha_i[y_i(\vec w\cdot\vec x+b)-1]$ is the sum of all constraints of the primal
 
-The objective is to maximize $L$, then let’s put its partial derivatives equal to $0$:
+It can be proved that the optimal $\omega^*, b^*, \alpha^*$ satisfy the so-called **KKT conditions**:
+* **stationarity**
+* **primal feasibility**
+* **dual feasibility**
+* **complementary slackness**
+
+The stationarity constraint of KKT states that the stationary point defined by $\omega^*, b^*, \alpha^*$ is the optimal one. So let’s put its partial derivatives equal to $0$:
 $$
 \begin{align}
-& \cfrac{\partial L}{\partial\vec w}=0 \Rightarrow \vec w=\sum_i\alpha_i y_i\vec x_i \\
-& \cfrac{\partial L}{\partial b}=0 \Rightarrow \sum_i\alpha_i y_i=0
+& \cfrac{\partial L(\omega, b, \alpha)}{\partial\vec \omega}=0 \Rightarrow \vec \omega=\sum_i\alpha_i y_i\vec x_i \\
+& \cfrac{\partial L(\omega, b, \alpha)}{\partial b}=0 \Rightarrow \sum_i\alpha_i y_i=0
 \end{align}
 $$
-See how $w$ depends on *some* of the input points; the others wont appear in the final sum because they will have $\alpha=0$.
-Then, plug these results in $L$ to maximize it:
+See how $w$ depends on *some* of the input points, ones that lies on the support vectors. As a result, their respective $\alpha_i>0$; all the other points that wont appear in the final sum will have $\alpha_i=0$.
+
+Then, plug these results in $L$:
 $$
 \begin{align*}
-& \max_\alpha L \\
-& =\max_\alpha\sum_i\alpha_i-\frac12\sum_i\sum_j\alpha_i\alpha_j y_i y_j
+L &= \frac12 
+\left( \sum_{i=0}^m\alpha_i y_i\vec x_i \right) \cdot 
+\left( \sum_{j=0}^m\alpha_j y_j\vec x_j \right) - 
+\left( \sum_{i=0}^m\alpha_i y_i\vec x_i \right) \cdot 
+\left( \sum_{j=0}^m\alpha_j y_j\vec x_j \right) - 
+\sum_{i=0}^m\alpha_i y_i b + \sum_{i=0}^m\alpha_i\\
+&= \sum_i\alpha_i-\frac12\sum_i\sum_j\alpha_i\alpha_j y_i y_j
 \underbrace{\vec x_i\cdot\vec x_j}_{\text{ samples }} \\
 & \alpha_i\ge0 \quad\forall i \\
 & \sum_i\alpha_iy^{(i)}=0
 \end{align*}
 $$
-The most important thing derivable from the last result is that the whole optimization problem depends only on pair of $\text{samples}$ from input dataset.
+The most important thing derivable from the last result is that <u>the whole optimization problem depends only on pair of samples from input dataset.</u>
 
 Once that all $\alpha$’s have been found, the separator can be obtained:
 $$
 \vec w\cdot\vec x +b=\sum_i\alpha_iy_i\vec x_i \cdot\vec x+b
 $$
 where:
-* all samples $\vec x_i$ used are only **support vectors**
+* $\vec x_i$ used are only **support vectors**
+
+Once all the optimal values of $\alpha$ have been found, let’s compute $\omega$ and $b$ in the
+separator hyperplane:
+$$
+\begin{align}
+& \vec \omega=\sum_i\alpha_i y_i\vec x_i \\
+& b = \frac{1-y_i \vec \omega \cdot \vec x }{y_i}
+\end{align}
+$$
+where:
+* samples $(x_i, y_i)$ are only support vectors
 ## Non-linearly separable dataset
 Of course, in reality, data is often non-linearly separable. This means that, without changing the problem formulation, there will not be any optimal hyperplane because no plane will be able to split data without any misclassification.
 ![Untitled|300](assets/Untitled%2074.png)
@@ -1979,7 +2006,7 @@ As previously seen, some parameters must be defined before applying SVMs:
 * regularization term $C$ value
 In general, they are all determined using cross-validation.
 ### Pros
-* There are no local minima, just a single global minimum. This means that the optimization problem is quadratic, so there must exist a optimal solution.
+* There are no local minima, just a single global minimum. This means that the optimization problem is quadratic, with just a single global minimum (avoiding problems that [[#Neural Network]] have).
 * The optimal solution can be found in polynomial time.
 * There are just a few parameters to set up.
 * Solution is stable (ex. there is no problem of randomly initializing of weights just as in Neural Networks).
