@@ -3,25 +3,32 @@ A.Y. 2023-2024, Polytechnic of Bari
 Professor: Tommaso di Noia
 Author: Vito Di Bari
 ## Reading suggestions
-<aside>
 <font color="#6425d0">⚠️ Purple sections are AI-generated</font>
-</aside>
-<aside>
 <font color="#00b050">⚠️ Green sections are deep divings, so not mandatory for the exam</font>
-</aside>
 ### Long demonstrations
 The following ones must be memorized for the mid-term exam.
-1. Probabilistic interpretation of Linear Regression (see [[#Probabilistic interpretation]])
-2. Calculus of MSE and GER (see [[#Bias and Variance trade-off]])
-3. [Derivative of $J(\theta)$](https://www.notion.so/Machine-Learning-Notes-fd12021b7a554122bce07e4233196a54?pvs=21)
-4. [Calculus of $J(\theta)$ for logistic regression](https://www.notion.so/Machine-Learning-Notes-fd12021b7a554122bce07e4233196a54?pvs=21)
-5. [[#Proof of Normal equations]]
+1. [[#Cost Function (Linreg)]]
+2. [[#Cost Function (Logreg)]]
+3. Calculus of MSE and GER (see [[#Bias and Variance trade-off]])
+4. [[#Proof of Normal equations]]
+5. Probabilistic interpretation of Linear Regression (see [[#Probabilistic interpretation]])
+6. [[#9. Support Vector Machines (SVM)]]
+7. [[#Kernel PCA]]
 ### Exercises
-1. [[#Feature Scaling]]
-2. [[#Gradient Descent]] by hand
-3. [[#Outlier removal - boxplot]]
-4. Curves (in general)
-5. [[#Learning Curves]]
+1. [[#Univariate (Linear)]] regression
+2. [[#Feature Scaling]]
+3. [[#Gradient Descent]] by hand
+4. [[#Outlier removal - boxplot]]
+5. [[#Learning Curves]] (in general)
+6. [[#Learning Curves]]
+7. [[#Evaluation Metrics for Regression]]
+8. [[#Evaluation Metrics for Classification]]
+9. [[#Receiver Operating Characteristic (ROC) Space]]
+10. [[#Classification Trees]]
+11. [[#Regression Trees]]
+12. [[#K-Means]]
+13. [[#K-Medoids]]
+14. [[#PCA Algorithm]] (with given $X$, $\Sigma$, $U$)
 # 1. Introduction
 What is ML? **Machine Learning** is the field of study that gives to a program the ability to learn even if not explicitly programmed. 
 
@@ -209,7 +216,16 @@ x_n
 \quad
 h_\theta(x^{(i)})=\theta^T\textbf{x}|_{x_0=1}
 $$
-## Gradient Descent
+## Cost Function (Linreg)
+$$
+J(\theta)=\frac{1}{2m} \sum_{i=1}^m(h_{\theta}(x^{(i)})-y^{(i)})^2
+$$
+where its derivative w.r.t. $\theta$ used in the GD’s update step is:
+$$
+\Delta J(\theta_{j})=\frac{\partial J(\theta_{j})}{\partial \theta_{j}}=
+\frac 1m \sum_{i=1}^m(h_{\theta}(x^{(i)})-y^{(i)})x_{j}^{(i)}
+$$
+## Gradient Descent (Linreg)
 Also known as **steepest descent**.
 
 The **Gradient Descent Algorithm** is used to (iteratively) minimize the cost function $J(\theta_0, \theta_1)$ by changing $\theta_0$ and $\theta_1$. The steps are the following:
@@ -327,17 +343,18 @@ J(\theta)
 =\frac12(\textbf{X}\theta-\textbf{y})^2
 =\frac12(\textbf{X}\theta-\textbf{y})^T(\textbf{X}\theta-\textbf{y})
 $$
-
+The goal is to find the minimum of $J(\theta)$, so the point where the gradient is null.
+Let’s compute $\nabla J(\theta)$ (recall [[#Cost Function (Linreg)]]):
 $$
-\Delta J(\theta)
+\nabla J(\theta)
 =\textbf{X}^T(\textbf{X}\theta-\textbf{y})
 =\textbf{X}^T\textbf{X}\theta-\textbf{X}^T\textbf{y}
 $$
-By imposing the resolutive condition of the cost function $\Delta J=0$ I have:
+By imposing the resolutive condition of the cost function where gradient is null I have:
 $$
+\nabla J=0 \implies
 \theta=(\textbf{X}^T\textbf{X})^{-1}\textbf{X}^T\textbf{y}
 $$
-
 Unfortunately, there are some drawbacks that make this computation unfeasible:
 - huge matrix inverse $(X^T X)^{-1}$ is expensive to compute
 - too many features
@@ -355,19 +372,18 @@ p(e^{(i)})=\mathcal{N}(0,\sigma^2)=\frac1{\sqrt{2\pi}\sigma}e^{-\frac{(e^{(i)})^
 \;\;i=1...m
 $$
 $$
-e^{(i)}=y^{(i)}-\theta^T\textbf{x}^{(i)}
-\Rightarrow
-\\
-\Rightarrow
+\begin{align}
+& e^{(i)}=y^{(i)}-\theta^T\textbf{x}^{(i)} \Rightarrow \\
+& \Rightarrow
 p(y^{(i)}|\textbf{x}^{(i)};\theta^T)=\mathcal{N}(0,\sigma^2)=\frac1{\sqrt{2\pi}\sigma}e^{-\frac{(y^{(i)}-\theta^T\textbf{x}^{(i)})^2}{2\sigma^2}}
 \;\;i=1...m
+\end{align}
 $$
-Let’s now introduce the **likelihood** function: it is parametrized by $\theta$ and returns the most probabile output, for each training case.
+The goal is to maximize the probability that predicted outputs are as close as possible to the original ones, so the **likelihood** function is introduced: it is parametrized by $\theta$ and returns the most probabile output, for each training case.
 $$
 L(\theta)=
 L(\theta;\textbf X, \textbf y)=
-p(\textbf y|\textbf X;\theta)=
-\prod_{i=1}^m\frac1{\sqrt{2\pi}\sigma}e^{-\frac{(y^{(i)}-\theta^T\textbf{x}^{(i)})^2}{2\sigma^2}}
+p(\textbf y|\textbf X;\theta)
 $$
 
 > [!warning]
@@ -376,16 +392,22 @@ $$
 > [!tip]
 > $\theta$ gives the expressiveness of a model. The larger $\theta$, the more expressive the model is.
 
-Of course, the main goal is to maximize $L(\theta)$:
+In this case we have:
+$$
+L(\theta)=
+p(\textbf y|\textbf X;\theta)=
+\prod_{i=1}^m\frac1{\sqrt{2\pi}\sigma}e^{-\frac{(y^{(i)}-\theta^T\textbf{x}^{(i)})^2}{2\sigma^2}}
+$$
+The main goal is to maximize $L(\theta)$:
 $$
 \begin{align*}
-\hat\theta &= \max_\theta[L(\theta)]
-\\ &= \max_\theta [\log{L(\theta)}] 
+\hat\theta &= \arg\max_\theta[L(\theta)]
+\\ &= \arg\max_\theta [\log{L(\theta)}] 
 \\ &= [...]
-\\ &=\max\bigg(-
+\\ &=\arg\max_\theta \bigg(-
 \frac12\sum_{i=1}^m(y^{(i)}-\theta^T\textbf x^{(i)})^2
 \bigg)
-\\ & =\min\bigg(
+\\ & =\arg\min_\theta \bigg(
 \frac12\sum_{i=1}^m(y^{(i)}-\theta^T\textbf x^{(i)})^2
 \bigg)
 \end{align*}
@@ -478,7 +500,7 @@ $h_\theta(x)=g(\theta_0+\theta_1x_1+\theta_2x_2)$
 
 Supposing $\theta^T=[-1 \space +1 \space +1]$, the objective is then to predict:
 $y=1 \space\text{if} \space -3+x_1+x_2 \ge 0\\ \Longrightarrow x_1+x_2\ge3$ (the line plotted in the image)
-## Cost Function
+## Cost Function (Logreg)
 Let’s now see how to derive the **cost function** and how to minimize it, in order to get an optimal classifier.
 
 As seen for the linear regression, the idea is to solve the problem of the cost function minimization using the **maximum likelihood criterion**.
@@ -510,11 +532,11 @@ p(y^{(i)}=0|\mathbf{x}^{(i)};\theta)=1-h_\theta(\mathbf{x}^{(i)})
 \Longrightarrow
 \\
 & \Longrightarrow
-p(y^{(i)}|\mathbf{x}^{(i)};\theta) = h_\theta(\mathbf{x}^{(i)})^{y^{(i)}} \cdot 1-h_\theta(\mathbf{x}^{(i)})^{1-y^{(i)}}
+p(y^{(i)}|\mathbf{x}^{(i)};\theta) = h_\theta(\mathbf{x}^{(i)})^{y^{(i)}} \cdot (1-h_\theta(\mathbf{x}^{(i)}))^{1-y^{(i)}}
 \Longrightarrow
 \\
 & \Longrightarrow
-L(\theta)=\prod_{i=1}^m h_\theta(\mathbf{x}^{(i)})^{y^{(i)}} \cdot 1-h_\theta(\mathbf{x}^{(i)})^{1-y^{(i)}}
+L(\theta)=\prod_{i=1}^m h_\theta(\mathbf{x}^{(i)})^{y^{(i)}} \cdot (1-h_\theta(\mathbf{x}^{(i)}))^{1-y^{(i)}}
 \end{align}
 $$
 > [!warning]
@@ -522,19 +544,18 @@ $$
 
 $$
 \begin{align}
-L(\theta) &= \prod_{i=1}^m h_\theta(\mathbf{x}^{(i)})^{y^{(i)}} \cdot 1-h_\theta(\mathbf{x}^{(i)})^{1-y^{(i)}}
+L(\theta) &= \prod_{i=1}^m h_\theta(\mathbf{x}^{(i)})^{y^{(i)}} \cdot (1-h_\theta(\mathbf{x}^{(i)}))^{1-y^{(i)}}
 \Longrightarrow
 \\
 \Longrightarrow
 l(\theta) &= \log(L(\theta))=\sum_{i=1}^m \bigg(y^{(i)}\log h_\theta(\mathbf{x}^{(i)}) + (1-y^{(i)})\log(1-h_\theta(\mathbf{x}^{(i)}))\bigg)
 \end{align}
 $$
-
 The **cost function** can be defined in a proper form in order to have a minimization problem (just by putting the minus at the beginning):
 $$
 \begin{align}
-J(\theta) &= -\frac1m \sum_{i=1}^m \bigg(y^{(i)}\log h_\theta(\mathbf{x}^{(i)}) + (1-y^{(i)})\log(1-h_\theta(\mathbf{x}^{(i)}))\bigg) \\
-&=-\frac1m l(\theta)
+J(\theta) &=-\frac1m l(\theta) \\
+&= -\frac1m \sum_{i=1}^m \bigg(y^{(i)}\log h_\theta(\mathbf{x}^{(i)}) + (1-y^{(i)})\log(1-h_\theta(\mathbf{x}^{(i)}))\bigg) \\
 \end{align}
 \tag{2}
 $$
@@ -574,7 +595,7 @@ h_\theta(\mathbf{x}^{(i)}) = 1 \Rightarrow e^{(i)} \to \infty
 \end{cases}
 \end{align}
 $$
-## Gradient Descent
+## Gradient Descent (Logreg)
 One more time, gradient descent is used to find the vector of parameters $\hat\theta$ which minimizes the cost function $J(\theta)$.
 
 The most important step (and the only actual difference with linear regression as well) is the following, the derivative step:
@@ -636,27 +657,26 @@ y^{(i)}=f(\mathbf x^{(i)})+e^{(i)}
 $$
 Each hypothesis $h^{(D_i)}(x)$ will be affected by an error while predicting values ($y^{(i)}$), w.r.t. the ground truth ($\mathbf x^{(i)}$). The error can be modeled in the form of a **Mean Squared Error** (**MSE**):
 $$
-MSE(h^{(D_i)}(x))=
-E_x\bigg[
-(h^{(D_i)}(x)-f(x))^2
-\bigg]
+\begin{align}
+MSE(h^{(D_i)}(x)) &= E_x\bigg[(h^{(D_i)}(x)-y)^2\bigg] \\
+&= E_x\bigg[(h^{(D_i)}(x)-(f(\mathbf x+e))^2\bigg] 
+\end{align}
 $$
 Moreover, it is interesting to evaluate the overall error, for each hypothesis found (respective of $D_i$), by calculating the **Generalization Error** (**GER**):
 $$
 \begin{align*}
-GER&=E_D[MSE] \\
-&=E_D\bigg[E_x\bigg[
-(h^{(D_i)}(x)-f(x))^2
-\bigg]\bigg] \\
-&=E_x\bigg[E_D\bigg[
-(h^{(D)}(x^{(i)})-f(x^{(i)}))^2
-\bigg]\bigg]
+GER&=E_D[MSE(h^{(D_i)}(x))] \\
+&=E_D\bigg[E_x\bigg[(h^{(D_i)}(x)-(f(\mathbf x)+e)^2\bigg]\bigg] \\
+&=E_x\bigg[E_D\bigg[(h^{(D)}(x^{(i)})-(f(x^{(i)}) + e^{(i)}))^2\bigg]\bigg] \\
+&=E_x \left[ MSE(h^{(D)}(x^{(i)})) \right]
 \end{align*}
 $$
 The last step is possible because of the linearity of the operator $E$.
 
 > [!tip]
 > **Deep dive $h^{(D_i)}(x)$ vs $h^{(D)}(x^{(i)})$**
+> #TODO non mi sembra corretto, credo che $h^{(D)}(x^{(i)})$ sia calcolato sul singolo sample
+> 
 > The dataset can be represented as a set defined by the union of partitions: $D=D_0 \cup...\cup D_n$
 > 
 > $h^{(D_i)}(x)$ is the hypothesis calculated on partition $D_i$
@@ -666,13 +686,26 @@ The last step is possible because of the linearity of the operator $E$.
 
 > [!tip]
 > **Deep dive $h^{(D_i)}(x)$ vs $h^{(D)}(x^{(i)})$**
-> 
+> #TODO correggi di conseguenza
 > The dataset can be represented as a set defined by the union of partitions: $D=D_0 \cup...\cup D_n$
 > 
 > $h^{(D_i)}(x)$ is the hypothesis calculated on partition $D_i$
 > $h^{(D)}(x)$ is the hypothesis calculated on the entire dataset $D$.
 
-Let’s now focus on term $E_D\bigg[(h^{(D)}(x^{(i)})-f(x^{(i)}))^2\bigg]$.
+Let’s now focus on term $MSE(h^{(D)}(x^{(i)})) = E_D\bigg[(h^{(D)}(x^{(i)})-(f(x^{(i)}) + e^{(i)}))^2\bigg]$.
+Let’s move some parenthesis:
+$$
+\begin{align}
+& E_D\bigg[ (h^{(D)}(x^{(i)})-f(x^{(i)})) - e^{(i)}))^2 \bigg] =  \\
+& = E_D \left[ (h^{(D)}(x^{(i)})-f(x^{(i)}))^2 \right] + E_D \left[ (e^{(i)})^2 \right] - 2E_D \left[ h^{(D)}(x^{(i)})-f(x^{(i)}) \right]E_D \left[ e^{(i)} \right] \\
+& = E_D \left[ (h^{(D)}(x^{(i)})-f(x^{(i)}))^2 \right] + \sigma_e^2
+\end{align}
+$$
+because:
+* $E_D \left[ e^{(i)} \right] = 0$
+* $\sigma_e^2=Var(e^{(i)})=E_D \left[ (e^{(i)})^2 \right]-E_D^2 \left[e^{(i)} \right]$
+
+Let’s now focus just on first term $E_D \left[ (h^{(D)}(x^{(i)})-(f(x^{(i)}) \right]$.
 I can define the **best estimation of $f(x^{(i)})$** by computing the mean of all hypothesis with the same training sample $x^{(i)}$:
 $$
 \bar h(x^{(i)}) = E_D\bigg[h^{(D)}(x^{(i)})\bigg]
@@ -680,38 +713,29 @@ $$
 By performing some simple steps (reported on the slides), $MSE$ can be expressed as follows:
 $$
 \begin{align*}
-MSE(h^{(D)}(x^{(i)})) &= E_D\bigg[\bigg(\bar  h(x^{(i)})-f(x^{(i)}))^2 \bigg) + \bigg((h^{(D)}(x^{(i)})-\bar h(x^{(i)}))^2\bigg)\bigg]\\
-
+E_D \left[ (h^{(D)}(x^{(i)})-(f(x^{(i)}) \right]
+&= E_D\bigg[\bigg( h^{(D)}(x^{(i)}) -\bar h(x^{(i)}) + \bar  h(x^{(i)})-f(x^{(i)})\bigg)^2\bigg]\\
+&= E_D\bigg[\bigg(\bar  h(x^{(i)})-f(x^{(i)}))^2 \bigg) + \bigg((h^{(D)}(x^{(i)})-\bar h(x^{(i)}))^2\bigg)\bigg]\\
 &= (\bar h(x^{(i)})-f(x^{(i)}))^2 + E_D\bigg[(h^{(D)}(x^{(i)})-\bar h(x^{(i)}))^2\bigg]\\
-
 &= Bias^2(h^{(D)}(x^{(i)}))) + Var(h^{(D)}(x^{(i)}))
 \end{align*}
 $$
+Finally, going back to $MSE(h^{(D)}(x^{(i)}))$:
 $$
-\begin{align*}
-GER&=E_x[MSE(h^{(D)}(x^{(i)}))] \\
-
-&= E_x\bigg[Bias^2(h^{(D)}(x^{(i)}))) + Var(h^{(D)}(x^{(i)}))\bigg]\\
-\end{align*}
+MSE(h^{(D)}(x^{(i)}))= Bias^2(h^{(D)}(x^{(i)}))) + Var(h^{(D)}(x^{(i)})) + \sigma_e^2
 $$
-
-The main objective is, of course, to reduce the Generalization Error. This is possible by reducing the bias or the variance.
+The final equation shows that the expected - squared - error of a model is made up of:
+* The **bias** <u>represents the systematic deviation of the estimator, so the (in)ability to capture the true relationship.</u>
+  It tells how close the estimation can get to the ground truth.
+  
+  High bias $\Longrightarrow$ too-simple model which is not able to predict, whatever (test) dataset is given. $$Bias(h(X),f(X)) = E[h(X)]-f(X)$$
+* The **variance** <u>represents the (squared mean) variation of predicted values w.r.t. the mean of predicted values them selves.</u> It gives an intuition about (in)ability of the model to response well to unseen values.
+  It tells how different a single estimation can get w.r.t. the best estimation.
+  
+  High variance $\Longrightarrow$ too-complex model which is not able to generalize. 
+  The same model, with different (test) datasets, will generate very different hypothesis. $$Var(h(X))=E[h(X)-E[h(X)]]^2$$
+* an **irreducible error** component that no model can eliminate, since it’s just inherent noise
 ![Untitled|500](assets/Untitled%2019.png)
-The **bias** <u>represents the systematic deviation of the estimator, so the (in)ability to capture the true relationship.</u>
-It tells how close the estimation can get to the ground truth.
-
-High bias $\Longrightarrow$ too-simple model which is not able to predict, whatever (test) dataset is given.
-$$
-Bias(h(X),f(X)) = (E[h(X)]-f(X))^2
-$$
-The **variance** <u>represents the (squared mean) variation of predicted values w.r.t. the mean of predicted values them selves.</u> It gives an intuition about (in)ability of the model to response well to unseen values.
-It tells how different a single estimation can get w.r.t. the best estimation.
-
-High variance $\Longrightarrow$ too-complex model which is not able to generalize. 
-The same model, with different (test) datasets, will generate very different hypothesis.
-$$
-Var(h(X))=E[h(X)-E[h(X)]]^2
-$$
 <u>The ideal would be to find a model complexity able to maintain both bias and variance low. This possible only by finding a tradeoff</u>: these values behave at the opposite w.r.t. the complexity of the model.
 ![Untitled|500](assets/Untitled%2020.png)
 As the image suggests, the model to pick is the one which complexity is the best trade-off in lowering the sum bias + variance.
@@ -1065,12 +1089,12 @@ Given a dataset of elements $<x_i,y_i>$:
 - $y_i^*$ is the predicted output value
 ![Untitled|500](assets/Untitled%2039.png)
 
-| **Mean Absolute Error**     | $MAE=\dfrac{\sum_{i=1}^my_i^*-y_i}{m}$                                                                                            |
-| --------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| **Mean Squared Error**      | $MSE=\dfrac{\sum_{i=1}^m(y_i^*-y_i)^2}{m}$                                                                                        |
-| **Root Mean Squared Error** | $RMSE=\sqrt{\dfrac{\sum_{i=1}^m(y_i^*-y_i)^2}{m}}$                                                                                |
-| $R^2$                       | See [Coefficient of Determination](https://www.notion.so/Machine-Learning-Notes-fd12021b7a554122bce07e4233196a54?pvs=21)          |
-| Adjusted $R^2$              | See [Adjusted Coefficient of Determination](https://www.notion.so/Machine-Learning-Notes-fd12021b7a554122bce07e4233196a54?pvs=21) |
+| **Mean Absolute Error**     | $MAE=\dfrac{\sum_{i=1}^m\|y_i^*-y_i\|}{m}$         |
+| --------------------------- | -------------------------------------------------- |
+| **Mean Squared Error**      | $MSE=\dfrac{\sum_{i=1}^m(y_i^*-y_i)^2}{m}$         |
+| **Root Mean Squared Error** | $RMSE=\sqrt{\dfrac{\sum_{i=1}^m(y_i^*-y_i)^2}{m}}$ |
+| $R^2$                       | See [[#Coefficient of Determination]]              |
+| Adjusted $R^2$              | See [[#Adjusted Coefficient of Determination]]     |
 
 ### Evaluation Metrics for Classification
 All metrics reported in table below are calculated on values given by the confusion matrix of a classifier.
@@ -1086,7 +1110,7 @@ All metrics reported in table below are calculated on values given by the confus
 | Specificity or True Negative Rate (TNR)         | $\Large\frac{TN}{TN+FP}$                                         |
 | Error Rate = 1 - Accuracy                       | $\Large\frac{FP+FN}{TP+TN+FP+FN}$                                |
 | F-Measure (or F1)                               | $2 \cdot \Large \frac{precision \cdot recall}{precision+recall}$ |
-| False Positive Rate (FPR) = 1 - Specificity     | $\Large\frac{FP}{TN+FP}$                                         |
+| False Positive Rate (FPR) = 1 - Specificity     | $\Large\frac{FP}{FP+TN}$                                         |
 
 #### Receiver Operating Characteristic (ROC) Space
 **ROC Space** is a convenient way to evaluate all at once different classifiers, based on the respective confusion matrices’ results.
@@ -1155,7 +1179,7 @@ The **coefficient of determination** is indicated with $R^2$ and <u>it is a stat
 
 $R^2$ is a measure of how much of the variance in the dependent variable ($Y$) is explained - or predictable - by the independent variable ($X$) in a regression model.
 
-* Total Deviation (**Total Sum of Squares** or **TTS**) $$Dev(T)=\sum_{i=1}^m(y_i-\bar y)^2$$
+* Total Deviation (**Total Sum of Squares** or **TSS**) $$Dev(T)=\sum_{i=1}^m(y_i-\bar y)^2$$
 * Regression Deviation $$Dev(R)=\sum_{i=1}^m(\hat y_i-\bar y)^2$$
 * Residual Deviation (**Residual Sum of Squares** or **RSS**) $$Dev(E)=\sum_{i=1}^m(y_i-\hat y_i)^2$$
 where:
@@ -1757,7 +1781,7 @@ Assume that a random forest has already been trained and consider target feature
 4. Run all the copies through the random forest and keep track of how many times target value (set in step 2) matches the random forest trees’ output;
     ![Untitled](assets/Untitled%2071.png)
 5. Pick the sample with highest score.
-# 9. Support Vector Machines
+# 9. Support Vector Machines (SVM)
 > [!info]
 > - https://youtu.be/_PwhiWxHK8o
 > - https://www.youtube.com/watch?v=efR1C6CvhmE
@@ -1850,20 +1874,21 @@ $$
 ---
 Applying Lagrange duality to the current problem gives the following $L$:
 $$
-L=\frac12||\vec w||^2-\sum_i\alpha_i[y_i(\vec w\cdot\vec x+b)-1]
+L=\frac12||\vec w||^2-\sum_i\alpha_i[y_i(\vec w\cdot\vec x_{i}+b)-1]
 $$
 where:
 * $\frac 12 ||\omega||^2$ is the concave objective function of the primal
 * $\sum_i\alpha_i[y_i(\vec w\cdot\vec x+b)-1]$ is the sum of all constraints of the primal
 
-The objective is to maximize $L$, then let’s put its partial derivatives equal to 0:
+The objective is to maximize $L$, then let’s put its partial derivatives equal to $0$:
 $$
 \begin{align}
 & \cfrac{\partial L}{\partial\vec w}=0 \Rightarrow \vec w=\sum_i\alpha_i y_i\vec x_i \\
 & \cfrac{\partial L}{\partial b}=0 \Rightarrow \sum_i\alpha_i y_i=0
 \end{align}
 $$
-Then, plug these results in $L$ and the final result is the following problem:
+See how $w$ depends on *some* of the input points; the others wont appear in the final sum because they will have $\alpha=0$.
+Then, plug these results in $L$ to maximize it:
 $$
 \begin{align*}
 & \max_\alpha L \\
@@ -2645,22 +2670,25 @@ Given a word, several (numeric) vector representation could be derived.
 
 It is not enough to represent words numerically, but the notion of **relatedness** between two embeddings must be encoded in some way. Moreover, this relatedness must be mathematically computable.
 ### Document occurrence vectors
-Identify documents in which the word occurs
+Identify documents in which the word occurs.
 ![Untitled!|500](assets/Untitled%2095.png)
-relatedness is calculated using **topic similarity**:
+
+Relatedness is calculated using **topic similarity**:
 ![Untitled|300](assets/Untitled%2096.png)
 ### Word context vectors
-Identify neighboring word context with respect to the following two documents
+Identify neighboring word context with respect to the following two documents.
 ![Untitled|500](assets/Untitled%2097.png)
-relatedness is calculated using **typical similarity**:
+
+Relatedness is calculated using **typical similarity**:
 ![Untitled|400](assets/Untitled%2098.png)
 ### Character trigram vectors
-Identify trigrams in the word itself    
+Identify trigrams in the word itself.
 ![Untitled|500](assets/Untitled%2099.png)
-relatedness is calculated using **string edit-distance**:
+
+Relatedness is calculated using **string edit-distance**:
 ![Untitled|400](assets/Untitled%20100.png)
-    
-- and so on…
+
+---
 All representations above are not that efficient in reality: they are very high-dimensional and sparse representations that would lead to really slow training processes. A way to reduce dimensionality is needed.
 ### Embeddings
 An **embedding** is a dense and lower-dimensional vector representation for a word, which uses the same intuitions seen above.
