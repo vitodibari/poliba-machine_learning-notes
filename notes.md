@@ -2218,8 +2218,32 @@ The GMM algorithm follows the EM framework and it aims at finding all $\mu$’s 
 $$
 4. goto step 2. until convergence
 ### Anomaly Detection
-#2025-2026
-#TODO 
+#2024-2025
+Given a dataset, anomaly detection is used to flag data samples that significantly deviate from the dataset’s normal behavior.
+
+A single gaussian or a mixture can be used to implement such tool. The idea is to have a probability density function where:
+$$
+\begin{align}
+& p(x_{\text{test}})<\epsilon \implies \text{anomaly}\\
+& p(x_{\text{test}})\geq\epsilon \implies \text{OK}
+\end{align}
+$$
+Algorithm:
+1. split dataset in training, cross validation and test set, where:
+	1. training has only OK samples
+	2. cv and test have both OK and anomalous data 
+2. train the model only on training set
+3. use cv set to find $\epsilon$ value that maximizes correct predictions
+4. evaluate the model with $\epsilon$ found in step 3. using test set
+
+> [!tip] Anomaly Detection vs Supervised Learning
+> Anomaly Detection:
+> * small number of positive samples, large number of negative samples
+> * many different types of anomalies even in the same scenario
+>   
+> Supervised Learning
+> * large number of positive and negative samples
+> * (usually) easier to get a sense of what positive samples are like
 ### Pros and Cons
 **Pros**
 - can detect overlapping clusters (soft clustering)
@@ -2241,6 +2265,14 @@ The idea consists of plotting the explained variation* as a function of the numb
 Sometimes K can be an authentic external constraint (e.g. t-shirt sizing).
 ![Untitled|500](assets/Untitled%2080.png)
 ### Information criterion approach
+#TODO 
+#### Akaike Information Criterion (AIC)
+#TODO 
+#### Bayesian information criterion (BIC)
+#TODO 
+#### Deviance information criterion (DIC)
+#TODO 
+#### Information criterion comparison
 #TODO 
 ### Silhouette Coefficient
 #TODO 
