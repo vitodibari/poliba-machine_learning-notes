@@ -315,6 +315,8 @@ Forces the values in a fixed interval normally distributed between $[0,1]$.
 $$
 z=\frac{x-mean(x)}{devstd(x)}=\frac{x-\mu_x}{\sigma_x} \approx \mathcal N(0,1)
 $$
+> [!tip]
+> Mean and standard deviation are calculated over the training set, then used to normalize training, cv, and test sets.
 ## Proof of Normal equations
 If everything is represented as a matrix, in theory it’s possibile to immediately compute the optimal parameters’ matrix.
 The input dataset is made up of:
@@ -600,11 +602,12 @@ One more time, gradient descent is used to find the vector of parameters $\hat\t
 
 The most important step (and the only actual difference with linear regression as well) is the following, the derivative step:
 $$
-\frac{\partial J(\theta)}{\partial\theta_k}=
-\frac1m\sum_{i=1}^m\bigg(
-h_\theta(\mathbf{x}^{(i)})-y^{(i)}
-\bigg)x_k^{(i)}=
-\frac1m\sum_{i=1}^m\bigg(e^{(i)}\bigg)x_k^{(i)}
+\begin{align}
+\frac{\partial J(\theta)}{\partial\theta_k}  &= -\frac1m \sum_{i=1}^m \left( y^{(i)} \frac{\partial}{\partial\theta_k}\log h_\theta(\mathbf{x}^{(i)}) + (1-y^{(i)}) \frac{\partial}{\partial\theta_k}\log(1-h_\theta(\mathbf{x}^{(i)})) \right) \\
+&= -\frac1m \sum_{i=1}^m \left( y^{(i)} (1-h_\theta(\mathbf{x}^{(i)}))x_k^{(i)} + (1-y^{(i)}) (-h_\theta(\mathbf{x}^{(i)}))x_k^{(i)} \right)\\
+&=\frac1m\sum_{i=1}^m\bigg(h_\theta(\mathbf{x}^{(i)})-y^{(i)}\bigg)x_k^{(i)} \\
+&=\frac1m\sum_{i=1}^m(e^{(i)})x_k^{(i)}
+\end{align}
 $$
 #Recall And then the update step (same as the linear regression):
 $$
@@ -1111,7 +1114,7 @@ All metrics reported in table below are calculated on values given by the confus
 | Error Rate = 1 - Accuracy                       | $\Large\frac{FP+FN}{TP+TN+FP+FN}$                                |
 | F-Measure (or F1)                               | $2 \cdot \Large \frac{precision \cdot recall}{precision+recall}$ |
 | False Positive Rate (FPR) = 1 - Specificity     | $\Large\frac{FP}{FP+TN}$                                         |
-
+![[d0UCCIF10Soi7VQGxdVrWQ.jpg|600]]
 #### Receiver Operating Characteristic (ROC) Space
 **ROC Space** is a convenient way to evaluate all at once different classifiers, based on the respective confusion matrices’ results.
 
@@ -1287,16 +1290,19 @@ The cost function used depends mainly by the output layer, so the mathematical f
 $$
 J(\Theta)=
 \sum_{i=0}^m(h_\Theta(\mathbb x^{(i)})-y^{(i)})^2
-+\frac{\lambda}{2m}\sum_{l=0}^{L-1}\sum_{i=0}^{s_l}\sum_{j=0}^{s_{l+1}}{(\Theta^{(l)}_{ji})^2}
++\textcolor{blue}{\frac{\lambda}{2m}\sum_{l=0}^{L-1}\sum_{i=0}^{s_l}\sum_{j=0}^{s_{l+1}}{(\Theta^{(l)}_{ji})^2}}
 $$
+* where blue part is regularization
 ### Cost Function for Classification with Regularization
 $$
 J(\Theta)=
 -\frac1m\bigg[
 \sum_{i=0}^m\sum_{k=1}^K y_k^{(i)}\log(h_\Theta(x^{(i)}))+ (1-y_k^{(i)})\log(1-h_\Theta(x^{(i)}))
-+\frac{\lambda}{2m}\sum_{l=0}^{L-1}\sum_{i=0}^{s_l}\sum_{j=0}^{s_{l+1}}{(\Theta^{(l)}_{ji})^2}
++\textcolor{blue}{\frac{\lambda}{2m}\sum_{l=0}^{L-1}\sum_{i=0}^{s_l}\sum_{j=0}^{s_{l+1}}{(\Theta^{(l)}_{ji})^2}}
 \bigg]
 $$
+* where blue part is regularization
+
 > [!warning] Why three summations?
 > Because the cost sums for all $L$ layers, for each $s_l$ nodes, for each connection to $s_{l+1}$ nodes of next layer
 > 
@@ -1323,19 +1329,29 @@ In this case:
 1. randomly initialize (see [[#Random Initialization]]) parameters $\Theta$
     - $\Theta_{ji}^{(l)}$ is the weight for the connection between the $i$-th node on the $l$-th layer and the $j$-th node on the $(l-1)$-th one
     ![image.png|200](Personale/poliba-machine_learning-notes/assets/image%202.png)
-2. perform the (first) forward propagation step and collect the $K$ results:
-    - $h_{\Theta}(x)=\{y_1,y_2,...,y_K\} \in \mathbb{R}^{K}$
-3. compute the loss function (e.g. using $MSE$)
-4. back-propagate: tune each model’s parameter to lower the loss calculated in the output layer. This is possible by calculating partial derivative of the loss function w.r.t. each parameter (one per edge, basically)
-    
-    The general formula is: $$
-    \frac{\partial J(\Theta)}{\partial \Theta_{ji}^{(l)}}
-    =\delta_i^{(l+1)}a_j^{(l)}
-    =\delta_i^{(l+1)}g(z_j^{(l)})
+2. perform the (first) forward propagation step, so compute all $z$’s and $a$’s:
+	1. for the first layer, $a^0=x$: $$a^{(1)}=g(z^{(1)})=g(\Theta^{(1)} \cdot a^{(0)})=g(\Theta^{(1)} \cdot x)$$
+	2. for the last layer for regression only no activation is used: $$a^{(L)}=z^{(L)}=\Theta^{(L)} \cdot a^{(L-1)}$$
+	3. in general: $$a^{(l)}=g(\Theta^{(l)} \cdot a^{(l-1)})=g(z^{(l)})$$	   $$\begin{align} & z^{(l)}_{j}= \sum_i \theta_{ji}^{(l)} a_{j}^{(l-1)}+b_j^{(l)} \\ & a_{j}^{(l)} = g(z^{(l)}_{j}) \end{align}$$
+3. collect the $K$ results: $h_{\Theta}(x)=\{y_1,y_2,...,y_K\} \in \mathbb{R}^{K}$
+4. compute the loss function at output layer $L$:
+	1. for regression see [[#Cost Function for Regression with Regularization]]
+	2. for classification see [[#Cost Function for Classification with Regularization]]
+5. back-propagate: tune each model’s parameter to lower the loss calculated in the output layer. This is possible by calculating partial derivative of the loss function w.r.t. each parameter $\Theta$ and $b$  (one per edge, basically)
+	1. for the last layer of regression where no sigmoid is used and the derivative of regression cost is used: $$ \delta^{(L)}=a^{L}-y $$
+	2. for the last layer of regression where sigmoid and derivative of classification cost are used: $$ \delta^{(L)}=(-\frac{y}{a^{(L)}}+\frac{1-y}{1-a^{(L)}}) \odot g'(z^{(L)}) $$
+	3. in general: $$ \begin{align} \delta^{(l)} &= \underbrace{\underbrace{(\Theta^{(l)})^T \cdot \delta^{(l-1)}}_{\textcolor{red}{dA}} \odot g'(z^{(l)})}_{\textcolor{red}{dZ}} \\ &= (\Theta^{(l)})^T \cdot \delta^{(l-1)} \odot a^{(l)} \odot  (1-a^{(l)}) \end{align}$$$$
+    \begin{align}
+    \frac{\partial J(\Theta)}{\partial \Theta_{ji}^{(l)}} &=\delta_i^{(l)}a_j^{(l-1)} + \textcolor{blue}{\lambda \Theta^{(l)}} \\
+    &=\delta_i^{(l)}g(z_j^{(l-1)}) + \textcolor{blue}{\lambda \Theta^{(l)}} \\ & \\
+    b&=\delta_i^{(l)}\end{align}
     $$
     where:
-    - $\delta_i^{(l)}$: is defined as the **local gradient** and can be thought as the error contribution given by node $i$ on layer $l$ (which is function of all its connected nodes’ errors, towards the input layer)
-5. if stop condition is true, then end training
+    - $\delta_i^{(l)}$: is defined as the **local gradient** and <u>can be thought as the error contribution</u> given by node $i$ on layer $l$ (which is function of all its connected nodes’ errors, towards the input layer)
+    - blue component is regularization
+    - bias has no regularization
+6. then update all the parameters: $$\begin{align} & W^{(l)} := W^{(l)} - \alpha \frac{\partial J}{\partial \Theta^{(l)}} \\ & b^{(l)} := b^{(l)} - \alpha \frac{\partial J}{\partial b^{(l)}} \end{align}$$
+7. if stop condition is true, then end training
    else goto stop 2.
 ## Random Initialization
 Basically, <u>random initialization is used to break the **symmetry problem**: if all parameters are equals, gradient descent algorithm will produce the same adjustments for each parameter</u> (by fixing the layer, all cost function’s derivatives w.r.t. each parameter will be the same).
