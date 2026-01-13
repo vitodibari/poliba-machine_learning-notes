@@ -1532,7 +1532,7 @@ This can be done in different ways, such as:
 - **Gini index**
 
 There is no “preferred” measure.
-### Entropy and Information gain #TODO 
+### Entropy and Information gain
 But first, some definitions: they are all measures and error measures that can be calculated for each dataset $D$ ($i$-th element represented with $i \in D$) w.r.t. a specific feature $C$ and its $|C|$  classes (each class of the feature is represented with $c \in C$).
 #### Entropy
 The entropy measures the homogeneity of data.
@@ -1549,7 +1549,7 @@ Uniform distribution means $p_c=\dfrac1n$
 $H[C] = -\sum_{c \in C} \dfrac1n \log_2 \dfrac1n$
 #### Surprise
 $$
-S(p_c)=log_2\bigg(\frac{1}{p_i(c)} \bigg)
+S(p_c)=\log_2\bigg(\frac{1}{p_i(c)} \bigg)
 $$
 ![[Pasted image 20251230203115.png|300]]
 *Relation between probability and surprise*
@@ -1557,8 +1557,8 @@ $$
 [[#Entropy]] can also be defined as the **expected surprise**. 
 $$
 \begin{align*}
-H[C] &=\sum_{c \in C} p_c S(p_{c}) \\
-&=E[S(p_c)]
+H[C] &=-\sum_{c \in C} p_c S(p_{c}) \\
+&=-E[S(p_c)]
 \end{align*}
 $$
 #### Conditional Entropy
@@ -1570,7 +1570,10 @@ $$
 \end{align*}
 $$
 #### Information gain
-Also known as **Kullback-Leiber divergence**:
+> [!info]
+> - https://www.geeksforgeeks.org/machine-learning/information-gain-and-mutual-information-for-machine-learning/
+
+Also known as **Kullback-Leiber divergence**, Information Gain quantifies the reduction in [[#Entropy]] after splitting the data on a particular feature $C$.
 $$
 \begin{align*}
 IG[C] &= H[T]-R(C) \\
@@ -1579,9 +1582,17 @@ IG[C] &= H[T]-R(C) \\
 \end{align*}
 $$
 where
-* $T$ is the target attribute.
-Information Gain measures the expected reduction in the entropy that we can notice if we partition the examples according to an attribute A.
-That’s why the $i$-th node must be based on the feature that allows the biggest entropy reduction, because we want to make subsets of data as “clean” as possible (target attribute with homogeneous values).
+* $T$ is the target attribute
+* $H[T]=H_0$, the initial entropy of the dataset
+* $C$ is the attribute to evaluate w.r.t. the target
+
+Information Gain measures the expected reduction in the entropy that we can notice if we partition the examples according to an attribute $C$.
+That’s why the $i$-th node must be based on the feature that allows the biggest entropy reduction, because we want to make subsets of data as *clean* or *pure* as possible (target attribute with homogeneous values).
+
+> [!note] Impure regions
+> A region (a leaf of the tree) is called **pure** when target attribute of samples is homogenous, so all true or all false.
+> A region (a leaf of the tree) is called **impure** when is not pure, of course.
+
 ### Gini index #TODO 
 Like entropy, it measures the impurity of data and it’s defined between $[0.5, 0]$:
 - $0.5$ means that the data used is NOT homogeneus (half and half) w.r.t. the class $c$ of the selected feature;
@@ -1590,22 +1601,26 @@ $$
 Gini(c)=1-p_c^2
 $$
 Then, **total gini impurity** is defined:
+---
 
 Finally, the algorithm:
-1. \[ Check whether the region worth to be split, otherwise move to the next one \]
-2. Calculate $IG[C]$ ($Gini(C)$) for each feature $C$
-3. Pick the feature which gives the lowest $IG$ and subdivide the dataset (or the region for > 1 step) into the chosen feature’s classes
+1. \[ Check whether the region is impure, otherwise move to the next one \]
+2. Calculate $IG[C]$ for each feature $C$
+3. Pick the feature which gives the highest $IG$ (so lowest $H[C|T]$) and subdivide the region (entire dataset if step 0) into the chosen feature’s classes
 4. Select next un-splitted region and go back to 1.
-- **Example**
-    Here is represented the calculus of $IG[Pat]$
-    ![Untitled|500](assets/Untitled%2056.png)
-    
-    ![Untitled|400](assets/Untitled%2057.png)
-    ![Untitled](assets/Untitled%2058.png)
-    . . . 
-    Then the feature chosen will be the one that maximizes $$
-    \max(IG(Alt), IG(Bar),..., IG(Est))
-    $$
+
+**Example**
+![Untitled|500](assets/Untitled%2056.png)
+Calculate dataset entropy $H_0$
+![Untitled|400](assets/Untitled%2057.png)
+Compute the information gain for all the features
+![Untitled|600](assets/Untitled%2058.png)
+. . . 
+Then the feature chosen will be the one that maximizes 
+$$
+\max(IG(Alt), IG(Bar),..., IG(Est))
+$$
+And so on.
 ### Numerical Values
 Classification trees can be built even over features with numerical values, by following these steps:
 1. sort rows w.r.t. numerical values (ascending)
