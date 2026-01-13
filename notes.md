@@ -1342,9 +1342,9 @@ In this case:
 	2. for the last layer of regression where sigmoid and derivative of classification cost are used: $$ \delta^{(L)}=(-\frac{y}{a^{(L)}}+\frac{1-y}{1-a^{(L)}}) \odot g'(z^{(L)}) $$
 	3. in general: $$ \begin{align} \delta^{(l)} &= \underbrace{\underbrace{(\Theta^{(l)})^T \cdot \delta^{(l-1)}}_{\textcolor{red}{dA}} \odot g'(z^{(l)})}_{\textcolor{red}{dZ}} \\ &= (\Theta^{(l)})^T \cdot \delta^{(l-1)} \odot a^{(l)} \odot  (1-a^{(l)}) \end{align}$$$$
     \begin{align}
-    \frac{\partial J(\Theta)}{\partial \Theta_{ji}^{(l)}} &=\delta_i^{(l)}a_j^{(l-1)} + \textcolor{blue}{\lambda \Theta^{(l)}} \\
-    &=\delta_i^{(l)}g(z_j^{(l-1)}) + \textcolor{blue}{\lambda \Theta^{(l)}} \\ & \\
-    b&=\delta_i^{(l)}\end{align}
+    \frac{\partial J(\Theta, b)}{\partial \Theta^{(l)}} &=\delta^{(l)}\cdot(a^{(l-1)})^T + \textcolor{blue}{\lambda \Theta^{(l)}} \\
+    &=\delta^{(l)}\cdot g(z^{(l-1)})^T + \textcolor{blue}{\lambda \Theta^{(l)}} \\ & \\
+    \frac{\partial J(\Theta, b)}{\partial b^{(l)}}&=\delta^{(l)}\end{align}
     $$
     where:
     - $\delta_i^{(l)}$: is defined as the **local gradient** and <u>can be thought as the error contribution</u> given by node $i$ on layer $l$ (which is function of all its connected nodes’ errors, towards the input layer)
