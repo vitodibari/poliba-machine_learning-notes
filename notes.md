@@ -699,7 +699,7 @@ Let’s now focus on term $MSE(h^{(D)}(x^{(i)})) = E_D\bigg[(h^{(D)}(x^{(i)})-(f
 Let’s move some parenthesis:
 $$
 \begin{align}
-& E_D\bigg[ (h^{(D)}(x^{(i)})-f(x^{(i)})) - e^{(i)}))^2 \bigg] =  \\
+& E_D\bigg[ ((h^{(D)}(x^{(i)})-f(x^{(i)})) - e^{(i)}))^2 \bigg] =  \\
 & = E_D \left[ (h^{(D)}(x^{(i)})-f(x^{(i)}))^2 \right] + E_D \left[ (e^{(i)})^2 \right] - 2E_D \left[ h^{(D)}(x^{(i)})-f(x^{(i)}) \right]E_D \left[ e^{(i)} \right] \\
 & = E_D \left[ (h^{(D)}(x^{(i)})-f(x^{(i)}))^2 \right] + \sigma_e^2
 \end{align}
@@ -2571,7 +2571,21 @@ The idea behind PCA is to transform the correlated features in the dataset into 
 <u>The first principal component (PC1) always captures the most variation in the data and the second component captures the maximum variance that is orthogonal to the first component and so on for other components.</u>
 Its also possibile to quantify how much of the total variance a PC is representing.
 ### Singular Value Decomposition (SVD)
-#TODO estrai ed approfondisci da step 3. qui giù
+$$
+    svd(A)=[U,S,V]$$
+$svd$ function takes a matrix $A\in\mathbb R^{m,n}$ as input and outputs a factorization s.t. $A=U \cdot S \cdot V^T$ where:
+- $U \in \mathbb R^{m \times m}$ **left eigenvectors**: orthogonal matrix with orthonormal eigenvectors chosen from $AA^T$
+- $S \in \mathbb R^{m \times n}$ **singular values**: diagonal matrix where first $m$ diagonal components are $AA^T$’s squared eigenvalues, others are 0
+- $V \in \mathbb R^{n \times n}$ **right eigenvectors**: orthogonal matrix with orthonormal eigenvectors chosen from $A^TA$  
+![Untitled|600](assets/Untitled%2094.png)
+$\Sigma$’s elements are ordered according to their importance: $\sigma_1 \ge \sigma_2 \ge…\ge \sigma_m$. Specifically, the <u>magnitude of each singular value are related to the variance captured by each principal component</u>.
+
+<u>Each eigenvector has a respective eigenvalue</u>: eigenvectors associated to larger singular values correspond to directions where the data is more spread out (higher variance), while eigenvectors associated to small singular values correspond to directions where the data varies little.      
+
+In other words, SVD decomposes the linear transformation A into:
+* a rotation of the input space ($V^T$)
+* a scaling along orthogonal axes ($S$)
+* a rotation of the output space ($U$)
 ### PCA Algorithm
 > [!info]
 > - https://youtu.be/vSczTbgc8Rc (SVD)
@@ -2592,45 +2606,26 @@ Its also possibile to quantify how much of the total variance a PC is representi
 	Again, let’s vectorize: $$\Sigma = \frac 1m \sum_{l=1}^m x^{(l)}\cdot x^{{(l)}^T}$$
 3. \[ **Compute SVD** \]
     Next step is to determine the Principal Components that fit the highest variance of the data, based on covariance matrix’s eigenvectors and eigenvalues.
+    [[#Singular Value Decomposition (SVD)]] is used over matrix $\Sigma$ to compute eigenvectors.
     
-    In order to compute eigenvectors, **Singular Value Decomposition** (**SVD**) is used: $$
-    svd(A)=[U,S,V]$$
-        $svd$ takes a matrix $A\in\mathbb R^{m,n}$ as input and outputs a factorization s.t. $A=U \cdot S \cdot V^T$ where:
-	    - $U \in \mathbb R^{m \times m}$ **left eigenvectors**: orthogonal matrix with orthonormal eigenvectors chosen from $AA^T$
-	    - $S \in \mathbb R^{m \times n}$ **singular values**: diagonal matrix where first $m$ diagonal components are $AA^T$’s squared eigenvalues, others are 0
-	    - $V \in \mathbb R^{n \times n}$ **right eigenvectors**: orthogonal matrix with orthonormal eigenvectors chosen from $A^TA$  
-	    ![Untitled](assets/Untitled%2094.png)
-	  $\Sigma$’s elements are ordered according to their importance: $\sigma_1 \ge \sigma_2 \ge…\ge \sigma_m$. Specifically, the <u>magnitude of each singular value are related to the variance captured by each principal component</u>.
-	  
-	  <u>Each eigenvector has a respective eigenvalue</u>: eigenvectors associated to larger singular values correspond to directions where the data is more spread out (higher variance), while eigenvectors associated to small singular values correspond to directions where the data varies little.
-      
-      In other words, SVD decomposes the linear transformation A into:
-	      • a rotation of the input space ($V^T$)
-	      • a scaling along orthogonal axes ($S$)
-	      • a rotation of the output space ($U$)
-      
-      Since $svd$ is calculated over covariance matrix $\Sigma$ which is symmetric ($\Sigma=\Sigma^T$), then the process gets simpler: $$
-      \begin{align}
-& svd(\Sigma)=[U,S,V]=[U,S,U] \\
-& \Sigma = U \cdot S \cdot U^T
-\end{align}$$
+    Since $\Sigma$ is a symmetric matrix ($\Sigma=\Sigma^T$), the process gets simpler: $$\begin{align}& svd(\Sigma)=[U,S,V]=[U,S,U] \\& \Sigma = U \cdot S \cdot U^T\end{align}$$
+    where:
 	    - $\Sigma\Sigma^T=\Sigma^T\Sigma=\Sigma^2$
 	    - $U=V$
 	    - $S \in \mathbb R^{m \times n}$ diagonal matrix where n diagonal components are $\Sigma$ eigenvalues
-1. \[ **Select the number of dimensions to keep** \]
+4. \[ **Select the number of dimensions to keep** \]
    Now $k$ dimensions must be picked from $U$, s.t. $k \le n$. (see [[#Choose k]])![[Pasted image 20260106123138.png]]
    A new, reduced, matrix is defined: $$U_{\text{reduced}}=U(:,1:k)$$
-2. \[ **Map data in new space** \] $$
+5. \[ **Map data in new space** \] $$
    \begin{align}
 & z^{(i)}=U_{\text{reduced}}^T \cdot x^{(i)} \\
 & Z=U^T_{\text{reduced}} \cdot X
 \end{align}
    $$
-3. \[ **OPTIONAL: Approx. pap data back into original space** \] $$\begin{align}
-& x_{\text{approx}}^{(i)}=U_{\text{reduced}}^T \cdot z^{(i)} \\
-& X_{\text{approx}}=U^T_{\text{reduced}} \cdot Z
+6. \[ **OPTIONAL: Approx. pap data back into original space** \] $$\begin{align}
+& x_{\text{approx}}^{(i)}=U_{\text{reduced}} \cdot z^{(i)} \\
+& X_{\text{approx}}=U_{\text{reduced}} \cdot Z
 \end{align}$$
-   
 > [!note] #Recall **Eigenvectors and Eigenvalues**
 > Given $A \in \mathbb R^{n \times n}, X \ne0 \in \mathbb C^n, \lambda\in\mathbb R$ s.t. $$     AX=\lambda X     $$ 	    then, $\lambda$ is an **eigenvalue** for $A$ and $X$ is an **eigenvector** associated to $\lambda$ for $A$
 ### Choose k
