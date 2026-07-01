@@ -1,3 +1,7 @@
+---
+title: Machine Learning Notes
+header-includes:
+---
 # Machine Learning Notes
 A.Y. 2023-2024, Polytechnic of Bari
 Professor: Tommaso di Noia
@@ -5,13 +9,13 @@ Author: Vito Di Bari
 ## Reading suggestions
 <font color="#6425d0">⚠️ Purple sections are AI-generated</font>
 <font color="#00b050">⚠️ Green sections are deep divings, so not mandatory for the exam</font>
-### Long demonstrations
+### Long math demonstrations
 The following ones must be memorized for the mid-term exam.
 1. [[#Cost Function (Linreg)]]
 2. [[#Cost Function (Logreg)]]
 3. Calculus of MSE and GER (see [[#Bias and Variance trade-off]])
 4. [[#Proof of Normal equations]]
-5. Probabilistic interpretation of Linear Regression (see [[#Probabilistic interpretation]])
+5. [[#Probabilistic interpretation]] of Linear Regression
 6. [[#9. Support Vector Machines (SVM)]]
 7. [[#Kernel PCA]]
 ### Exercises
@@ -313,7 +317,7 @@ $$
 ### Z-score normalization
 Forces the values in a fixed interval normally distributed between $[0,1]$. 
 $$
-z=\frac{x-mean(x)}{devstd(x)}=\frac{x-\mu_x}{\sigma_x} \approx \mathcal N(0,1)
+z=\frac{x-mean(x)}{std(x)}=\frac{x-\mu_x}{\sigma_x} \approx \mathcal N(0,1)
 $$
 > [!tip]
 > Mean and standard deviation are calculated over the training set, then used to normalize training, cv, and test sets.
@@ -512,8 +516,8 @@ The formula used for the maximum likelihood criterion works only under **iid ass
 $$
 \begin{align}
 L(\theta)=L(\theta;X,y)=p(y|X;\theta)=\prod_{i=1}^mp(y^{(i)}|\mathbf{x}^{(i)};\theta)
-\end{align}
 \tag{1}
+\end{align}
 $$
 In a binary classifier we have $y = \{0,1\}$ and data is distributed aver a **Bernoulli distribution**: the discrete probability distribution of the random variable $X$(the entire dataset) for which:
 $$
@@ -557,9 +561,9 @@ The **cost function** can be defined in a proper form in order to have a minimiz
 $$
 \begin{align}
 J(\theta) &=-\frac1m l(\theta) \\
-&= -\frac1m \sum_{i=1}^m \bigg(y^{(i)}\log h_\theta(\mathbf{x}^{(i)}) + (1-y^{(i)})\log(1-h_\theta(\mathbf{x}^{(i)}))\bigg) \\
-\end{align}
+&= -\frac1m \sum_{i=1}^m \bigg(y^{(i)}\log h_\theta(\mathbf{x}^{(i)}) + (1-y^{(i)})\log(1-h_\theta(\mathbf{x}^{(i)}))\bigg)
 \tag{2}
+\end{align}
 $$
 > [!tip]
 > The reason why a **minimization problem** is wanted is easy: we already know an algorithm able to solve such a problem, the gradient descent.
@@ -650,7 +654,7 @@ Let’s assume a set of Datasets $D_i$ ($D_0,…,D_n$) each of size $m$, sampled
 ![Untitled|400](assets/Untitled%2018.png)
 Consider a fixed model trained on all the several $D_i$: a corresponding number of hypothesis $h^{(D_i)}(x)$ is obtained.
 
-For each $D_i$, it’s possible to represent the **training set**:
+For each $D_i$, it’s possible to represent its **training set**:
 $$
 <\mathbf x^{(i)},y^{(i)}>
 $$
@@ -658,11 +662,11 @@ Where $y^{(i)}$ can be expressed in the form of *prediction = ground truth + gau
 $$
 y^{(i)}=f(\mathbf x^{(i)})+e^{(i)}
 $$
-Each hypothesis $h^{(D_i)}(x)$ will be affected by an error while predicting values ($y^{(i)}$), w.r.t. the ground truth ($\mathbf x^{(i)}$). The error can be modeled in the form of a **Mean Squared Error** (**MSE**):
+Each hypothesis $h^{(D_i)}(x)$ is trained on a partition $D_i$ and will be affected by an error while predicting values ($y^{(i)}$), w.r.t. the ground truth ($\mathbf x^{(i)}$). The error can be modeled in the form of a **Mean Squared Error** (**MSE**):
 $$
 \begin{align}
 MSE(h^{(D_i)}(x)) &= E_x\bigg[(h^{(D_i)}(x)-y)^2\bigg] \\
-&= E_x\bigg[(h^{(D_i)}(x)-(f(\mathbf x+e))^2\bigg] 
+&= E_x\bigg[(h^{(D_i)}(x)-(f(\mathbf x)+e)^2\bigg] 
 \end{align}
 $$
 Moreover, it is interesting to evaluate the overall error, for each hypothesis found (respective of $D_i$), by calculating the **Generalization Error** (**GER**):
@@ -709,9 +713,9 @@ because:
 * $\sigma_e^2=Var(e^{(i)})=E_D \left[ (e^{(i)})^2 \right]-E_D^2 \left[e^{(i)} \right]$
 
 Let’s now focus just on first term $E_D \left[ (h^{(D)}(x^{(i)})-(f(x^{(i)}) \right]$.
-I can define the **best estimation of $f(x^{(i)})$** by computing the mean of all hypothesis with the same training sample $x^{(i)}$:
+I can define the **best estimation of $f(x^{(i)})$** by computing expected value over all the models trained on the different $D_j$ for the input data point $x(i)$:
 $$
-\bar h(x^{(i)}) = E_D\bigg[h^{(D)}(x^{(i)})\bigg]
+\bar h(x^{(i)}) = E_D\bigg[h^{(D_{j})}(x^{(i)})\bigg]
 $$
 By performing some simple steps (reported on the slides), $MSE$ can be expressed as follows:
 $$
@@ -1092,13 +1096,16 @@ Given a dataset of elements $<x_i,y_i>$:
 - $y_i^*$ is the predicted output value
 ![Untitled|500](assets/Untitled%2039.png)
 
-| **Mean Absolute Error**     | $MAE=\dfrac{\sum_{i=1}^m\|y_i^*-y_i\|}{m}$         |
-| --------------------------- | -------------------------------------------------- |
-| **Mean Squared Error**      | $MSE=\dfrac{\sum_{i=1}^m(y_i^*-y_i)^2}{m}$         |
-| **Root Mean Squared Error** | $RMSE=\sqrt{\dfrac{\sum_{i=1}^m(y_i^*-y_i)^2}{m}}$ |
-| $R^2$                       | See [[#Coefficient of Determination]]              |
-| Adjusted $R^2$              | See [[#Adjusted Coefficient of Determination]]     |
-
+| Metric                             | Formula                                                          | Notes                                                    |
+| ---------------------------------- | ---------------------------------------------------------------- | -------------------------------------------------------- |
+| **Mean Absolute Error**            | $MAE=\dfrac{\sum_{i=1}^m\|y_i^*-y_i\|}{m}$                       |                                                          |
+| **Mean Squared Error**             | $MSE=\dfrac{\sum_{i=1}^m(y_i^*-y_i)^2}{m}$                       | the squared heavily penalizes large errors               |
+| **Root Mean Squared Error**        | $RMSE=\sqrt{\dfrac{\sum_{i=1}^m(y_i^*-y_i)^2}{m}}$               | the squared heavily penalizes large errors               |
+| **Mean Percentage Error**          | $MPE=\dfrac1m\sum_{i=1}^m \dfrac{y_i^*-y_i}{y_i} \cdot 100$      |                                                          |
+| **Mean Absolute Percentage Error** | $MAPE=\dfrac1m\sum_{i=1}^m \|\dfrac{y_i^*-y_i}{y_i}\| \cdot 100$ |                                                          |
+| $R^2$                              | See [[#Coefficient of Determination]]                            | intuitively assess the **goodness of fit** of the model  |
+| Adjusted $R^2$                     | See [[#Adjusted Coefficient of Determination]]                   | used when new predictors/features are added to the model |
+|                                    |                                                                  |                                                          |
 ### Evaluation Metrics for Classification
 All metrics reported in table below are calculated on values given by the confusion matrix of a classifier.
 #### Confusion Matrix
@@ -1106,17 +1113,18 @@ All metrics reported in table below are calculated on values given by the confus
 > [!tip]
 > There are some scenarios where the $FN$ class is very important, such as medical, fraud detection and security fields.
 
-| Accuracy                                        | $\Large\frac{TP+TN}{TP+TN+FP+FN}$                                |
-| ----------------------------------------------- | ---------------------------------------------------------------- |
-| Precision                                       | $\Large\frac{TP}{TP+FP}$                                         |
-| Recall / Sensitivity / True Positive Rate (TPR) | $\Large\frac{TP}{TP+FN}$                                         |
-| Specificity or True Negative Rate (TNR)         | $\Large\frac{TN}{TN+FP}$                                         |
-| Error Rate = 1 - Accuracy                       | $\Large\frac{FP+FN}{TP+TN+FP+FN}$                                |
-| F-Measure (or F1)                               | $2 \cdot \Large \frac{precision \cdot recall}{precision+recall}$ |
-| False Positive Rate (FPR) = 1 - Specificity     | $\Large\frac{FP}{FP+TN}$                                         |
+| Metric                                          | Formula                                                          | Notes                                                                                                       |
+| ----------------------------------------------- | ---------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| Accuracy                                        | $\Large\frac{TP+TN}{TP+TN+FP+FN}$                                | good general indicator of how accurate the prediction was overall, assuming classes are relatively balanced |
+| Precision                                       | $\Large\frac{TP}{TP+FP}$                                         | useful when a high degree of accuracy for positive predictions is required                                  |
+| Recall / Sensitivity / True Positive Rate (TPR) | $\Large\frac{TP}{TP+FN}$                                         | used when False Negatives (FN) are extremely dangerous or costly                                            |
+| Specificity or True Negative Rate (TNR)         | $\Large\frac{TN}{TN+FP}$                                         |                                                                                                             |
+| Error Rate = 1 - Accuracy                       | $\Large\frac{FP+FN}{TP+TN+FP+FN}$                                |                                                                                                             |
+| F-Measure (or F1)                               | $2 \cdot \Large \frac{precision \cdot recall}{precision+recall}$ | useful to have high precision and high recall at the same time                                              |
+| False Positive Rate (FPR) = 1 - Specificity     | $\Large\frac{FP}{FP+TN}$                                         |                                                                                                             |
 ![[d0UCCIF10Soi7VQGxdVrWQ.jpg|600]]
 #### Receiver Operating Characteristic (ROC) Space
-**ROC Space** is a convenient way to evaluate all at once different classifiers, based on the respective confusion matrices’ results.
+**ROC Space** is a convenient way to evaluate all at once different classifiers, for different threshold values, based on the respective confusion matrices’ results.
 
 Only $TPR$ and $FPR$ values are needed.
 
@@ -1186,8 +1194,8 @@ $R^2$ is a measure of how much of the variance in the dependent variable ($Y$) i
 * Regression Deviation $$Dev(R)=\sum_{i=1}^m(\hat y_i-\bar y)^2$$
 * Residual Deviation (**Residual Sum of Squares** or **RSS**) $$Dev(E)=\sum_{i=1}^m(y_i-\hat y_i)^2$$
 where:
-- $\bar y$: mean of observed data
-- $y_i$: dataset $i$-th value
+- $\bar y$: mean of observed values
+- $y_i$: dataset $i$-th observed value
 - $\hat y_i$: $i$-th predicted value
 
 Finally, the coefficient of determination is defined as:
@@ -1218,7 +1226,7 @@ A model with $R^2=0.75$ means that 75% of the variation in the dependent variabl
 
 <font color="#00b050">Adjusted r-squared adjusts the r-squared value to account for the number of independent variables in the model. The adjusted r-squared value can decrease if a new predictor does not improve the model's fit, making it a more reliable measure of model accuracy.</font>
 $$
-R_{adj}^2=\frac{m-1}{m-n-1}(1-R^2)
+R_{adj}^2=\left( 1-(1-R^2)\frac{m-1}{m-n-1} \right)
 $$
 where:
 * $R^2$: the [[#Coefficient of Determination]] of the model
@@ -1330,22 +1338,25 @@ In this case:
     - $\Theta_{ji}^{(l)}$ is the weight for the connection between the $i$-th node on the $l$-th layer and the $j$-th node on the $(l-1)$-th one
     ![image.png|200](Personale/poliba-machine_learning-notes/assets/image%202.png)
 2. perform the (first) forward propagation step, so compute all $z$’s and $a$’s:
-	1. for the first layer, $a^0=x$: $$a^{(1)}=g(z^{(1)})=g(\Theta^{(1)} \cdot a^{(0)})=g(\Theta^{(1)} \cdot x)$$
-	2. for the last layer for regression only no activation is used: $$a^{(L)}=z^{(L)}=\Theta^{(L)} \cdot a^{(L-1)}$$
+	1. <u>for the first layer</u>, $a^0=x$: $$a^{(1)}=g(z^{(1)})=g(\Theta^{(1)} \cdot a^{(0)})=g(\Theta^{(1)} \cdot x)$$
+	2. <u>for the last layer for regression</u> only no activation is used: $$a^{(L)}=z^{(L)}=\Theta^{(L)} \cdot a^{(L-1)}$$
 	3. in general: $$a^{(l)}=g(\Theta^{(l)} \cdot a^{(l-1)})=g(z^{(l)})$$	   $$\begin{align} & z^{(l)}_{j}= \sum_i \theta_{ji}^{(l)} a_{j}^{(l-1)}+b_j^{(l)} \\ & a_{j}^{(l)} = g(z^{(l)}_{j}) \end{align}$$
 3. collect the $K$ results: $h_{\Theta}(x)=\{y_1,y_2,...,y_K\} \in \mathbb{R}^{K}$
 4. compute the loss function at output layer $L$:
 	1. for regression see [[#Cost Function for Regression with Regularization]]
 	2. for classification see [[#Cost Function for Classification with Regularization]]
 5. back-propagate: tune each model’s parameter to lower the loss calculated in the output layer. This is possible by calculating partial derivative of the loss function w.r.t. each parameter $\Theta$ and $b$  (one per edge, basically)
-	1. for the last layer of regression where no sigmoid is used and the derivative of regression cost is used: $$ \delta^{(L)}=a^{L}-y $$
-	2. for the last layer of regression where sigmoid and derivative of classification cost are used: $$ \delta^{(L)}=(-\frac{y}{a^{(L)}}+\frac{1-y}{1-a^{(L)}}) \odot g'(z^{(L)}) $$
+   #TODO aggiungi esempio 
+	1. <u>for the last layer of regression</u> where no sigmoid is used and the derivative of regression cost is used: $$ \delta^{(L)}=a^{L}-y $$
+	2. <u>for the last layer of regression</u> where sigmoid and derivative of classification cost are used: $$ \delta^{(L)}=\left( -\frac{y}{a^{(L)}}+\frac{1-y}{1-a^{(L)}} \right)$$
 	3. in general: $$ \begin{align} \delta^{(l)} &= \underbrace{\underbrace{(\Theta^{(l)})^T \cdot \delta^{(l-1)}}_{\textcolor{red}{dA}} \odot g'(z^{(l)})}_{\textcolor{red}{dZ}} \\ &= (\Theta^{(l)})^T \cdot \delta^{(l-1)} \odot a^{(l)} \odot  (1-a^{(l)}) \end{align}$$$$
     \begin{align}
-    \frac{\partial J(\Theta, b)}{\partial \Theta^{(l)}} &=\delta^{(l)}\cdot(a^{(l-1)})^T + \textcolor{blue}{\lambda \Theta^{(l)}} \\
-    &=\delta^{(l)}\cdot g(z^{(l-1)})^T + \textcolor{blue}{\lambda \Theta^{(l)}} \\ & \\
-    \frac{\partial J(\Theta, b)}{\partial b^{(l)}}&=\delta^{(l)}\end{align}
+    \frac{\partial J(\Theta, b)}{\partial \Theta^{(l)}} &=\left( \frac{1}{m} \right)\delta^{(l)}\cdot(a^{(l-1)})^T + \textcolor{blue}{\lambda \Theta^{(l)}} \\
+    &=\left( \frac{1}{m} \right)\delta^{(l)}\cdot g(z^{(l-1)})^T + \textcolor{blue}{\lambda \Theta^{(l)}} \\ & \\
+    \frac{\partial J(\Theta, b)}{\partial b^{(l)}}&=\left( \frac{1}{m} \right)\delta^{(l)}\end{align}
     $$
+    #TODO capire bene da dove viene $\left( \frac{1}{m} \right)$
+    
     where:
     - $\delta_i^{(l)}$: is defined as the **local gradient** and <u>can be thought as the error contribution</u> given by node $i$ on layer $l$ (which is function of all its connected nodes’ errors, towards the input layer)
     - blue component is regularization
@@ -1593,7 +1604,8 @@ That’s why the $i$-th node must be based on the feature that allows the bigges
 > A region (a leaf of the tree) is called **pure** when target attribute of samples is homogenous, so all true or all false.
 > A region (a leaf of the tree) is called **impure** when is not pure, of course.
 
-### Gini index #TODO 
+### Gini index
+#TODO 
 Like entropy, it measures the impurity of data and it’s defined between $[0.5, 0]$:
 - $0.5$ means that the data used is NOT homogeneus (half and half) w.r.t. the class $c$ of the selected feature;
 - $0$ means that the data used is homogeneous w.r.t. the class $c$ of the selected feature.
@@ -1601,6 +1613,7 @@ $$
 Gini(c)=1-p_c^2
 $$
 Then, **total gini impurity** is defined:
+
 ---
 
 Finally, the algorithm:
@@ -1748,15 +1761,16 @@ It consists in using bootstrapped datasets to build decorrelated trees, by using
 ## Build Random Forest
 Follow this algorithm in order to build a random forest:
 1. Create a bootstrapped dataset
-2. Build a bunch of full trees by following an edited algorithm:
-    1. check if region has more than one datapoin, otherwise goto step 2.4
+2. Build a bunch of full trees by following a modified algorithm:
+    1. check if region has more than one datapoint, otherwise goto step 2.4
     2. select a subset of features as candidates for $i$-th node
     3. define the most appropriate feature for that node (using algorithms explained in [[#Build a Regression Tree]] or [[#Build a Classification Tree]])
     4. select next region and goto step 2.1
 3. goto step 1 until a certain number of trees is built
+4. [[#Evaluate Random Forest]]
 ![Untitled](assets/Untitled%2067.png)
 ### Use Random Forest
-Now, we have a bunch of decorrelated trees. Once a particular data is fed, the result will be the average of all results produced by each tree of the forest (using techniques explained at the beginning of the chapter).
+Now, we have a bunch of uncorrelated trees. Once a particular data is fed, the result will be the average of all results produced by each tree of the forest (using techniques explained at the beginning of the chapter).
 ### Evaluate Random Forest
 A random forest having $N$ trees, has $N$ respective bootstrapped datasets, hence $N$ respective out-of-bag datasets.
 
@@ -1859,7 +1873,7 @@ $$
 \begin{align*}
 &\max \frac{|(\vec w\cdot\vec x)+b|}{||\vec w||} = \\
 &=\max \frac{1}{||\vec w||}= \\
-&=\min\frac{||\vec w||^2}2
+&=\min\frac12 ||\vec w||^2
 \end{align*}
 $$
 > [!tip]
@@ -1887,13 +1901,13 @@ $$
 & \alpha\ge0\\
 \end{split}
 $$
-where
+where:
 * $f(\omega)$ is the convex objective function of the primal problem
 * $g(\omega)$ is the convex constraint function of the primal problem
 * $L(\omega, \alpha)$ is the concave objective function of the dual problem
 * $\alpha>0$ are the the constraint of the dual problem, called **lagrangian multipliers**
 
-This transformation is used because the dual problem is way easier to solve, even when in high dimensional spaces. Moreover
+This transformation is used because the dual problem is easier to solve, even when in high dimensional spaces. Moreover
 
 It can be proved that:
 $$
@@ -1906,7 +1920,9 @@ $$
 & \frac{\partial L(\omega^*,\alpha^*)}{\partial\alpha} = 0
 \end{align*}
 $$
+
 ---
+
 Applying Lagrange duality to the current problem gives the following $L$:
 $$
 L(\omega, b, \alpha)=\frac12||\vec w||^2-\sum_i\alpha_i[y_i(\vec w\cdot\vec x_{i}+b)-1]
@@ -1953,6 +1969,7 @@ $$
 $$
 where:
 * $\vec x_i$ used are only **support vectors**
+#TODO 
 
 Once all the optimal values of $\alpha$ have been found, let’s compute $\omega$ and $b$ in the
 separator hyperplane:
@@ -1988,8 +2005,8 @@ $$
 \underbrace{\vec x_i\cdot\vec x_j}_{samples} \\
 & 0\le\alpha\le C\quad\forall i=1...m \\
 & \sum_i\alpha_iy^{(i)}=0
-\end{align*}
 \tag{3}
+\end{align*}
 $$
 > [!tip]
 > $C$ is bounding the value of $\alpha$.
@@ -2288,7 +2305,7 @@ The elbow method is a heuristic used in determining the number of clusters in a 
 
 The idea consists of plotting the explained variation* as a function of the number of clusters and picking the elbow of the curve as the number of clusters to use. 
 
-\*multiple heuristic can be used. The one in the figure below is calculated by summing up all the distances for each sample from centroid (or medoid) of respective cluster. In fact, for $K=m$, $0$ will be given.
+\*multiple heuristic can be used. The one in the figure below is the **Within-Clusters Sum of Squares** (**WCSS**), calculated by summing up all the distances for each sample from centroid (or medoid) of respective cluster. In fact, for $K=m$, $0$ will be given.
 ![Untitled|400](assets/Untitled%2079.png)
 > [!tip]
 > The same method can be used to choose the number of parameters in other data-driven models, such as the number of principal components to describe a data set.
@@ -2306,7 +2323,20 @@ Sometimes K can be an authentic external constraint (e.g. t-shirt sizing).
 #### Information criterion comparison
 #TODO 
 ### Silhouette Coefficient
-#TODO 
+This metric combines two concepts in one formula:
+* **cohesion**: how close a data point is to other points in its own cluster
+* **separation**: how far a data point is from points in other clusters
+$$
+s_{i}=1-\frac{\text{coh}}{\text{sep}}
+$$
+where:
+* $\text{coh}$: average distance between the $i$-th sample and all the samples of the same cluster
+* $\text{sep}$: average distance between the $i$-th sample and all the samples of the other clusters
+
+In order to calculate a final silhouette coefficient for the whole clustering, an average is computed:
+$$
+s=\frac{1}{N}\sum_{i=0}^Ns_{i}
+$$
 ## KL-Divergence
 **Kullback-Leibler** (**KL**) **Divergence** (or **relative entropy**) is a method used to measure the difference between two probability distributions (better, between a “true” distribution $P(i)$ wrt the expected one $Q(i)$, representing a ML model).
 $$
@@ -2362,6 +2392,7 @@ High-level algorithm is really similar to the single linkage criterion one excep
 This criterion has a more probabilistic approach: it aims to minimize the total within-cluster variance. In other words, it merges the pair of clusters that results in the smallest increase in total within-cluster variance after merging.
 
 ---
+
 #Recap 
 ![Untitled](assets/Untitled%2083.png)
 ## DBSCAN
@@ -2411,7 +2442,7 @@ In total, there are two parameters to set:
 - $k$ does not required to be specified
 - cluster shape can be various
 - robust: there is notion of noise
-- minPts and $\varepsilon$ can be set by a domain expert
+- minPts and $\varepsilon$ can be set by a domain expert (not a pro, but still)
 **Cons**
 - not entirely deterministic: in step 3 of the algorithm, border points may be in the $\varepsilon$-neighborhood of many core points, but they are assigned to the cluster of the first core point’s found
 - cannot cluster data belonging to clusters with different densities
@@ -2486,7 +2517,9 @@ Here the mutual reachability distance between green and red is equal to the - eu
    ![Untitled|600](assets/Untitled%2087.png)
    *In the image above, minClusterSize=5. See how all the regions end up in the same color, around value 5.*
    What DBSCAN would do is cutting the dendogram with one single line and all clusters identified would have same density.
-   ---
+
+---
+   
    What HDBSCAN does is actually more sophisticated: it cuts the dendogram in “different places”, trying to identify several clusters with different densities.
    
    🚫 One cut…
@@ -2494,7 +2527,7 @@ Here the mutual reachability distance between green and red is equal to the - eu
    ![Untitled|400](assets/Untitled%2089.png)
    ✅ …vs Different cuts
    ![[Pasted image 20260105181020.png|400]]
-5. \[ Flat the clusters \]
+6. \[ Flat the clusters \]
    We still have an hierarchical representation of clusters, even if more selective.
    A final selection of clusters must be done, recalling that if a cluster is selected, then all the descendant cannot be selected, because are included in the selected one. <u>The idea is to select the most persistent clusters.</u>
    
@@ -2719,7 +2752,9 @@ $x'=A'\cdot s$ where $s \sim \mathcal  N(0,1)$, then also $x' \sim \mathcal  N(0
 
 There is no way to tell wether sources where mixed with $A$ or $A’$, because:
 $\mathbb E[xx^T]=\mathbb E[Ass^TA^T]=AA^T=AIA^T=ARR^TA^T=\mathbb E[ARss^T(AR)^T]=\mathbb E[A'ss^T(A')^T]=\mathbb E[x'x'^T]$
+
 ---
+
 Moreover, also **Central Limit Theorem** can be invoked:
 Under appropriate conditions, the distribution of a normalized version of the sample mean converges to a standard normal distribution. This holds even if the original variables themselves are not normally distributed.
 
@@ -2744,6 +2779,7 @@ where:
 So, in the example above: $p_x(x)=(0.5)1\{0 \leq x \leq 2 \}$
 
 ---
+
 Finally, the algorithm:
 #TODO 
 ## Embeddings
@@ -2774,6 +2810,7 @@ Relatedness is calculated using **string edit-distance**:
 ![Untitled|400](assets/Untitled%20100.png)
 
 ---
+
 All representations above are not that efficient in reality: they are very high-dimensional and sparse representations that would lead to really slow training processes. A way to reduce dimensionality is needed.
 ### Embeddings
 An **embedding** is a dense and lower-dimensional vector representation for a word, which uses the same intuitions seen above.
