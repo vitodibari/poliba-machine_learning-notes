@@ -9,7 +9,7 @@ Author: Vito Di Bari
 ## Reading suggestions
 <font color="#6425d0">⚠️ Purple sections are AI-generated</font>
 <font color="#00b050">⚠️ Green sections are deep divings, so not mandatory for the exam</font>
-### Long math demonstrations
+## Long math demonstrations
 The following ones must be memorized for the mid-term exam.
 1. [[#Cost Function (Linreg)]]
 2. [[#Cost Function (Logreg)]]
@@ -18,10 +18,10 @@ The following ones must be memorized for the mid-term exam.
 5. [[#Probabilistic interpretation]] of Linear Regression
 6. [[#9. Support Vector Machines (SVM)]]
 7. [[#Kernel PCA]]
-### Exercises
+## Exercises
 1. [[#Univariate (Linear)]] regression
 2. [[#Feature Scaling]]
-3. [[#Gradient Descent]] by hand
+3. [[#Gradient Descent]] by hand and pseudocode
 4. [[#Outlier removal - boxplot]]
 5. [[#Learning Curves]] (in general)
 6. [[#Learning Curves]]
@@ -29,10 +29,10 @@ The following ones must be memorized for the mid-term exam.
 8. [[#Evaluation Metrics for Classification]]
 9. [[#Receiver Operating Characteristic (ROC) Space]]
 10. [[#Classification Trees]]
-11. [[#Regression Trees]]
-12. [[#K-Means]]
-13. [[#K-Medoids]]
-14. [[#PCA Algorithm]] (with given $X$, $\Sigma$, $U$)
+11. \[ [[#Regression Trees]] \]
+12. [[#K-Means]] pseudocode
+13. [[#K-Medoids]] pseudocode
+14. [[#PCA Algorithm]] (given $X$, $\Sigma$, $U$)
 # 1. Introduction
 What is ML? **Machine Learning** is the field of study that gives to a program the ability to learn even if not explicitly programmed. 
 
@@ -159,6 +159,8 @@ Where:
 It says that the average of the performance over all the optimizations on problem $f$ is always the same.
 
 There’s “no free lunch” in real life: you don’t get something for nothing.
+### Cover’s Theorem
+A complex pattern-classification problem cast in a high-dimensional space non-linearly is more likely to be linearly separable than in a low-dimensional space.
 # —Supervised Learning—
 # 2. Linear Regression
 > [!info] Notation
@@ -349,6 +351,12 @@ J(\theta)
 =\frac12(\textbf{X}\theta-\textbf{y})^2
 =\frac12(\textbf{X}\theta-\textbf{y})^T(\textbf{X}\theta-\textbf{y})
 $$
+> [!note]
+> Normal Equations are specifically suited for solving the Ordinary Least Squares (OLS) problem in linear regression, which, instead of minimizing the MSE (see [[#Cost Function (Linreg)]]), minimizes the SSR. They are comparable, of course.
+> $$
+> J(\theta)=\frac{1}{2} \sum_{i=1}^m(h_{\theta}(x^{(i)})-y^{(i)})^2
+> $$
+
 The goal is to find the minimum of $J(\theta)$, so the point where the gradient is null.
 Let’s compute $\nabla J(\theta)$ (recall [[#Cost Function (Linreg)]]):
 $$
@@ -438,7 +446,7 @@ The two minimization problems are identical (the constant $m$ has practically no
 
 > [!info]
 > The complete demonstration of the probabilistic interpretation is reported on the slides.
-# 3. Logistic Regression
+	# 3. Logistic Regression
 Even it’s called “regression”, the **logistic regression** is <u>used for classification tasks</u>. The objective is to assign each data instance to a **class**, among a finite set of classes.
 
 There exists:
@@ -650,11 +658,12 @@ In Machine Learning there are basically three scenarios:
 
 There exists some procedures to automatically find the best model among a bunch of them, but for now let’s focus on the bias and variance concepts.
 ## Bias and Variance trade-off
+#TODO sistemare dimostrazione rispetto A.A. 2025-2026
 Let’s assume a set of Datasets $D_i$ ($D_0,…,D_n$) each of size $m$, sampled from the original data distribution.
 ![Untitled|400](assets/Untitled%2018.png)
-Consider a fixed model trained on all the several $D_i$: a corresponding number of hypothesis $h^{(D_i)}(x)$ is obtained.
+Consider a fixed model trained on all the several $D_i$ partitions: a corresponding number of hypothesis $h^{(D_i)}(x)$ is obtained.
 
-For each $D_i$, it’s possible to represent its **training set**:
+Each training sample of $D_i$ can be represented as:
 $$
 <\mathbf x^{(i)},y^{(i)}>
 $$
@@ -662,14 +671,14 @@ Where $y^{(i)}$ can be expressed in the form of *prediction = ground truth + gau
 $$
 y^{(i)}=f(\mathbf x^{(i)})+e^{(i)}
 $$
-Each hypothesis $h^{(D_i)}(x)$ is trained on a partition $D_i$ and will be affected by an error while predicting values ($y^{(i)}$), w.r.t. the ground truth ($\mathbf x^{(i)}$). The error can be modeled in the form of a **Mean Squared Error** (**MSE**):
+After fixing the model, each hypothesis $h^{(D_i)}(x)$ is trained on a partition $D_i$ and will be affected by an error while predicting values ($y^{(i)}$), w.r.t. the ground truth ($\mathbf x^{(i)}$). The error can be modeled in the form of a **Mean Squared Error** (**MSE**) or **Generalization Error**:
 $$
 \begin{align}
 MSE(h^{(D_i)}(x)) &= E_x\bigg[(h^{(D_i)}(x)-y)^2\bigg] \\
 &= E_x\bigg[(h^{(D_i)}(x)-(f(\mathbf x)+e)^2\bigg] 
 \end{align}
 $$
-Moreover, it is interesting to evaluate the overall error, for each hypothesis found (respective of $D_i$), by calculating the **Generalization Error** (**GER**):
+Moreover, it is interesting to evaluate the overall error, for each hypothesis found (respective of $D_i$), by calculating the :
 $$
 \begin{align*}
 GER&=E_D[MSE(h^{(D_i)}(x))] \\
@@ -785,7 +794,10 @@ J(\theta)&=
 \bigg)
 \end{align*}
 $$
-Where $\lambda$ is the **regularization parameter** that controls the influence of regularization w.r.t. the hypothesis. To be noticed that the sum operator does not consider the parameter $\theta_0$, the bias is never regularized.
+Where $\lambda$ is the **regularization parameter** that controls the influence of regularization w.r.t. the hypothesis.
+
+> [!important]
+> To be noticed that the sum operator does not consider the parameter $\theta_0$, the bias is never regularized.
 
 Bigger $\lambda$ ⇒ Smoother curve
 
@@ -992,11 +1004,11 @@ The process just described is ok in the case we have just one model to evaluate,
 ✅ The workflow becomes the following:
 1. shuffle data to avoid correlation;
 2. split dataset into:
-    - **training set**: 60% of dataset values, to train the several models;
-    - **cross validation set**: 20% of dataset values, to choose the best model with the lowest $J_{cv}(\theta)$. It can be used also to find the hyper-parameters (such as the regularization factor);
-    - **test set**: 20% of dataset values, to evaluate the best model;
-3. (for each model) learn parameters $\theta$ from $training \space set$, by minimizing $J(\theta)=J_{train}(\theta)$;
-4. (for each model) compute the **cross validation error** $J_{cv}(\theta)$ ($=J_{test}(\theta)$, but calculated on $cross \space validation \space set$);
+    - **training set**: 60% of dataset values, to train the several models
+    - **cross validation set**: 20% of dataset values, to choose the best model with the lowest $J_{cv}(\theta)$. It can be used also to find the hyper-parameters (such as the regularization factor)
+    - **test set**: 20% of dataset values, to evaluate the best model
+3. (for each model) learn parameters $\theta$ from $training \space set$, by minimizing $J(\theta)=J_{train}(\theta)$
+4. (for each model) compute the **cross validation error** $J_{cv}(\theta)$ ($=J_{test}(\theta)$, but calculated on $cross \space validation \space set$)
 5. pick the model with the lowest $J_{cv}(\theta)$ and then evaluate it by calculating $J_{test}(\theta)$. This is useful in order to understand if the model really generalize well enough.
 
 In general, $test \space set$ is used only in the end, when the model is chosen and we want to finally evaluate it. 
@@ -1075,16 +1087,24 @@ In this case there is a convergence of the two errors on a (relatively) small er
 
 ![Untitled](assets/Untitled%2038.png)
 ### Diagnostic Cheatsheets
-- Getting more training examples → fixes high variance 
-  the model could have the right complexity, but it’s still not learning well from the training set
-- Try smaller sets of features → fixes high variance
-  because maybe there are some perturbing features that make the learning curve distorted
-- Try getting additional features (es. adding polynomial features) → fixes high bias
+#### Fix high bias
+High bias occurs when a model is **underfitting**: it is too simple to capture the underlying structure or patterns in the training data, leading to poor performance on both training and test sets.
+- <u>Try getting additional features</u> (es. adding polynomial features)
   because maybe the curve is not learning well from training data using actual features
-- Try decreasing $\lambda$ → fixes high bias
+- <u>Try decreasing </u>$\lambda$
   because, by increasing regularization factor, the influence of certain parameters is reduced (middle ground w.r.t. adding features)
-- Try increasing $\lambda$ → fixes high variance
+- <u>Increase model complexity</u>
+	- <u>Switch ML algorithm</u>
+	- <u>Add NLP layers</u>
+#### Fix high variance
+High variance occurs when a model is **overfitting**: it is too complex and has learned the training data _too_ well, including its random noise and outliers, leading to poor performance on unseen test data - poor generalization.
+- <u>Getting more training examples</u>
+  the model could have the right complexity, but it’s still not learning well from the training set
+- <u>Try smaller sets of features</u>
+  because maybe there are some perturbing features that make the learning curve distorted
+- <u>Try increasing </u>$\lambda$
   because, by increasing regularization factor, the influence of certain parameters is reduced (middle ground w.r.t. removing features)
+- <u>Reduce model complexity</u>
 ## Evaluation Metrics
 Being linear regression and logistic regression two different tools, different metrics are used to evaluate models belonging to each other.
 ### Evaluation Metrics for Regression
@@ -1113,15 +1133,15 @@ All metrics reported in table below are calculated on values given by the confus
 > [!tip]
 > There are some scenarios where the $FN$ class is very important, such as medical, fraud detection and security fields.
 
-| Metric                                          | Formula                                                          | Notes                                                                                                       |
-| ----------------------------------------------- | ---------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
-| Accuracy                                        | $\Large\frac{TP+TN}{TP+TN+FP+FN}$                                | good general indicator of how accurate the prediction was overall, assuming classes are relatively balanced |
-| Precision                                       | $\Large\frac{TP}{TP+FP}$                                         | useful when a high degree of accuracy for positive predictions is required                                  |
-| Recall / Sensitivity / True Positive Rate (TPR) | $\Large\frac{TP}{TP+FN}$                                         | used when False Negatives (FN) are extremely dangerous or costly                                            |
-| Specificity or True Negative Rate (TNR)         | $\Large\frac{TN}{TN+FP}$                                         |                                                                                                             |
-| Error Rate = 1 - Accuracy                       | $\Large\frac{FP+FN}{TP+TN+FP+FN}$                                |                                                                                                             |
-| F-Measure (or F1)                               | $2 \cdot \Large \frac{precision \cdot recall}{precision+recall}$ | useful to have high precision and high recall at the same time                                              |
-| False Positive Rate (FPR) = 1 - Specificity     | $\Large\frac{FP}{FP+TN}$                                         |                                                                                                             |
+| Metric                                          | Formula                                                          | Notes                                                                                                       |     |
+| ----------------------------------------------- | ---------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- | --- |
+| Accuracy                                        | $\Large\frac{TP+TN}{TP+TN+FP+FN}$                                | good general indicator of how accurate the prediction was overall, assuming classes are relatively balanced |     |
+| Precision                                       | $\Large\frac{TP}{TP+FP}$                                         | useful when a high degree of accuracy for positive predictions is required                                  |     |
+| Recall / Sensitivity / True Positive Rate (TPR) | $\Large\frac{TP}{TP+FN}$                                         | used when False Negatives (FN) are extremely dangerous or costly                                            |     |
+| Specificity or True Negative Rate (TNR)         | $\Large\frac{TN}{TN+FP}$                                         |                                                                                                             |     |
+| Error Rate = 1 - Accuracy                       | $\Large\frac{FP+FN}{TP+TN+FP+FN}$                                |                                                                                                             |     |
+| F-Measure (or F1)                               | $2 \cdot \Large \frac{precision \cdot recall}{precision+recall}$ | useful to have high precision and high recall at the same time                                              |     |
+| False Positive Rate (FPR) = 1 - Specificity     | $\Large\frac{FP}{FP+TN}$                                         |                                                                                                             |     |
 ![[d0UCCIF10Soi7VQGxdVrWQ.jpg|600]]
 #### Receiver Operating Characteristic (ROC) Space
 **ROC Space** is a convenient way to evaluate all at once different classifiers, for different threshold values, based on the respective confusion matrices’ results.
@@ -1185,7 +1205,7 @@ The algorithm to follow is:
     
     Then, if $p$ value is sufficiently small, null hypothesis is rejected and system A is different from system B (one of them is better than the other).
     ![Untitled|400](assets/Untitled%2044.png)
-### Coefficient of Determination
+f### Coefficient of Determination
 The **coefficient of determination** is indicated with $R^2$ and <u>it is a statistical measure used to assess how well a regression model fits a dataset.</u>
 
 $R^2$ is a measure of how much of the variance in the dependent variable ($Y$) is explained - or predictable - by the independent variable ($X$) in a regression model.
@@ -1339,30 +1359,29 @@ In this case:
     ![image.png|200](Personale/poliba-machine_learning-notes/assets/image%202.png)
 2. perform the (first) forward propagation step, so compute all $z$’s and $a$’s:
 	1. <u>for the first layer</u>, $a^0=x$: $$a^{(1)}=g(z^{(1)})=g(\Theta^{(1)} \cdot a^{(0)})=g(\Theta^{(1)} \cdot x)$$
-	2. <u>for the last layer for regression</u> only no activation is used: $$a^{(L)}=z^{(L)}=\Theta^{(L)} \cdot a^{(L-1)}$$
-	3. in general: $$a^{(l)}=g(\Theta^{(l)} \cdot a^{(l-1)})=g(z^{(l)})$$	   $$\begin{align} & z^{(l)}_{j}= \sum_i \theta_{ji}^{(l)} a_{j}^{(l-1)}+b_j^{(l)} \\ & a_{j}^{(l)} = g(z^{(l)}_{j}) \end{align}$$
+	2. <u>for the last layer for regression only</u> no activation is used: $$a^{(L)}=z^{(L)}=\Theta^{(L)} \cdot a^{(L-1)}$$
+	3. in general: $$a^{(l)}=g(\Theta^{(l)} \cdot a^{(l-1)} + b^{(l-1)})=g(z^{(l)})$$	   $$\begin{align} & z^{(l)}_{j}= \sum_i \theta_{ji}^{(l)} a_{j}^{(l-1)}+b_j^{(l)} \\ & a_{j}^{(l)} = g(z^{(l)}_{j}) \end{align}$$
 3. collect the $K$ results: $h_{\Theta}(x)=\{y_1,y_2,...,y_K\} \in \mathbb{R}^{K}$
 4. compute the loss function at output layer $L$:
 	1. for regression see [[#Cost Function for Regression with Regularization]]
 	2. for classification see [[#Cost Function for Classification with Regularization]]
 5. back-propagate: tune each model’s parameter to lower the loss calculated in the output layer. This is possible by calculating partial derivative of the loss function w.r.t. each parameter $\Theta$ and $b$  (one per edge, basically)
    #TODO aggiungi esempio 
-	1. <u>for the last layer of regression</u> where no sigmoid is used and the derivative of regression cost is used: $$ \delta^{(L)}=a^{L}-y $$
-	2. <u>for the last layer of regression</u> where sigmoid and derivative of classification cost are used: $$ \delta^{(L)}=\left( -\frac{y}{a^{(L)}}+\frac{1-y}{1-a^{(L)}} \right)$$
+	1. <u>for the last layer of regression</u> where no sigmoid is used and the derivative of [[#Cost Function for Regression with Regularization]] is used: $$ \delta^{(L)}=a^{L}-y $$
+	2. <u>for the last layer of classification</u> where sigmoid and derivative of [[#Cost Function for Classification with Regularization]] are used: $$ \delta^{(L)}=\left( -\frac{y}{a^{(L)}}+\frac{1-y}{1-a^{(L)}} \right)$$
 	3. in general: $$ \begin{align} \delta^{(l)} &= \underbrace{\underbrace{(\Theta^{(l)})^T \cdot \delta^{(l-1)}}_{\textcolor{red}{dA}} \odot g'(z^{(l)})}_{\textcolor{red}{dZ}} \\ &= (\Theta^{(l)})^T \cdot \delta^{(l-1)} \odot a^{(l)} \odot  (1-a^{(l)}) \end{align}$$$$
     \begin{align}
-    \frac{\partial J(\Theta, b)}{\partial \Theta^{(l)}} &=\left( \frac{1}{m} \right)\delta^{(l)}\cdot(a^{(l-1)})^T + \textcolor{blue}{\lambda \Theta^{(l)}} \\
-    &=\left( \frac{1}{m} \right)\delta^{(l)}\cdot g(z^{(l-1)})^T + \textcolor{blue}{\lambda \Theta^{(l)}} \\ & \\
-    \frac{\partial J(\Theta, b)}{\partial b^{(l)}}&=\left( \frac{1}{m} \right)\delta^{(l)}\end{align}
+    \frac{\partial J(\Theta, b)}{\partial \Theta^{(l)}} &=\delta^{(l)}\cdot(a^{(l-1)})^T + \textcolor{blue}{\lambda \Theta^{(l)}} \\
+    &=\delta^{(l)}\cdot g(z^{(l-1)})^T + \textcolor{blue}{\lambda \Theta^{(l)}} \\ & \\
+    \frac{\partial J(\Theta, b)}{\partial b^{(l)}}&=\delta^{(l)}\end{align}
     $$
-    #TODO capire bene da dove viene $\left( \frac{1}{m} \right)$
     
     where:
     - $\delta_i^{(l)}$: is defined as the **local gradient** and <u>can be thought as the error contribution</u> given by node $i$ on layer $l$ (which is function of all its connected nodes’ errors, towards the input layer)
     - blue component is regularization
     - bias has no regularization
-6. then update all the parameters: $$\begin{align} & W^{(l)} := W^{(l)} - \alpha \frac{\partial J}{\partial \Theta^{(l)}} \\ & b^{(l)} := b^{(l)} - \alpha \frac{\partial J}{\partial b^{(l)}} \end{align}$$
-7. if stop condition is true, then end training
+1. then update all the parameters: $$\begin{align} W^{(l)} &:= W^{(l)} - \frac{\alpha}{m} \cdot \frac{J(\Theta, b)}{\partial \Theta^{(l)}} \\b^{(l)} &:= b^{(l)} - \frac{\alpha}{m} \cdot \frac{J(\Theta, b)}{\partial b^{(l)}} \end{align}$$
+2. if stop condition is true, then end training
    else goto stop 2.
 ## Random Initialization
 Basically, <u>random initialization is used to break the **symmetry problem**: if all parameters are equals, gradient descent algorithm will produce the same adjustments for each parameter</u> (by fixing the layer, all cost function’s derivatives w.r.t. each parameter will be the same).
@@ -1727,7 +1746,7 @@ The algorithm to find the best value for $\alpha$ is:
    6.5. goto 6.1. with a new fold
 7. the final value for $\alpha$ is the most voted one in the \[ Cross validation phase \]
 8. #TODO pick the tree with the best $\alpha$, found in step 7.
-# 8. Random Forests
+	# 8. Random Forests 
 > [!info]
 > - https://youtu.be/J4Wdy0Wc_xQ
 
@@ -1769,8 +1788,6 @@ Follow this algorithm in order to build a random forest:
 3. goto step 1 until a certain number of trees is built
 4. [[#Evaluate Random Forest]]
 ![Untitled](assets/Untitled%2067.png)
-### Use Random Forest
-Now, we have a bunch of uncorrelated trees. Once a particular data is fed, the result will be the average of all results produced by each tree of the forest (using techniques explained at the beginning of the chapter).
 ### Evaluate Random Forest
 A random forest having $N$ trees, has $N$ respective bootstrapped datasets, hence $N$ respective out-of-bag datasets.
 
@@ -1785,8 +1802,8 @@ In the end, some metrics to evaluate the quality of a random forest:
 In random forests there are two cases where missing data can occur.
 ### Missing Values from Original Dataset
 ![Untitled|300](assets/Untitled%2068.png)
-First, use one of the methods explained in [[#Missing Values (in Dataset)]] to find an initial version of missing data. Then, build a random forest with the initial guess of complete dataset.
-![[Screenshot 2026-01-02 alle 18.51.25.png|300]]
+First, use one of the methods explained in [[#Missing Values (in Dataset)]] to find an initial version of missing data. Then, build a random forest with the initial guess of the complete dataset.
+![[Screenshot 2026-07-13 alle 17.01.59.png|300]]
 A way to improve these mainly naive techniques is to <u>consider the similarity of incomplete entries w.r.t. the others</u>.
 
 A really convenient tool used with random forests is the **Proximity Matrix**: it keeps track of the similarity $x \in\mathbb R: [0,1]$ for each dataset’s entry w.r.t. all the others.
@@ -1809,10 +1826,13 @@ $NO = \frac 13\cdot0.9=0.6$
 
 $NO$ is chosen.
 #### Missing continuous values
-Even trivially, new continuous values are given by the similarity-wighted average of other values.
+Even more trivial, new continuous values are given by the similarity-wighted average of other values.
 
 In the example, new value for “Weight” is given by:
 $w=125\cdot0.1+280+0.1\cdot210\cdot0.8=198.5$
+---
+So, the refined version of the example dataset will be:
+![[Screenshot 2026-07-13 alle 17.02.32.png|300]]
 #### Curiosity: Distance Matrix
 It is possible to directly obtain a new matrix useful for metrics: **Distance Matrix**.
 A distance matrix $D$ is trivially given by $1-M$.
@@ -1820,7 +1840,7 @@ A distance matrix $D$ is trivially given by $1-M$.
 ### Missing Values from New Data
 Assume that a random forest has already been trained and consider target feature $A$, which can assume $N$ different values $[A_1,…,A_N]$.
 1. Create as many copies of the sample as the classes of the target (hence, $N$ copies);
-2. Populate each copy’s target value $i$ with $A_i$;
+2. Populate each copy’s target value $i$-th with $A_i$;
     ![Untitled](assets/Untitled%2070.png)
 3. Apply techniques seen in [[#Missing Values from Original Dataset]] to guess a value for each copy;
 4. Run all the copies through the random forest and keep track of how many times target value (set in step 2) matches the random forest trees’ output;
@@ -2015,7 +2035,7 @@ However, this first alternative formalization is often not enough, specifically 
 ![Untitled|300](assets/Untitled%2075.png)![Untitled|300](assets/Untitled%2076.png)
 
 ### Kernel SVM
-**Cover’s theorem** can help: ”A complex pattern-classification problem cast in a high-dimensional space non-linearly is more likely to be linearly separable than in a low-dimensional space”
+Applies the [[#Cover’s Theorem]], where 
 
 The idea is to map input space (defined over $\mathbb R^d$) into a feature space with higher dimension (defined over $\mathbb R^p$ where $p>d$) using the function (called **feature map**) $\Phi(x):\mathbb R^d \rightarrow \mathbb R^{p}$. The optimal hyperplane will be defined within the feature space ($\mathbb R^{p-1}$).
 
@@ -2299,7 +2319,7 @@ Algorithm:
 **Cons**
 - can diverge if there few points wrt the overall mixture
 - all the flexibility of the model is always used, even when not needed
-## Choosing value of K
+## Clustering | Choose K
 ### Elbow method
 The elbow method is a heuristic used in determining the number of clusters in a data set.
 
@@ -2327,7 +2347,7 @@ This metric combines two concepts in one formula:
 * **cohesion**: how close a data point is to other points in its own cluster
 * **separation**: how far a data point is from points in other clusters
 $$
-s_{i}=1-\frac{\text{coh}}{\text{sep}}
+s_{i}=1-\frac{\text{coh}_{i}}{\text{sep}_i}
 $$
 where:
 * $\text{coh}$: average distance between the $i$-th sample and all the samples of the same cluster
@@ -2335,8 +2355,10 @@ where:
 
 In order to calculate a final silhouette coefficient for the whole clustering, an average is computed:
 $$
-s=\frac{1}{N}\sum_{i=0}^Ns_{i}
+s=\frac{1}{m}\sum_{i=0}^m s_{i}
 $$
+The $K$ that maximizes the average silhouette coefficient will be chosen.
+![[Screenshot 2026-07-13 alle 19.33.19.png|300]]
 ## KL-Divergence
 **Kullback-Leibler** (**KL**) **Divergence** (or **relative entropy**) is a method used to measure the difference between two probability distributions (better, between a “true” distribution $P(i)$ wrt the expected one $Q(i)$, representing a ML model).
 $$
@@ -2647,8 +2669,8 @@ In other words, SVD decomposes the linear transformation A into:
 	    - $U=V$
 	    - $S \in \mathbb R^{m \times n}$ diagonal matrix where n diagonal components are $\Sigma$ eigenvalues
 4. \[ **Select the number of dimensions to keep** \]
-   Now $k$ dimensions must be picked from $U$, s.t. $k \le n$. (see [[#Choose k]])![[Pasted image 20260106123138.png]]
-   A new, reduced, matrix is defined: $$U_{\text{reduced}}=U(:,1:k)$$
+   Now $k$ dimensions must be picked from $U$, s.t. $k \le n$. (see [[#PCA Choose k]])![[Pasted image 20260106123138.png]]
+   A new, reduced, matrix is defined: $$U_{\text{reduced}}=U[:,1:k]$$
 5. \[ **Map data in new space** \] $$
    \begin{align}
 & z^{(i)}=U_{\text{reduced}}^T \cdot x^{(i)} \\
@@ -2661,7 +2683,7 @@ In other words, SVD decomposes the linear transformation A into:
 \end{align}$$
 > [!note] #Recall **Eigenvectors and Eigenvalues**
 > Given $A \in \mathbb R^{n \times n}, X \ne0 \in \mathbb C^n, \lambda\in\mathbb R$ s.t. $$     AX=\lambda X     $$ 	    then, $\lambda$ is an **eigenvalue** for $A$ and $X$ is an **eigenvector** associated to $\lambda$ for $A$
-### Choose k
+### PCA | Choose k
 The usual approach to define $k$ is to pick the lowest $k$ that satisfies: 
 $$
 \frac{\tfrac 1m \sum_{i=1}^m ||x^{(i)}- x_{\text{approx}}^{(i)}||^2 }{\tfrac 1m \sum_{i=1}^m ||x^{(i)}||^2} \le 0.01
@@ -2671,14 +2693,10 @@ where:
 * $\tfrac 1m \sum_{i=1}^m ||x^{(i)}- x_{\text{approx}}^{(i)}||^2$ is the **average squared projection error**
 * $\tfrac 1m \sum_{i=1}^m ||x^{(i)}||^2$  is the **total variation** of data
 
-In other words, the $k$ to use is the lowest one s.t. the $99\%$ of variance is retained in the generated reduced space.
-
-It is found in a simple iterative fashion:
-1. $k=1$
-2. compute PCA and keep $k$ dimensions
-3. check condition in $(5)$
-   then stop
-   else $k=k+1$ and goto step 2. 
+In other words, the $k$ to use is the lowest one s.t. the $99\%$ of variance is retained in the generated reduced space:
+$$
+\frac{\sum_{j=0}^ks_{jj}}{\sum_{i=0}^ns_{ii}}\ge0.99
+$$
 ### Pros and Cons
 **Pros**
 * can handle varying densities of data
@@ -2689,7 +2707,7 @@ It is found in a simple iterative fashion:
 * some parameters must be set by hand (in choosing $k$)
 ## Kernel PCA
 This is the first example of non-linear dimensionality reduction.
-#TODO 
+Kernel PCA applies a nonlinear mapping function to the data before applying PCA, allowing it to capture more complex and nonlinear relationships between the data points.
 ## Independent Component Analysis (ICA)
 ICA algorithm is used in cases where there is some data $s \in \mathbb R^d$ (signals) generated by $d$ independent sources, but what it is observed is a mix $x$ of these signals:
 $$
@@ -2919,10 +2937,10 @@ This is a spoiler of the Deep Learning course: autoencoders can have <u>multiple
 
 However, while training such architectures, the problem of vanishing gradients can arise. Nowadays many inventions can help such training, like modern activation functions and weights initializations.
 
-Back when autoencoders were invented non of the things said above existed, so researches came up with **layerwise training**:
+Back then, when autoencoders were invented, none of the things said above existed, so researches came up with **layerwise training**:
 1. train an autoencoder with just one hidden layer
 2. cut the output layer and keep fixed the weights just trained
-3. add a new hidden layer (and an output one) and train it with to reconstruct the last hidden layer’s output
+3. add a new hidden layer (and an output one) and train the newly added hidden to reconstruct the last-trained hidden layer’s output
 4. goto step 2. till the stack has reached the desired depth
 5. now that all weights have meaningful values, they will be used as initialization.
-   So finally train the whole stack to lower the total loss.
+   Finally train the whole stack to lower the total loss.
